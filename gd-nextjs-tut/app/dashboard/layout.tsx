@@ -1,5 +1,6 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export default function BlogLayout({
     children,
@@ -12,6 +13,7 @@ export default function BlogLayout({
             <div className="flex flex-col w-full">
                 <header className="flex items-center justify-between px-4 sticky top-0 z-40 h-(--header-height) shrink-0 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
                     <SidebarTrigger />
+                    <ModeToggle />
                 </header>
 
                 <main className="flex flex-col flex-1">
