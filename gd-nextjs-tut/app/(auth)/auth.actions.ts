@@ -1,12 +1,12 @@
 'use server'
 
-import { loginSchema, registerPayloadSchema } from "@/app/(auth)/auth.types"
+import { loginSchema, registerFormSchema, type RegisterState } from "@/app/(auth)/auth.types"
 import { createClient } from "@/lib/supabase/server"
 import { cookies } from "next/headers"
-import { redirect } from 'next/navigation'
-import { z } from 'zod';
+import { redirect } from "next/navigation"
+import { z } from "zod"
 
-export async function login(input: unknown) {
+export async function login(input: z.input<typeof loginSchema>) {
     const parsed = loginSchema.safeParse(input)
 
     if (!parsed.success) {
@@ -22,23 +22,29 @@ export async function login(input: unknown) {
         password,
     })
 
-    if (error) {
-        return { error: error.message }
-    }
-
-    if (data?.user) {
-        redirect("/dashboard")
-    }
+    if (error) return { error: error.message }
+    if (data?.user) redirect("/dashboard")
 
     return { error: "Login failed unexpectedly" }
 }
 
-export async function register(input: unknown) {
-    const parsed = registerPayloadSchema.safeParse(input)
+export async function register(
+    _prevState: RegisterState,
+    formData: FormData
+): Promise<RegisterState> {
+    const raw = {
+        email: String(formData.get("email") ?? ""),
+        password: String(formData.get("password") ?? ""),
+        confirm_password: String(formData.get("confirm_password") ?? ""),
+    }
+
+    const parsed = registerFormSchema.safeParse(raw)
 
     if (!parsed.success) {
-        const firstIssue = parsed.error.issues[0]
-        return { error: firstIssue?.message ?? "Invalid registration payload" }
+        return {
+            error: parsed.error.issues[0]?.message ?? "Invalid registration payload",
+            success: false,
+        }
     }
 
     const { email, password } = parsed.data
@@ -49,21 +55,13 @@ export async function register(input: unknown) {
         password,
     })
 
-    // Keep logs minimal in production
-    console.log("Supabase signUp result:", {
-        hasUser: !!data?.user,
-        hasSession: !!data?.session,
-        error: error?.message ?? null,
-    })
-
     if (error) {
-        return { error: error.message }
+        return { error: error.message, success: false }
     }
 
-    // For email-confirm flow, user may exist while session is null.
     if (data?.user) {
         redirect("/login")
     }
 
-    return { error: "Sign up failed unexpectedly" }
+    return { error: "Sign up failed unexpectedly", success: false }
 }

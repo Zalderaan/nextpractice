@@ -18,8 +18,20 @@ export const registerFormSchema = z.object({
     path: ["confirm_password"],
 })
 
-// schema for server-side register validation
+// schema for server-side register request validation
 export const registerPayloadSchema = z.object({
     email: z.email(),
     password: z.string().min(8)
 })
+
+// schema for register's response
+export type RegisterState = {
+    error: string | null;
+    success: boolean
+}
+
+// use in server action
+export const initialRegisterState: RegisterState = {
+    error: null,
+    success: false
+}
