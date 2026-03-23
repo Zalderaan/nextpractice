@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input"
 import { useForm } from "@tanstack/react-form"
 import { registerFormSchema } from "@/app/(auth)/auth.types"
 import { toast } from "sonner"
-import { useState } from "react"
+import { useState, useActionState } from "react"
 import { register } from "@/app/(auth)/auth.actions"
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"form">) {

@@ -6,8 +6,6 @@ import { cookies } from "next/headers"
 import { redirect } from 'next/navigation'
 import { z } from 'zod';
 
-
-
 export async function login(input: unknown) {
     const parsed = loginSchema.safeParse(input)
 

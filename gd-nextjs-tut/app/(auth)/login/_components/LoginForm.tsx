@@ -134,12 +134,22 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                                 }}
                             />
                             <Field>
-                                <Button type="submit" disabled={form.state.isSubmitting}>{form.state.isSubmitting ? "Logging in..." : "Login"}</Button>
-                                <Button variant="outline" type="button">
-                                    Login with Google
-                                </Button>
+                                <form.Subscribe
+                                    selector={(state) => state.isSubmitting}
+                                    children={(isSubmitting) => (
+                                        <>
+                                            <span>
+                                                testing here: {form.state.isSubmitting ? "True" : "False"}
+                                            </span>
+                                            <Button type="submit" disabled={form.state.isSubmitting}>{form.state.isSubmitting ? "Logging in..." : "Login"}</Button>
+                                            <Button variant="outline" type="button">
+                                                Login with Google
+                                            </Button>
+                                        </>
+                                    )}
+                                />
                                 <FieldDescription className="text-center">
-                                    Don&apos;t have an account? <a href="#">Sign up</a>
+                                    Don&apos;t have an account? <a href="/signup">Sign up</a>
                                 </FieldDescription>
                             </Field>
                         </FieldGroup>
