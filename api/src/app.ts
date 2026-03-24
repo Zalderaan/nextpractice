@@ -1,0 +1,28 @@
+import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
+import helmet from 'helmet';
+
+import router from './routes/routes';
+import { notFoundHandler } from './middleware/notFound';
+import { errorHandler } from './middleware/errorHandler';
+
+const app = express();
+
+// app-level middleware
+app.use(cookieParser());
+app.use(cors())
+app.use(express.json())
+app.use(morgan('dev'))
+app.use(helmet())
+
+
+// use the routes
+app.use('/api', router);
+
+// custom route-level middleware
+app.use(notFoundHandler)
+app.use(errorHandler)
+
+export default app;
