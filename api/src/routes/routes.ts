@@ -18,6 +18,7 @@ router.get('/ping', (req, res) => {
 // AUTH ROUTES
 router.post('/register', validate({ body: registerSchema }), UserController.register)
 router.post('/login', validate({ body: loginSchema }), UserController.login)
+router.post('/refresh', UserController.refreshTokens)
 // router.get('/users/:id')
 
 // APPLICATION ROUTES

@@ -3,6 +3,9 @@ import { UserService } from "./user.service"
 import { Response, Request, NextFunction, type CookieOptions } from "express"
 import { LoginInput, RegisterInput } from "./user.validator";
 import { AppError } from "../../types/types";
+import { verifyRefreshToken } from '../../utls/jwt';
+import { makeAppError } from '../../middleware/errorHandler';
+import { JwtPayload } from 'jsonwebtoken';
 
 const isProduction = process.env.NODE_ENV === "production";
 console.log("from user.controller, this is isProduction: ", isProduction);
@@ -56,6 +59,38 @@ export class UserController {
                 err.message = "Invalid email or password";
             }
             next(err);
+        }
+    }
+
+    static async refreshTokens(req: Request, res: Response, next: NextFunction) {
+        try {
+            // read cookie 
+            const refresh_cookie = req.cookies?.refreshToken;
+
+            // no cookie, return 401
+            if (!refresh_cookie) {
+                return next(makeAppError("Refresh token missing", 401));
+            }
+
+            // verify refresh token from cookie
+            const decoded: JwtPayload & { sub: string } = verifyRefreshToken(refresh_cookie);
+
+            // find user
+            const user = await UserService.getUserById(decoded.sub);
+
+            // TODO: stuff below this
+            // issue new access token
+            const tokens = await UserService.issueTokens();
+
+            // rotate refresh token too
+            res.cookie("refreshToken", auth.refreshToken, refreshCookieOptions);
+
+            // return response
+
+        } catch (error) {
+            next(error);
+        } finally {
+            // clean up
         }
     }
 

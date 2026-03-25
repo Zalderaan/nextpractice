@@ -33,7 +33,7 @@ export class UserService {
         }
 
         const accessToken = signAccessToken(payload);
-        const refreshToken = signRefreshToken( {sub: payload.sub} )
+        const refreshToken = signRefreshToken({ sub: payload.sub })
         const { password: _, ...userWithoutPassword } = user.toObject(); // Return user (exclude password for security)
 
         return {
@@ -45,20 +45,13 @@ export class UserService {
 
     // read
     static async getUsers() {
-        try {
-            const users = await User.find([]);
-            return users;
-        } catch (error) {
-            throw new Error(`Error fetching users: ${error as Error}`).message;
-        }
+        const users = await User.find([]);
+        return users; 
     }
 
-    static async getUserById() {
-        try {
-            const user = await User.find([])
-        } catch (error) {
-            throw new Error(`Error fetching user by id: ${error as Error}.message`)
-        }
+    static async getUserById(id: string) {
+        const user = await User.find({ _id: id });
+        return user 
     }
 
     // update

@@ -25,19 +25,44 @@ import { useRouter } from "next/navigation"
 
 import { toast } from "sonner"
 import Link from "next/link"
+import { useAuthStore } from "@/app/(auth)/auth.stores"
 
 const loginFormSchema = z.object({
   email: z.email("Invalid email address"),
   password: z.string().min(1, "Password is required")
 });
 
+// response shapes (base this from the backend response shapes)
+const loginSuccessSchema = z.object({
+  success: z.literal(true),
+  message: z.string(),
+  data: z.object({
+    user: z.unknown(), // intentionally loose
+    accessToken: z.string().min(1),
+  }),
+});
+
+const apiValidationIssueSchema = z.object({
+  field: z.string().optional(),
+  message: z.string().optional(),
+});
+
+const apiErrorSchema = z.object({
+  success: z.literal(false).optional(),
+  error: z.string().optional(),
+  details: z.array(apiValidationIssueSchema).optional(),
+});
+
 type LoginFormValues = z.infer<typeof loginFormSchema>
+type LoginSuccessResponse = z.infer<typeof loginSuccessSchema>;
+type ApiErrorResponse = z.infer<typeof apiErrorSchema>;
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
 
+  const setAuth = useAuthStore((s) => s.setAuth);
   const router = useRouter();
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -51,7 +76,7 @@ export function LoginForm({
 
   async function onSubmit(data: LoginFormValues) {
     try {
-      const res = await fetch("http://localhost:5000/api/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -60,11 +85,14 @@ export function LoginForm({
         body: JSON.stringify(data),
       })
 
-      const result = await res.json()
+      const raw: unknown = await res.json()
 
       if (!res.ok) {
-        if (Array.isArray(result?.details)) {
-          for (const issue of result.details) {
+        const parsedError = apiErrorSchema.safeParse(raw);
+        const err: ApiErrorResponse | null = parsedError.success ? parsedError.data : null;
+
+        if (Array.isArray(err?.details)) {
+          for (const issue of err.details) {
             const field = issue?.field
             const message = issue?.message || "Invalid value"
 
@@ -77,13 +105,27 @@ export function LoginForm({
         } else {
           form.setError("root.server", {
             type: "server",
-            message: result?.error || "Login failed",
+            message: err?.error || "Login failed",
           })
         }
-        return
+        return;
       }
 
-      console.log(result);
+      const parsedSuccess = loginSuccessSchema.safeParse(raw);
+      if (!parsedSuccess.success) {
+        form.setError("root.server", {
+          type: "server",
+          message: "Unexpected server response",
+        });
+        return;
+      }
+
+      const result: LoginSuccessResponse = parsedSuccess.data; // get access token
+      setAuth({ // store in zustand memory-only
+        user: result.data.user,
+        accessToken: result.data.accessToken
+      })
+
       toast.success("Login successful!")
       router.push("/dashboard")
 

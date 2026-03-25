@@ -1,4 +1,4 @@
-export default function Protectedpage() {
+export default function ProtectedPage() {
     return (
         <>
             test dashboard
