@@ -19,6 +19,10 @@ import { Input } from "@/components/ui/input"
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
+import { Spinner } from "./ui/spinner"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import Link from "next/link"
 
 const signupFormSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -34,6 +38,8 @@ type SignupFormValues = z.infer<typeof signupFormSchema>
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
+  const router = useRouter();
+
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
@@ -42,10 +48,44 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       password: "",
       confirm_password: ""
     }
-  })
+  });
 
-  function onSubmit(data: SignupFormValues) {
-    console.log("Submitted the following values: ", data);
+  const isSubmitting = form.formState.isSubmitting;
+
+  async function onSubmit(data: SignupFormValues) {
+    try {
+      // strip down to only necessary values (match according to backend shape)
+      // TODO: share schemas with backend so it's more type-safe
+      const payload = {
+        username: data.username,
+        email: data.email,
+        password: data.password,
+      }
+
+      // call backend
+      const res = await fetch("http://localhost:5000/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.message);
+      }
+
+      console.log("signup result: ", result);
+      toast.success("Sign up successful!")
+      router.push('/login');
+      console.log("Submitted the following values: ", data);
+
+    } catch (error) {
+      const message = error instanceof Error ? error.message : `Something went wrong: ${error}`
+      toast.error(message);
+    }
+
+
   }
 
   return (
@@ -143,12 +183,21 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
             />
             <FieldGroup>
               <Field>
-                <Button type="submit">Create Account</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <div className="flex space-x-2">
+                      <Spinner />
+                      <span>"Creating account..."</span>
+                    </div>
+                  ) : "Create Account"}
+                </Button>
+
+                {/* NOT WORKING YET  */}
                 <Button variant="outline" type="button">
                   Sign up with Google
                 </Button>
                 <FieldDescription className="px-6 text-center">
-                  Already have an account? <a href="#">Sign in</a>
+                  Already have an account? <Link href="/login">Sign in</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
