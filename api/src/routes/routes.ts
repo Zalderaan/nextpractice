@@ -2,10 +2,10 @@ import { Router } from "express"
 import { validate } from "../middleware/validate";
 
 // import controllers
-import { UserController } from "../controllers/user.controller";
+import { UserController } from "../modules/auth/user.controller";
 
 // validation schemas
-import { loginSchema, registerSchema } from "../validators/user.validator";
+import { loginSchema, registerSchema } from "../modules/auth/user.validator";
 
 const router = Router();
 
@@ -19,5 +19,30 @@ router.get('/ping', (req, res) => {
 router.post('/register', validate({ body: registerSchema }), UserController.register)
 router.post('/login', validate({ body: loginSchema }), UserController.login)
 // router.get('/users/:id')
+
+// APPLICATION ROUTES
+router
+    .route("/applications")
+    .post((req, res) => {
+        res.send("Called POST applications");
+    })
+    .get((req, res) => {
+        res.send("Called GET applications");
+    });
+
+router
+    .route("/applications/:id")
+    .get((req, res) => {
+        const { id } = req.params;
+        res.send("Called GET application by id");
+    })
+    .put((req, res) => {
+        const { id } = req.params;
+        res.send("Called PUT application by id");
+    })
+    .delete((req, res) => {
+        const { id } = req.params;
+        res.send("Called DELETE application by id");
+    });
 
 export default router

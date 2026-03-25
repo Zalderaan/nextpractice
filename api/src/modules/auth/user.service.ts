@@ -1,7 +1,14 @@
 import argon2 from "argon2";
-import User, { IUser } from "../models/User.model";
-import { LoginInput, RegisterInput } from "../validators/user.validator";
-import { makeAppError } from "../middleware/errorHandler";
+import User, { IUser } from "./User.model";
+import { LoginInput, RegisterInput } from ".//user.validator";
+import { makeAppError } from "../../middleware/errorHandler";
+import { signAccessToken, signRefreshToken, verifyAccessToken, verifyRefreshToken, type TokenPayload } from "../../utls/jwt";
+
+type AuthServiceResponse = {
+    user: Object;
+    accessToken: string;
+    refreshToken: string;
+}
 
 export class UserService {
     // post
@@ -11,16 +18,29 @@ export class UserService {
         return await newUser.save();
     }
 
-    static async authenticateUser({ email, password }: LoginInput) {
+    static async authenticateUser({ email, password }: LoginInput): Promise<AuthServiceResponse> {
         const user = await User.findOne({ email: email.toLowerCase() }).select('+password'); // include password just this once
         if (!user) throw makeAppError("Invalid email or password", 401)
 
         const isPasswordValid = await argon2.verify(user.password, password);
         if (!isPasswordValid) throw makeAppError("Invalid email or password", 401)
 
-        // Return user (exclude password for security)
-        const { password: _, ...userWithoutPassword } = user.toObject();
-        return userWithoutPassword;
+        // ! USER isn't typed here, might be useful for debugging later to look here
+        const payload: TokenPayload = {
+            email: user.email,
+            role: user.role,
+            sub: user._id.toString()
+        }
+
+        const accessToken = signAccessToken(payload);
+        const refreshToken = signRefreshToken( {sub: payload.sub} )
+        const { password: _, ...userWithoutPassword } = user.toObject(); // Return user (exclude password for security)
+
+        return {
+            user: userWithoutPassword,
+            accessToken: accessToken,
+            refreshToken: refreshToken
+        }
     }
 
     // read

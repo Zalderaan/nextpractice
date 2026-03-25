@@ -53,7 +53,10 @@ export function LoginForm({
     try {
       const res = await fetch("http://localhost:5000/api/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
         body: JSON.stringify(data),
       })
 
@@ -80,8 +83,10 @@ export function LoginForm({
         return
       }
 
+      console.log(result);
       toast.success("Login successful!")
       router.push("/dashboard")
+
     } catch {
       form.setError("root.server", {
         type: "server",
@@ -103,7 +108,7 @@ export function LoginForm({
           <form id="login" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldGroup>
               <FieldError
-                className="flex w-full items-center text-center"
+                className="flex w-full items-center justify-center py-2 rounded-lg text-center bg-red-200"
                 errors={[form.formState.errors.root?.server]}
               />
 
