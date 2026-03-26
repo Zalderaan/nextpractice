@@ -1,3 +1,5 @@
+
+import { Types } from "mongoose";
 import { z } from "zod";
 import {
     APPLICATION_STATUSES,
@@ -229,7 +231,13 @@ export const moveApplicationSchema = z.object({
     order: z.coerce.number().int().min(0),
 });
 
-// ---------- inferred types ----------
+// ---------- inferred types (only reflects pure forms) ----------
 export type CreateApplicationInput = z.infer<typeof createApplicationSchema>;
 export type UpdateApplicationInput = z.infer<typeof updateApplicationSchema>;
 export type MoveApplicationInput = z.infer<typeof moveApplicationSchema>;
+
+// ---------- model type-safe ---------
+export type CreateApplicationData = CreateApplicationInput & {
+    userId: Types.ObjectId;
+    order: number;
+};

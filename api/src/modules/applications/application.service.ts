@@ -1,12 +1,12 @@
 import Application, { IApplication } from "./Application.model"
 import { makeAppError } from "../../middleware/errorHandler";
-import { CreateApplicationInput, MoveApplicationInput, UpdateApplicationInput } from './application.validator'
+import { 
+    CreateApplicationInput, CreateApplicationData,
+    MoveApplicationInput, 
+    UpdateApplicationInput 
+} from './application.validator'
 import { Types } from "mongoose";
 
-type CreateApplicationData = CreateApplicationInput & {
-    userId: Types.ObjectId;
-    order: number;
-};
 
 export class ApplicationService {
     /**
