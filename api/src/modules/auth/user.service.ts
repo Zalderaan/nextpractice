@@ -1,8 +1,8 @@
 import argon2 from "argon2";
 import User, { IUser } from "./User.model";
-import { LoginInput, RegisterInput } from ".//user.validator";
+import { LoginInput, RegisterInput } from "./user.validator";
 import { makeAppError } from "../../middleware/errorHandler";
-import { signAccessToken, signRefreshToken, verifyAccessToken, verifyRefreshToken, type TokenPayload } from "../../utls/jwt";
+import { signAccessToken, signRefreshToken, type TokenPayload } from "../../utls/jwt";
 
 type AuthServiceResponse = {
     user: SafeUser;

@@ -24,14 +24,26 @@ export default function ProtectedPage() {
     }
 
     return (
-        <>
-            test dashboarded
-            <>
+        <main className="flex flex-col flex-1 h-full items-center justify-start space-y-2">
+
+            {/* Header section */}
+            <section className="w-full">
+                <h1 className="text-4xl font-semibold">Home</h1>
+                <p>Subtitles here</p>
+            </section>
+            
+            {/* Quick actions section */}
+            <section className="bg-accent py-4 px-2 rounded-lg w-full">
+                <span>Quick actions here</span>
+            </section>
+
+
+            {/* Main analytics section */}
+            <section className="w-full">
                 <Button onClick={() => testSend()}>
                     testing
                 </Button>
-            </>
-
-        </>
+            </section>
+        </main>
     )
 }

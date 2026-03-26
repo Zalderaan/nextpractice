@@ -17,7 +17,7 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
-import { FileUser, MonitorCog, SidebarIcon, SquareKanban } from "lucide-react"
+import { FileUser, Home, MonitorCog, SidebarIcon, SquareKanban } from "lucide-react"
 import { usePathname } from "next/navigation"
 
 // This is sample data.
@@ -28,13 +28,18 @@ const data = {
             title: "Core",
             items: [
                 {
+                    title: "Home",
+                    url: "/dashboard",
+                    icon: <Home />
+                },
+                {
                     title: "Board",
                     url: "/dashboard/board",
                     icon: <SquareKanban />
                 },
                 {
                     title: "My Applications",
-                    url: "dashboard/applications",
+                    url: "/dashboard/applications",
                     icon: <FileUser />
                 },
             ],
@@ -48,25 +53,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { state, toggleSidebar } = useSidebar();
 
     const isCollapsed = state === 'collapsed';
-
     const shouldShow = isCollapsed && hoverHeader;
 
     return (
         <Sidebar {...props} collapsible="icon">
             <SidebarHeader>
                 <SidebarMenu className="flex flex-row justify-between items-center">
-                    <SidebarMenuButton className="">
+                    <SidebarMenuButton
+                        onMouseEnter={() => setHoverHeader(true)}
+                        onMouseLeave={() => setHoverHeader(false)}
+                        onFocus={() => setHoverHeader(true)}
+                        onBlur={() => setHoverHeader(false)}
+                        aria-label="Open sidebar"
+                    >
                         <div className="flex flex-row items-center space-x-2">
-                            <span
-                                className="rounded-lg"
-                                tabIndex={0}
-                                onMouseEnter={() => setHoverHeader(true)}
-                                onMouseLeave={() => setHoverHeader(false)}
-                                onFocus={() => setHoverHeader(true)}
-                                onBlur={() => setHoverHeader(false)}
-                                aria-label="Open sidebar"
-                                onClick={isCollapsed ? () => toggleSidebar() : undefined}
-                            >
+                            <span className="rounded-lg" tabIndex={0} onClick={isCollapsed ? () => toggleSidebar() : undefined} >
                                 {shouldShow ? <SidebarIcon /> : <MonitorCog />}
                             </span>
                             <span>Slaver</span>
