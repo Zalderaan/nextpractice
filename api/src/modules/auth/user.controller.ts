@@ -78,14 +78,19 @@ export class UserController {
             // find user
             const user = await UserService.getUserById(decoded.sub);
 
-            // TODO: stuff below this
             // issue new access token
-            const tokens = await UserService.issueTokens();
+            const tokens = await UserService.refreshTokens(user);
 
-            // rotate refresh token too
-            res.cookie("refreshToken", auth.refreshToken, refreshCookieOptions);
-
-            // return response
+            // refreshToken in cookies, attach accessToken to response
+            res.cookie("refreshToken", tokens.refreshToken, refreshCookieOptions);
+            res.status(200).json({
+                success: true,
+                message: "Tokens refreshed successfully",
+                data: {
+                    user: user,
+                    accessToken: tokens.accessToken
+                }
+            })
 
         } catch (error) {
             next(error);

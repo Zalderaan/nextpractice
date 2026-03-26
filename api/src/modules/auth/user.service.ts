@@ -5,17 +5,35 @@ import { makeAppError } from "../../middleware/errorHandler";
 import { signAccessToken, signRefreshToken, verifyAccessToken, verifyRefreshToken, type TokenPayload } from "../../utls/jwt";
 
 type AuthServiceResponse = {
-    user: Object;
+    user: SafeUser;
     accessToken: string;
     refreshToken: string;
 }
 
+type RefreshTokensResponse = {
+    refreshToken: string;
+    accessToken: string;
+}
+
+type SafeUser = {
+    _id: string,
+    username: string;
+    email: string;
+    role: 'user' | 'admin';
+    createdAt: Date;
+    updatedAt: Date;  // Add this to match Mongoose timestamps
+}
+
 export class UserService {
     // post
-    static async createUser(userData: RegisterInput): Promise<IUser> {
+    static async createUser(userData: RegisterInput): Promise<SafeUser> {
         const hashedPassword = await argon2.hash(userData.password);
         const newUser = await new User({ ...userData, password: hashedPassword });
-        return await newUser.save();
+        const savedUser = await newUser.save();
+
+        // Exclude password (and any other sensitive fields) for security
+        const { password: _, ...safeUser } = savedUser.toObject();
+        return safeUser as unknown as SafeUser;
     }
 
     static async authenticateUser({ email, password }: LoginInput): Promise<AuthServiceResponse> {
@@ -25,7 +43,7 @@ export class UserService {
         const isPasswordValid = await argon2.verify(user.password, password);
         if (!isPasswordValid) throw makeAppError("Invalid email or password", 401)
 
-        // ! USER isn't typed here, might be useful for debugging later to look here
+        // * user is now typed
         const payload: TokenPayload = {
             email: user.email,
             role: user.role,
@@ -34,24 +52,44 @@ export class UserService {
 
         const accessToken = signAccessToken(payload);
         const refreshToken = signRefreshToken({ sub: payload.sub })
-        const { password: _, ...userWithoutPassword } = user.toObject(); // Return user (exclude password for security)
+        const { password: _, ...safeUser } = user.toObject();
 
         return {
-            user: userWithoutPassword,
+            user: safeUser as unknown as SafeUser,
             accessToken: accessToken,
             refreshToken: refreshToken
+        }
+    }
+
+    static async refreshTokens(user: SafeUser): Promise<RefreshTokensResponse> {
+        const payload: TokenPayload = {
+            sub: user._id.toString(),
+            email: user.email,
+            role: user.role
+        }
+
+        const accessToken = signAccessToken(payload);
+        const refreshToken = signRefreshToken({ sub: payload.sub })
+
+        return {
+            accessToken,
+            refreshToken
         }
     }
 
     // read
     static async getUsers() {
         const users = await User.find([]);
-        return users; 
+        return users;
     }
 
-    static async getUserById(id: string) {
-        const user = await User.find({ _id: id });
-        return user 
+    static async getUserById(id: string): Promise<SafeUser> {
+        const user = await User.findById({ _id: id });
+
+        // user not found, but return 401 since it's auth
+        if (!user) throw makeAppError("Invalid user credentials", 401)
+        const { password: _, ...safeUser } = user.toObject();
+        return safeUser as unknown as SafeUser
     }
 
     // update
