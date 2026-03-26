@@ -5,12 +5,12 @@ import { authedFetch } from "@/lib/auth_fetch"
 
 export default function ProtectedPage() {
 
-    const API_BASE_URL = 'http://localhost:5000'
-    
+    const NEXT_PUBLIC_PROTECTED_API_URL = process.env.NEXT_PUBLIC_PROTECTED_API_URL;
+
     async function testSend() {
         try {
             console.log("testSend called");
-            const res = await authedFetch(`${API_BASE_URL}/api/protected`);
+            const res = await authedFetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/test_protected`);
             console.log("Fetch completed, status:", res.status);
             if (res.ok) {
                 const data = await res.json();
@@ -22,14 +22,16 @@ export default function ProtectedPage() {
             console.error("Error in testSend:", error);
         }
     }
-    
+
     return (
         <>
             test dashboarded
+            <>
+                <Button onClick={() => testSend()}>
+                    testing
+                </Button>
+            </>
 
-            <Button onClick={() => testSend()}>
-                testing
-            </Button>
         </>
     )
 }

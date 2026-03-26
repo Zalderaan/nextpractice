@@ -8,15 +8,19 @@ import { UserController } from "../modules/auth/user.controller";
 import { loginSchema, registerSchema } from "../modules/auth/user.validator";
 import { authenticate } from "../middleware/authCheck";
 
-const router = Router();
+const router = Router(); // for public routes
+const protected_router = Router(); // for protected routes
+protected_router.use(authenticate);
 
 
+// ---------------------- PUBLIC ---------------------
 // test route
 router.get('/ping', (req, res) => {
     res.status(200).json({
         success: true,
         message: "Pong! Server working :)"
-    }); })
+    });
+})
 
 // AUTH ROUTES
 router.post('/register', validate({ body: registerSchema }), UserController.register)
@@ -24,12 +28,25 @@ router.post('/login', validate({ body: loginSchema }), UserController.login)
 router.post('/refresh', UserController.refreshTokens)
 // router.get('/users/:id')
 
-// PROTECTED
-router.get('/protected', authenticate, (req, res) => {
+
+
+
+
+// ---------------------- PROTECTED ---------------------
+protected_router.get('/protected', (req, res) => {
     res.json({ message: 'Protected data', user: (req as any).user });
 });
+
+// TEST PROTECTED
+protected_router.get('/test_protected', (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Called GET applications"
+    });
+});
+
 // APPLICATION ROUTES
-router
+protected_router
     .route("/applications")
     .post((req, res) => {
         res.status(200).json({
@@ -44,7 +61,7 @@ router
         });
     });
 
-router
+protected_router
     .route("/applications/:id")
     .get((req, res) => {
         const { id } = req.params;
@@ -59,4 +76,7 @@ router
         res.send(`Called DELETE application id: ${id}`);
     });
 
-export default router
+export {
+    router,
+    protected_router,
+} 
