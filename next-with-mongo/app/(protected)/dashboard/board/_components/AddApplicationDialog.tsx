@@ -31,6 +31,7 @@ import { toast } from "sonner"
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { authedFetch } from "@/lib/auth_fetch";
 
 // ? shape in backend
 // export interface IApplication {
@@ -141,7 +142,7 @@ export function AddApplicationDialog() {
             console.log("Submitted the following values: ", data);
             
             console.log('NEXT_PUBLIC_PROTECTED_API_URL in onSubmit: ', NEXT_PUBLIC_PROTECTED_API_URL)
-            const response = await fetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/applications`, {
+            const response = await authedFetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/applications`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
