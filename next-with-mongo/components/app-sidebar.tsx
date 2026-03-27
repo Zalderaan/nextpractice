@@ -19,6 +19,7 @@ import {
 import Link from "next/link"
 import { FileUser, Home, MonitorCog, SidebarIcon, SquareKanban } from "lucide-react"
 import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 // This is sample data.
 const data = {
@@ -56,17 +57,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const shouldShow = isCollapsed && hoverHeader;
 
     return (
-        <Sidebar {...props} collapsible="icon">
-            <SidebarHeader className="flex flex-row w-full items-center h-(--header-height) border-b" onClick={isCollapsed ? () => toggleSidebar() : undefined}>
+        <Sidebar {...props} collapsible="icon"
+            onMouseEnter={() => setHoverHeader(true)}
+            onMouseLeave={() => setHoverHeader(false)}
+            onFocus={() => setHoverHeader(true)}
+            onBlur={() => setHoverHeader(false)}
+            aria-label="Open sidebar"
+            onClick={isCollapsed ? () => toggleSidebar() : undefined}
+            className={cn(isCollapsed && "hover:cursor-col-resize")}
+        >
+            <SidebarHeader className="flex flex-row w-full items-center h-(--header-height) border-b">
                 <SidebarMenu className="flex flex-row justify-between items-center h-full">
-                    <SidebarMenuButton
-                        onMouseEnter={() => setHoverHeader(true)}
-                        onMouseLeave={() => setHoverHeader(false)}
-                        onFocus={() => setHoverHeader(true)}
-                        onBlur={() => setHoverHeader(false)}
-                        aria-label="Open sidebar"
-                        className="h-full"
-                    >
+                    <SidebarMenuButton className="h-full">
                         <div className="flex flex-row items-center space-x-2">
                             <span className="rounded-lg" tabIndex={0} >
                                 {shouldShow ? <SidebarIcon /> : <MonitorCog />}
