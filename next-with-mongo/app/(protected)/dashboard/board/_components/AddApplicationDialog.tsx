@@ -33,25 +33,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { authedFetch } from "@/lib/auth_fetch";
 
-// ? shape in backend
-// export interface IApplication {
-//     userId: Types.ObjectId;
-//     company: string;
-//     role: string;
-//     jobUrl?: string;
-//     location?: string;
-//     workType: WorkType;
-//     status: ApplicationStatus;
-//     priority: Priority;
-//     notes?: string;
-//     salaryMin?: number;
-//     salaryMax?: number;
-//     appliedAt?: Date | null;
-//     order: number;
-//     createdAt: Date;
-//     updatedAt: Date;
-// }
-
 // 1. Basic Job info - company, role, job URL
 // 2. Job Details - loc, type, salary_min, salary_max
 // 3. Application Status - status, prio, appliedAt

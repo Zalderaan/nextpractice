@@ -11,14 +11,8 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-
-// Define the shape of an application (based on your model)
-interface Application {
-  id: string;
-  company: string;
-  role: string;
-  // Add other fields as needed
-}
+import { ApplicationCard } from "./ApplicationCard";
+import { Application } from "./ApplicationCard";
 
 interface KanbanColumnProps {
   status: string;
@@ -29,7 +23,7 @@ interface KanbanColumnProps {
 export function KanbanColumn({ status, applications, onAddApplication }: KanbanColumnProps) {
 
   return (
-    <Card className="flex flex-col min-w-[320px] shrink-0">
+    <Card className="flex flex-col min-w-[320px] shrink-0 overflow-y-auto max-h-96">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="capitalize">{status}</CardTitle>
         <CardAction>
@@ -42,10 +36,7 @@ export function KanbanColumn({ status, applications, onAddApplication }: KanbanC
           <p className="text-sm text-muted-foreground">No applications yet.</p>
         ) : (
           applications.map((app) => (
-            <Card key={app.id} className="p-3 cursor-pointer hover:bg-accent">
-              <CardTitle className="text-sm">{app.company}</CardTitle>
-              <CardDescription className="text-xs">{app.role}</CardDescription>
-            </Card>
+            <ApplicationCard key={app._id} application={app}/>
           ))
         )}
       </CardContent>
