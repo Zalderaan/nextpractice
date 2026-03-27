@@ -1,22 +1,19 @@
 import { Request, Response } from "express";
 import { ApplicationService } from "./application.service";
+import { makeAppError } from "../../middleware/errorHandler";
 
 export class ApplicationController {
-    static async postApplication(req: Request, res: Response) {
-        try {
-            const userId = (req as any).user?.id;
-            if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  static async postApplication(req: Request, res: Response) {
+    const user = (req as any).user; // Extract full user object
+    const userId = user?.sub;
 
-            const input = req.body;
-            if (!input || Object.keys(input).length === 0) {
-                return res.status(400).json({ error: "Missing application data" });
-            }
+    if (!userId) throw makeAppError("Unauthorized", 401);
 
-            const application = await ApplicationService.createApplication(userId, input);
-            return res.status(201).json({ data: application });
-        } catch (err) {
-            console.error("postApplication error:", err);
-            return res.status(500).json({ error: "Internal server error" });
-        }
-    }
+    const input = req.body;
+    console.log('This is input from req.body: ', input);
+    if (!input || Object.keys(input).length === 0) throw makeAppError("Missing application data", 400);
+
+    const application = await ApplicationService.createApplication(userId, input);
+    res.status(201).json({ data: application });
+  }
 }

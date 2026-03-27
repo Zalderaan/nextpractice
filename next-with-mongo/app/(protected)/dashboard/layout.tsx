@@ -6,12 +6,20 @@ export default function DashboardLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const paths = {
+        dashboard: "/dashboard",
+        board: "/dashboard/board",
+        applications: "/dashboard/applications"
+    }
+
     return (
         <SidebarProvider>
             <AppSidebar />
             <div className="flex min-h-0 flex-1 min-w-0 flex-col">
-                <header className="bg-red-200">Main header</header>
-                <main className="w-full flex-1 overflow-hidden bg-blue-500">
+                <header className="flex flex-col justify-center px-(--header-px) border-b bg-sidebar h-(--header-height)">
+                    <span>Main header</span> {/* TODO: Conditionals here (changing according to the page) */}
+                </header>
+                <main className="w-full flex-1 overflow-hidden">
                     {children}
                 </main>
             </div>

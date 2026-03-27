@@ -57,14 +57,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     return (
         <Sidebar {...props} collapsible="icon">
-            <SidebarHeader onClick={isCollapsed ? () => toggleSidebar() : undefined}>
-                <SidebarMenu className="flex flex-row justify-between items-center">
+            <SidebarHeader className="flex flex-row w-full items-center h-(--header-height) border-b" onClick={isCollapsed ? () => toggleSidebar() : undefined}>
+                <SidebarMenu className="flex flex-row justify-between items-center h-full">
                     <SidebarMenuButton
                         onMouseEnter={() => setHoverHeader(true)}
                         onMouseLeave={() => setHoverHeader(false)}
                         onFocus={() => setHoverHeader(true)}
                         onBlur={() => setHoverHeader(false)}
                         aria-label="Open sidebar"
+                        className="h-full"
                     >
                         <div className="flex flex-row items-center space-x-2">
                             <span className="rounded-lg" tabIndex={0} >
@@ -73,7 +74,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             <span>Slaver</span>
                         </div>
                     </SidebarMenuButton>
-                    <SidebarTrigger hidden={isCollapsed} />
+                    <SidebarTrigger className="h-full" hidden={isCollapsed} />
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>

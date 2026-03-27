@@ -24,7 +24,7 @@ export default function ProtectedPage() {
     }
 
     return (
-        <main className="flex flex-col flex-1 h-full items-center justify-start space-y-2">
+        <main className="flex flex-col flex-1 h-full items-center justify-start space-y-2 p-(--dashboard-pages-padding)">
 
             {/* Header section */}
             <section className="w-full">

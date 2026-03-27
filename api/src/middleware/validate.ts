@@ -13,6 +13,7 @@ export const validate = (schemas: Schemas) => {
     return (req: Request, res: Response, next: NextFunction): void => {
         try {
             if (schemas.body) {
+                console.log("This is req.body: ", req.body)
                 req.body = schemas.body.parse(req.body);
             }
 

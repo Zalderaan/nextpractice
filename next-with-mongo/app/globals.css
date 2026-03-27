@@ -82,6 +82,9 @@
   --sidebar-ring: oklch(0.708 0 0);
   /* custom stuff */
   --header-height: 4rem;
+  --header-py: 0.25rem;
+  --header-px: 1rem;  
+  --dashboard-pages-padding: 1rem;
 }
 
 .dark {
