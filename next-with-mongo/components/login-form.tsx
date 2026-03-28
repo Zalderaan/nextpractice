@@ -38,7 +38,6 @@ const loginSuccessSchema = z.object({
   message: z.string(),
   data: z.object({
     user: z.unknown(), // intentionally loose
-    accessToken: z.string().min(1),
   }),
 });
 
@@ -121,10 +120,7 @@ export function LoginForm({
       }
 
       const result: LoginSuccessResponse = parsedSuccess.data; // get access token
-      setAuth({ // store in zustand memory-only
-        user: result.data.user,
-        accessToken: result.data.accessToken
-      })
+      setAuth({ user: result.data.user,})
 
       toast.success("Login successful!")
       router.push("/dashboard")

@@ -25,13 +25,13 @@ import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { Spinner } from "@/components/ui/spinner"
-import { useRouter } from "next/navigation"
+// import { useRouter } from "next/navigation"
 
 import { toast } from "sonner"
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { authedFetch } from "@/lib/auth_fetch";
+// import { authedFetch } from "@/lib/auth_fetch";
 
 // 1. Basic Job info - company, role, job URL
 // 2. Job Details - loc, type, salary_min, salary_max
@@ -123,9 +123,11 @@ export function AddApplicationDialog() {
             console.log("Submitted the following values: ", data);
             
             console.log('NEXT_PUBLIC_PROTECTED_API_URL in onSubmit: ', NEXT_PUBLIC_PROTECTED_API_URL)
-            const response = await authedFetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/applications`, {
+            const response = await fetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/applications`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',  
+                },
                 body: JSON.stringify(data),
             });
             if (!response.ok) throw new Error('Failed to add application');

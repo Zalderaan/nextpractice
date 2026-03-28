@@ -53,8 +53,8 @@ export class ApplicationService {
         return new_application;
     }
 
-    static async findApplications(_id: string) {
-        const user_applications = await Application.find({ _id })
+    static async findApplications(userId: string) {
+        const user_applications = await Application.find({ userId })
         return user_applications;
     }
 

@@ -12,7 +12,6 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     try {
         const decoded = verifyAccessToken(token);
         (req as any).user = decoded;  // Attach user to req for use in controllers
-        // console.log(req.user);
         next();
     } catch (error) {
         return next(makeAppError('Invalid or expired token', 401));

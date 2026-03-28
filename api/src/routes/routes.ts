@@ -53,12 +53,7 @@ protected_router.get('/test_protected', (req, res) => {
 protected_router
     .route("/applications")
         .post( validate({ body: createApplicationSchema }), ApplicationController.postApplication)
-        .get((req, res) => {
-            res.status(200).json({
-                success: true,
-                message: "Called GET applications"
-            });
-        });
+        .get( ApplicationController.getUserApplicatons);
 
 protected_router
     .route("/applications/:id")

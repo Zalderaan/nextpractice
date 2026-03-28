@@ -10,6 +10,7 @@ import { JwtPayload } from 'jsonwebtoken';
 const isProduction = process.env.NODE_ENV === "production";
 console.log("from user.controller, this is isProduction: ", isProduction);
 const refreshTokenMaxAgeMs = 7 * 24 * 60 * 60 * 1000; // 7 days (in milliseconds)
+const accessTokenMaxAgeMs = 30 * 60 * 1000 // 30 minutes;
 
 const refreshCookieOptions: CookieOptions = {
     httpOnly: true,
@@ -17,6 +18,14 @@ const refreshCookieOptions: CookieOptions = {
     sameSite: isProduction ? "none" : "lax",
     maxAge: refreshTokenMaxAgeMs,
     path: "/"
+};
+
+const accessTokenOptions: CookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+  maxAge: accessTokenMaxAgeMs,
+  path: "/",
 };
 
 export class UserController {
@@ -42,14 +51,11 @@ export class UserController {
 
             // store refreshToken in cookie with refreshCookieOptions for security
             res.cookie("refreshToken", auth.refreshToken, refreshCookieOptions);
-
+            res.cookie("accessToken", auth.accessToken, accessTokenOptions);
             res.status(200).json({
                 success: true,
                 message: "Login successful",
-                data: {
-                    user: auth.user,
-                    accessToken: auth.accessToken
-                }
+                data: { user: auth.user }
             });
         } catch (error) {
             // map auth failures to 401 before forwarding
@@ -83,13 +89,11 @@ export class UserController {
 
             // refreshToken in cookies, attach accessToken to response
             res.cookie("refreshToken", tokens.refreshToken, refreshCookieOptions);
+            res.cookie("accessToken", tokens.accessToken, accessTokenOptions)
             res.status(200).json({
                 success: true,
                 message: "Tokens refreshed successfully",
-                data: {
-                    user: user,
-                    accessToken: tokens.accessToken
-                }
+                data: { user: user }
             })
 
         } catch (error) {
