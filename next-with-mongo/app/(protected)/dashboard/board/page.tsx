@@ -1,4 +1,4 @@
-// TODO: naging CSR na to-- gawin tong SSR!
+// TODO: CSR only for now
 'use client'
 
 import React, { useEffect, useState } from 'react';
