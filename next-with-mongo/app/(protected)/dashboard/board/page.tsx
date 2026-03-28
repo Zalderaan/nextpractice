@@ -22,7 +22,7 @@ export default async function BoardPage() {
         },
         // Optional: cache control if data changes frequently
         cache: 'no-store'
-    });
+    })
 
     if (!res.ok) {
         console.error("Error fetching applications! MORE LOGGING ERRORS NEEDED HERE")
@@ -31,7 +31,8 @@ export default async function BoardPage() {
     const data = await res.json();
     console.log("This is data: ", data);
 
-    const applications: Application[] = [];
+    const applications: Application[] = data.data.applications;
+    console.log("This is applications: ", applications);
 
     const statuses = ['wishlist', 'applied', 'interview', 'offer', 'rejected'];
 

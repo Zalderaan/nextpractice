@@ -31,6 +31,7 @@ import { toast } from "sonner"
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { createApplicationAction } from "../actions";
 // import { authedFetch } from "@/lib/auth_fetch";
 
 // 1. Basic Job info - company, role, job URL
@@ -67,7 +68,7 @@ const additionalSchema = z.object({
 });
 
 // 2. Combine using the base objects (avoids the .shape stripping issue)
-const fullFormSchema = z.object({
+export const fullFormSchema = z.object({
     ...basicJobInfoSchema.shape,
     ...jobDetailsSchema.shape,
     ...applicationStatusSchema.shape,
@@ -116,25 +117,14 @@ export function AddApplicationDialog() {
 
     async function onSubmit(data: z.infer<typeof fullFormSchema>) {
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log("Delay done!");
-
-            console.log('isSubmitting: ', fullAddApplicationForm.formState.isSubmitting)
-            console.log("Submitted the following values: ", data);
-            
-            console.log('NEXT_PUBLIC_PROTECTED_API_URL in onSubmit: ', NEXT_PUBLIC_PROTECTED_API_URL)
-            const response = await fetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/applications`, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',  
-                },
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) throw new Error('Failed to add application');
+            const result = await createApplicationAction(data);
+            if (!result.success) throw new Error('Failed to add application');
             toast.success("Application added successfully!");
+            reset();
             // Optionally refresh the board or close dialog
         } catch (error) {
-            console.error('Error creating application: ', error)
+            console.error('Error creating application: ', error);
+            toast.error("An unexpected error occurred.");
         }
     }
 
