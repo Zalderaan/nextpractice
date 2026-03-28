@@ -23,7 +23,7 @@ interface KanbanColumnProps {
 export function KanbanColumn({ status, applications, onAddApplication }: KanbanColumnProps) {
 
   return (
-    <Card className="flex flex-col min-w-[320px] shrink-0 overflow-y-auto max-h-96">
+    <Card className="flex flex-col min-w-[320px] max-h-full shrink-0 overflow-y-auto">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="capitalize">{status}</CardTitle>
         <CardAction>

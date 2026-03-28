@@ -5,20 +5,24 @@ import { KanbanColumn } from './_components/KanbanColumn';
 import { BoardPageHeader } from './_components/BoardPageHeader';
 import BoardClient from '../_components/BoardClient';
 import { Application } from './_components/ApplicationCard';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 export default async function BoardPage() {
 
     const NEXT_PUBLIC_PROTECTED_API_URL = process.env.NEXT_PUBLIC_PROTECTED_API_URL
 
     const cookieStore = await cookies();
-    const token = cookieStore.get("accessToken")?.value;
+    const headersList = await headers();
+    let token = headersList.get("Authorization")?.split(" ")[1];
+    if (!token) {
+        token = cookieStore.get("accessToken")?.value
+    }
 
     const res = await fetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/applications`, {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${token}`, // Attach token here
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`, // Attach token here
         },
         // Optional: cache control if data changes frequently
         cache: 'no-store'
@@ -39,11 +43,8 @@ export default async function BoardPage() {
     return (
         <main className="flex min-h-0 h-full flex-1 flex-col">
             <BoardPageHeader />
-            <BoardClient
-                className={`min-w-0 flex-1 overflow-x-auto overflow-y-auto custom-scrollbar p-(--dashboard-pages-padding) select-none`}
-
-            >
-                <div className="flex w-max flex-row items-start gap-4">
+            <BoardClient className={`min-w-0 flex-1 overflow-x-auto overflow-y-auto custom-scrollbar p-(--dashboard-pages-padding) select-none`} >
+                <div className="flex w-max flex-row items-start gap-4 h-full">
                     {statuses.map((status) => (
                         <KanbanColumn
                             key={status}

@@ -10,7 +10,9 @@ import { JwtPayload } from 'jsonwebtoken';
 const isProduction = process.env.NODE_ENV === "production";
 console.log("from user.controller, this is isProduction: ", isProduction);
 const refreshTokenMaxAgeMs = 7 * 24 * 60 * 60 * 1000; // 7 days (in milliseconds)
-const accessTokenMaxAgeMs = 30 * 60 * 1000 // 30 minutes;
+// const accessTokenMaxAgeMs = 30 * 60 * 1000 // 30 minutes;
+const accessTokenMaxAgeMs = 15 * 1000 // 15 seconds; // ! FOR DEBUG ONLY
+
 
 const refreshCookieOptions: CookieOptions = {
     httpOnly: true,
@@ -70,12 +72,14 @@ export class UserController {
 
     static async refreshTokens(req: Request, res: Response, next: NextFunction) {
         try {
+            console.log("refresh token hit!")
             // read cookie 
             const refresh_cookie = req.cookies?.refreshToken;
+            console.log("refresh_cookie: ", refresh_cookie)
 
             // no cookie, return 401
             if (!refresh_cookie) {
-                return next(makeAppError("Refresh token missing", 401));
+                throw (makeAppError("Refresh token missing", 401));
             }
 
             // verify refresh token from cookie
@@ -93,7 +97,10 @@ export class UserController {
             res.status(200).json({
                 success: true,
                 message: "Tokens refreshed successfully",
-                data: { user: user }
+                data: { 
+                    user: user,
+                    accessToken: tokens.accessToken
+                }
             })
 
         } catch (error) {

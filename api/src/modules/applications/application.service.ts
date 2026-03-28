@@ -54,7 +54,7 @@ export class ApplicationService {
     }
 
     static async findApplications(userId: string) {
-        const user_applications = await Application.find({ userId })
+        const user_applications = await Application.find({ userId }).lean();
         return user_applications;
     }
 

@@ -9,7 +9,7 @@ export default async function ApplicationsPage() {
     const res = await fetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/applications`, {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
         },
         // Optional: cache control if data changes frequently

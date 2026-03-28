@@ -1,17 +1,23 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import * as z from 'zod';
+import * as z from "zod";
 import { fullFormSchema } from "./_components/AddApplicationDialog";
 // Optional: Import your Zod schema here to re-validate on the server for ultimate security,
 // though your backend probably already validates it too.
 
-export async function createApplicationAction(data: z.infer<typeof fullFormSchema>) {
+export async function createApplicationAction(
+  data: z.infer<typeof fullFormSchema>,
+) {
   // Type this with your Zod infer
   const cookieStore = await cookies();
-  const token = cookieStore.get("accessToken")?.value;
+  const headersList = await headers();
 
+  let token = headersList.get("Authorization")?.split(" ")[1];
+  if (!token) {
+    token = cookieStore.get("accessToken")?.value;
+  }
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_PROTECTED_API_URL}/applications`,

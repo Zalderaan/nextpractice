@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { ApplicationService } from "./application.service";
 import { makeAppError } from "../../middleware/errorHandler";
+import { IApplication } from "./Application.model";
+import { HydratedDocument } from "mongoose";
 
 export class ApplicationController {
   static async postApplication(
@@ -9,6 +11,7 @@ export class ApplicationController {
     next: NextFunction,
   ) {
     try {
+      // ! NOT TYPE SAFE
       const user = (req as any).user; // Extract full user object
       const userId = user?.sub;
 
@@ -19,10 +22,8 @@ export class ApplicationController {
       if (!input || Object.keys(input).length === 0)
         throw makeAppError("Missing application data", 400);
 
-      const application = await ApplicationService.createApplication(
-        userId,
-        input,
-      );
+      
+      const application: HydratedDocument<IApplication> = await ApplicationService.createApplication(userId, input);
       res.status(201).json({
         success: true,
         message: "Application created successfully",

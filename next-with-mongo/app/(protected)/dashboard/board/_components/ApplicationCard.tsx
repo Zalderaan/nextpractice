@@ -41,7 +41,7 @@ interface ApplicationCardProps {
 
 export function ApplicationCard({key, application}: ApplicationCardProps) {
     return (
-        <Card className="p-3 cursor-pointer hover:bg-accent">
+        <Card key={key} className="p-3 cursor-pointer hover:bg-accent">
             <CardTitle className="text-sm">{application.company}</CardTitle>
             <CardDescription className="text-xs">{application.role}</CardDescription>
         </Card>
