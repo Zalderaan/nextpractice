@@ -59,7 +59,7 @@ export class ApplicationController {
     }
 
     static async getApplication(
-        req: Request<{ appId: string }>,
+        req: Request,
         res: Response,
         next: NextFunction,
     ) {
@@ -69,11 +69,18 @@ export class ApplicationController {
 
             if (!userId) throw makeAppError("Unauthorized", 401);
 
-            const { appId } = req.params;
+            const appId = req.params.id as string;
+
+
+            console.log(`This is userId: ${userId}`);
+            console.log(`This is appId: ${appId}`);
 
             if (!appId) throw makeAppError("Application not found", 404);
 
+
             const application = await ApplicationService.findApplication(appId, userId)
+
+            console.log(`This is application: ${application} `)
 
             res.status(200).json({
                 success: true,

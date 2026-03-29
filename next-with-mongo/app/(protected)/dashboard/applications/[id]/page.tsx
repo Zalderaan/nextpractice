@@ -28,21 +28,23 @@ export default async function ApplicationDetails({ params }: { params: Promise<{
         cache: 'no-store'
     });
 
-    if (!res.ok) {
-        console.error('Error fetching applicaton details')
-    }
-
     const data = await res.json();
     console.log("Application data: ", data);
 
-    const application = data.data.application;
+    if (!res.ok) {
+        console.error('Error fetching applicaton details', data.error)
+        throw new Error(`Failed to fetch application with status ${res.status}`)
+    }
+
+
+    const application: Application = data.data.application;
 
 
     return (
         <>
 
             <h1>Application Details!</h1>
-            {application}
+            {application.company}
         </>
     )
 }
