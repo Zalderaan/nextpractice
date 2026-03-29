@@ -6,7 +6,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     // const allHeaders = req.headers;
     // console.log("All headers: ", allHeaders);
     const authHeader = req.headers.authorization;
-    console.log("This is authHeader: ", authHeader)
+    // console.log("This is authHeader: ", authHeader)
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return next(makeAppError('Access token missing', 401));
     }
