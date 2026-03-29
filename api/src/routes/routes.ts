@@ -52,23 +52,20 @@ protected_router.get('/test_protected', (req, res) => {
 // APPLICATION ROUTES
 protected_router
     .route("/applications")
-        .post( validate({ body: createApplicationSchema }), ApplicationController.postApplication)
-        .get( ApplicationController.getUserApplicatons);
+    .post(validate({ body: createApplicationSchema }), ApplicationController.postApplication)
+    .get(ApplicationController.getUserApplicatons);
 
 protected_router
     .route("/applications/:id")
-        .get((req, res) => {
-            const { id } = req.params;
-            res.send(`Called GET application id: ${id}`);
-        })
-        .put((req, res) => {
-            const { id } = req.params;
-            res.send(`Called PUT application id: ${id}`);
-        })
-        .delete((req, res) => {
-            const { id } = req.params;
-            res.send(`Called DELETE application id: ${id}`);
-        });
+    .get(ApplicationController.getApplication)
+    .put((req, res) => {
+        const { id } = req.params;
+        res.send(`Called PUT application id: ${id}`);
+    })
+    .delete((req, res) => {
+        const { id } = req.params;
+        res.send(`Called DELETE application id: ${id}`);
+    });
 
 export {
     router,

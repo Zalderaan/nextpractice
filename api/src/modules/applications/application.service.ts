@@ -1,9 +1,9 @@
 import Application, { IApplication } from "./Application.model"
 import { makeAppError } from "../../middleware/errorHandler";
-import { 
+import {
     CreateApplicationInput, CreateApplicationData,
-    MoveApplicationInput, 
-    UpdateApplicationInput 
+    MoveApplicationInput,
+    UpdateApplicationInput
 } from './application.validator'
 import { Types } from "mongoose";
 
@@ -56,6 +56,18 @@ export class ApplicationService {
     static async findApplications(userId: string) {
         const user_applications = await Application.find({ userId }).lean();
         return user_applications;
+    }
+
+    static async findApplication(appId: string, userId: string) {
+        console.log('This is appId: ', appId);
+        console.log('This is userId ', userId);
+
+        const application = await Application
+            .findOne({ _id: appId, userId })
+            .orFail(() => makeAppError("Application not found", 404))
+            .exec()
+
+        return application;
     }
 
     static async changeApplicationStatus(updateApplicationData: UpdateApplicationInput) {

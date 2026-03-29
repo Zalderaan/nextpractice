@@ -3,8 +3,8 @@ import { verifyAccessToken } from '../utls/jwt';
 import { makeAppError } from './errorHandler';
 
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
-    const allHeaders = req.headers;
-    console.log("All headers: ", allHeaders);
+    // const allHeaders = req.headers;
+    // console.log("All headers: ", allHeaders);
     const authHeader = req.headers.authorization;
     console.log("This is authHeader: ", authHeader)
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

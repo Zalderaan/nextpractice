@@ -1,11 +1,14 @@
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 export default async function ApplicationsPage() {
     const NEXT_PUBLIC_PROTECTED_API_URL = process.env.NEXT_PUBLIC_PROTECTED_API_URL
 
     const cookieStore = await cookies();
-    const token = cookieStore.get("accessToken")?.value;
-
+    const headersList = await headers();
+    let token = headersList.get("Authorization")?.split(" ")[1];
+    if (!token) {
+        token = cookieStore.get("accessToken")?.value
+    }
     const res = await fetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/applications`, {
         method: 'GET',
         headers: {
