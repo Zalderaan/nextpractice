@@ -1,5 +1,4 @@
-import { Card, CardTitle, CardDescription } from "@/components/ui/card";
-import Link from "next/link";
+import { Card, CardTitle, CardDescription, CardHeader, CardContent } from "@/components/ui/card";
 
 export const WORK_TYPES = ["remote", "hybrid", "onsite"] as const;
 export const APPLICATION_STATUSES = [
@@ -36,19 +35,22 @@ export interface Application {
 }
 
 interface ApplicationCardProps {
-    key?: string | null,
-    application: Application
+    application: Application,
+    onClick: () => void;
 }
 
-export function ApplicationCard({ application }: ApplicationCardProps) {
+export function ApplicationCard({ application, onClick }: ApplicationCardProps) {
     const { _id, company, role } = application;
 
     return (
-        <Link href={`/dashboard/applications/${_id}`}>
-            <Card className="p-3 cursor-pointer hover:bg-accent">
-                <CardTitle className="text-sm">{application.company}</CardTitle>
-                <CardDescription className="text-xs">{application.role}</CardDescription>
-            </Card>
-        </Link>
+        <Card
+            className="p-3 cursor-pointer hover:bg-accent"
+            onClick={onClick}
+        >
+            <CardHeader>
+                <CardTitle className="text-sm">{company}</CardTitle>
+                <CardDescription className="text-xs">{role}</CardDescription>
+            </CardHeader>
+        </Card>
     )
 }

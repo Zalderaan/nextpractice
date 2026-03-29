@@ -1,11 +1,7 @@
-// import React, { useEffect, useState } from 'react';
-// import { useHorizontalDragScroll } from '@/hooks/use-horizontal-drag-scroll';
-// import { authedFetch } from '@/lib/auth_fetch';
-import { KanbanColumn } from './_components/KanbanColumn';
 import { BoardPageHeader } from './_components/BoardPageHeader';
-import BoardClient from '../_components/BoardClient';
 import { Application } from './_components/ApplicationCard';
 import { cookies, headers } from 'next/headers';
+import BoardView from './_components/BoardView';
 
 export default async function BoardPage() {
 
@@ -33,27 +29,14 @@ export default async function BoardPage() {
     }
 
     const data = await res.json();
-    console.log("This is data: ", data);
-
     const applications: Application[] = data.data.applications;
-    console.log("This is applications: ", applications);
 
     const statuses = ['wishlist', 'applied', 'interview', 'offer', 'rejected'];
 
     return (
         <main className="flex min-h-0 h-full flex-1 flex-col">
             <BoardPageHeader />
-            <BoardClient className={`min-w-0 flex-1 overflow-x-auto overflow-y-auto custom-scrollbar p-(--dashboard-pages-padding) select-none`} >
-                <div className="flex w-max flex-row items-start gap-4 h-full">
-                    {statuses.map((status) => (
-                        <KanbanColumn
-                            key={status}
-                            status={status}
-                            applications={applications.filter(app => app.status === status)}
-                        />
-                    ))}
-                </div>
-            </BoardClient>
+            <BoardView applications={applications} />
         </main>
     );
 }
