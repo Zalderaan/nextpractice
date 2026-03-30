@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Pencil } from 'lucide-react'
 import Link from 'next/link'
 import { Link as LinkIcon } from "lucide-react"
+import { deleteApplicationAction } from "@/app/(protected)/dashboard/board/actions";
 
 type Props = {
     applications: Application[]
@@ -17,19 +18,40 @@ type Props = {
 
 export default function BoardView({ applications }: Props) {
     const [selectedApp, setSelectedApp] = useState<Application | null>(null)
-
     const handleSelect = useCallback((app: Application) => {
         setSelectedApp(app)
     }, [])
 
     const closeDrawer = useCallback(() => setSelectedApp(null), [])
-
     const statuses = useMemo(() => ['wishlist', 'applied', 'interview', 'offer', 'rejected'] as const, [])
 
     const {
+        _id,
         company, priority, role,
         jobUrl,
     } = selectedApp || {};
+
+
+    const handleDelete = async () => {
+        if (!selectedApp?._id) {
+            alert("No application selected to delete.");
+            return;
+        }
+
+        try {
+            const result = await deleteApplicationAction(selectedApp._id);
+            if (result.success) {
+                closeDrawer();  // Close the sheet
+                // Optional: Re-fetch data or show success message
+            } else {
+                alert(result.error || "Failed to delete application.");
+            }
+        } catch (error) {
+            alert("An unexpected error occurred.");
+        }
+    };
+
+    console.log("This is applications: ", applications)
 
     return (
         <>
@@ -136,7 +158,7 @@ export default function BoardView({ applications }: Props) {
 
                             {/* FOOTER: Pinned to bottom */}
                             <SheetFooter className="px-6 py-4 border-t shrink-0 flex flex-row items-center gap-3 sm:space-x-0">
-                                <Button className="flex-1" variant="destructive">
+                                <Button className="flex-1" variant="destructive" onClick={() => handleDelete()}>
                                     Delete
                                 </Button>
                                 <Button className="flex-1">

@@ -1,90 +1,97 @@
-import Application, { IApplication } from "./Application.model"
+import Application, { IApplication } from "./Application.model";
 import { makeAppError } from "../../middleware/errorHandler";
 import {
-    CreateApplicationInput, CreateApplicationData,
-    MoveApplicationInput,
-    UpdateApplicationInput
-} from './application.validator'
+  CreateApplicationInput,
+  CreateApplicationData,
+  MoveApplicationInput,
+  UpdateApplicationInput,
+} from "./application.validator";
 import { Types } from "mongoose";
 
-
 export class ApplicationService {
-    /**
-     * Create a new application for a user.
-     * @param {string} userId - User's _id as a string (converted to Types.ObjectId).
-     * @param {CreateApplicationInput} payload - Validated form input (does not include userId or DB-only fields). Use position to suggest an order.
-     * ? uses {CreateApplicationData} to be type-safe
-     *
-     * @returns {Promise<import("mongoose").HydratedDocument<IApplication>>} The created application document. 
-     * */
-    static async createApplication(
-        userId: string,
-        payload: CreateApplicationInput
-    ) {
-        const normalizedUserId = new Types.ObjectId(userId);
-        const targetStatus = payload.status ?? "wishlist";
+  /**
+   * Create a new application for a user.
+   * @param {string} userId - User's _id as a string (converted to Types.ObjectId).
+   * @param {CreateApplicationInput} payload - Validated form input (does not include userId or DB-only fields). Use position to suggest an order.
+   * ? uses {CreateApplicationData} to be type-safe
+   *
+   * @returns {Promise<import("mongoose").HydratedDocument<IApplication>>} The created application document.
+   * */
+  static async createApplication(
+    userId: string,
+    payload: CreateApplicationInput,
+  ) {
+    const normalizedUserId = new Types.ObjectId(userId);
+    const targetStatus = payload.status ?? "wishlist";
 
-        // get card's order
-        const last = await Application
-            .findOne({ userId: normalizedUserId, status: targetStatus })
-            .sort({ order: -1 })
-            .select("order")
-            .lean<{ order?: number | null }>();
-        const computedOrder = last && typeof last.order === "number" ? last.order + 1 : 0;
-        const order = (payload as any).order ?? computedOrder;
+    // get card's order
+    const last = await Application.findOne({
+      userId: normalizedUserId,
+      status: targetStatus,
+    })
+      .sort({ order: -1 })
+      .select("order")
+      .lean<{ order?: number | null }>();
+    const computedOrder =
+      last && typeof last.order === "number" ? last.order + 1 : 0;
+    const order = (payload as any).order ?? computedOrder;
 
-        // auto add appliedAt
-        const appliedAt =
-            payload.appliedAt !== undefined
-                ? payload.appliedAt
-                : targetStatus === "applied"
-                    ? new Date()
-                    : null;
+    // auto add appliedAt
+    const appliedAt =
+      payload.appliedAt !== undefined
+        ? payload.appliedAt
+        : targetStatus === "applied"
+          ? new Date()
+          : null;
 
+    const new_application_data: CreateApplicationData = {
+      ...payload,
+      userId: normalizedUserId,
+      order: order,
+      appliedAt: appliedAt,
+    };
 
-        const new_application_data: CreateApplicationData = {
-            ...payload,
-            userId: normalizedUserId,
-            order: order,
-            appliedAt: appliedAt
-        }
+    const new_application = Application.create(new_application_data);
+    return new_application;
+  }
 
-        const new_application = Application.create(new_application_data);
-        return new_application;
-    }
+  static async findApplications(userId: string) {
+    const user_applications = await Application.find({ userId }).lean();
+    return user_applications;
+  }
 
-    static async findApplications(userId: string) {
-        const user_applications = await Application.find({ userId }).lean();
-        return user_applications;
-    }
+  static async findApplication(appId: string, userId: string) {
+    const application = await Application.findOne({ _id: appId, userId })
+      .orFail(() => makeAppError("Application not found", 404))
+      .exec();
 
-    static async findApplication(appId: string, userId: string) {
-        console.log('This is appId: ', appId);
-        console.log('This is userId ', userId);
+    return application;
+  }
 
-        const application = await Application
-            .findOne({ _id: appId, userId })
-            .orFail(() => makeAppError("Application not found", 404))
-            .exec()
+  static async changeApplicationStatus(
+    updateApplicationData: UpdateApplicationInput,
+  ) {
+    // extract user id
+    // const {} = user;
 
-        return application;
-    }
+    const {} = updateApplicationData;
+    // find application first
+    const orig_application = await Application.find();
+  }
 
-    static async changeApplicationStatus(updateApplicationData: UpdateApplicationInput) {
-        // extract user id
-        // const {} = user;
+  static async updateApplication() {}
 
-        const { } = updateApplicationData;
-        // find application first
-        const orig_application = await Application.find()
+  static async deleteApplication(appId: string, userId: string) {
 
-    }
+    const deletedApplication = await Application.findOneAndDelete({
+      _id: appId,
+      userId: userId,
+    })
+      .orFail(() =>
+        makeAppError("Application not found or delete access denied", 404),
+      )
+      .exec();
 
-    static async updateApplication() {
-
-    }
-
-    static async deleteApplication() {
-
-    }
+    return deletedApplication;
+  }
 }

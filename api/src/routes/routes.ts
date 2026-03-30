@@ -62,10 +62,7 @@ protected_router
         const { id } = req.params;
         res.send(`Called PUT application id: ${id}`);
     })
-    .delete((req, res) => {
-        const { id } = req.params;
-        res.send(`Called DELETE application id: ${id}`);
-    });
+    .delete(ApplicationController.deleteApplication);
 
 export {
     router,

@@ -47,3 +47,39 @@ export async function createApplicationAction(
     return { success: false, error: "Network error occurred" };
   }
 }
+
+export async function deleteApplicationAction(appId: string) {
+  const cookieStore = await cookies();
+  const headersList = await headers();
+  let token = headersList.get("Authorization")?.split(" ")[1];
+  if (!token) {
+    token = cookieStore.get("accessToken")?.value;
+  }
+
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_PROTECTED_API_URL}/applications/${appId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.message || `Failed to delete application (${res.status})`,
+      };
+    }
+
+    //Force the page to re-fetch the latest data from the backend
+    revalidatePath("/dashboard/board");
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: "Network error occurred" };
+  }
+}
