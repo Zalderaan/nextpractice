@@ -87,7 +87,7 @@ export class ApplicationService {
       { _id: appId, userId: userId }, // filter ensures they only update their own app
       { $set: updateData }, // applies only the fields provided
       {
-        new: true, // returns the document AFTER the update
+        returnDocument: 'after', // returns the document AFTER the update
         runValidators: true, // forces Mongoose to check ENUMs and constraints on update
       },
     );

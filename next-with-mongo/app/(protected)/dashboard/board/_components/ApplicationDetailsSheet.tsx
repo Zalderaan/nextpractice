@@ -126,7 +126,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                         onSubmit={handleSubmit(onSubmit)}
                         className='flex flex-col h-full'
                     >
-                        <SheetHeader className="px-6 py-4 border-b shrink-0">
+                        <SheetHeader className="px-6 py-4 border-b shrink-0 max-h-full">
                             <div className="flex flex-row items-center space-x-3">
                                 {isEditing ? (
                                     <Controller
@@ -134,7 +134,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                         control={control}
                                         render={({ field, fieldState }) => (
                                             <Field data-invalid={fieldState.invalid}>
-                                                <FieldLabel htmlFor="company">Company *</FieldLabel>
+                                                <FieldLabel htmlFor="company">Company {isEditing && (<span className='text-red-500'>*</span>)}</FieldLabel>
                                                 <Input
                                                     {...field}
                                                     id="company"
@@ -166,7 +166,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                     control={control}
                                     render={({ field, fieldState }) => (
                                         <Field data-invalid={fieldState.invalid}>
-                                            <FieldLabel htmlFor="role">Role *</FieldLabel>
+                                            <FieldLabel htmlFor="role">Role {isEditing && (<span className='text-red-500'>*</span>)}</FieldLabel>
                                             <Input
                                                 {...field}
                                                 id="role"
@@ -187,7 +187,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                             )}
                         </SheetHeader>
 
-                        <main className="flex-1 overflow-y-autopx-6 p-4 space-y-8">
+                        <main className="flex-1 overflow-y-auto px-6 p-4 space-y-8">
                             {/* Action Buttons */}
                             {!isEditing && (
                                 <section className="flex items-center w-full gap-3">
@@ -508,7 +508,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                         <SheetFooter className="px-6 py-4 border-t shrink-0 flex flex-row items-center gap-3 sm:space-x-0">
                             {isEditing ? (
                                 <>
-                                    <Button className="flex-1" variant="outline" onClick={() => setIsEditing(false)} disabled={isSubmitting}>
+                                    <Button type="button" className="flex-1" variant="outline" onClick={() => setIsEditing(false)} disabled={isSubmitting}>
                                         <X className="w-4 h-4 mr-2" />
                                         Cancel
                                     </Button>
