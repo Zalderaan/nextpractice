@@ -1,6 +1,15 @@
 import { create } from "zustand";
 
-type AuthUser = unknown;
+// type AuthUser = {};
+
+interface AuthUser {
+    _id: string;
+    username: string;
+    email: string;
+    role: "user" | "admin";
+    createdAt: Date;
+    updatedAt: Date; // Add this to match Mongoose timestamps
+}
 
 type AuthState = {
     user: AuthUser | null;

@@ -1,9 +1,13 @@
 'use client'
 
 import { usePathname } from "next/navigation";
+import { useAuthStore } from "@/app/(auth)/auth.stores";
+import { Separator } from "@/components/ui/separator";
 
 export function DashboardHeader() {
     const pathname = usePathname();
+    const { user } = useAuthStore();
+    console.log("this is user: ", user)
 
     // Define page data with title and description for each route
     const pageData = {
@@ -29,9 +33,17 @@ export function DashboardHeader() {
                 <p className="text-xs">{currentPage.desc}</p>
             </div>
 
-            <div className="rounded-full bg-black text-white w-8 h-8 flex items-center justify-center">
-                <span>SP</span>
+            <div className="flex flex-row items-center space-x-4">
+                <Separator orientation="vertical" className="border-x" />
+                <div className="flex flex-row items-center space-x-2">
+                    <div className="rounded-full bg-black text-white w-8 h-8 flex items-center justify-center">
+                        <span className="text-sm">{user?.username.charAt(0).toLocaleUpperCase()}</span>
+                    </div>
+                    <span className="text-sm">{user?.username}</span>
+                </div>
             </div>
+
+
         </header>
     );
 }
