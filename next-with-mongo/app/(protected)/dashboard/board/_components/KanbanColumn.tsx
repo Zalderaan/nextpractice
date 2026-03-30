@@ -10,11 +10,10 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, PlusIcon } from "lucide-react";
 import { ApplicationCard } from "./ApplicationCard";
 import { Application } from "./ApplicationCard";
-import { useState } from "react";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import { Badge } from "@/components/ui/badge";
 
 interface KanbanColumnProps {
     status: string;
@@ -25,13 +24,19 @@ interface KanbanColumnProps {
 
 export function KanbanColumn({ status, applications, onAddApplication, onSelect }: KanbanColumnProps) {
     return (
-        <Card className="flex flex-col min-w-[320px] max-h-full shrink-0 overflow-y-auto">
-            <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="capitalize">{status}</CardTitle>
-                <span className="text-sm text-muted-foreground">{applications.length}</span>
+        <Card className="flex flex-col min-w-[320px] max-h-full shrink-0 overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between shrink-0 border-b h-full">
+                <div className="flex flex-row space-x-2 item-center justify-start">
+                    <CardTitle className="capitalize">{status}</CardTitle>
+                    <Badge className="text-sm">{applications.length}</Badge>
+                </div>
+
+                <CardAction onClick={() => console.log(`Add application to ${status} clicked`)}>
+                    <PlusIcon />
+                </CardAction>
             </CardHeader>
 
-            <CardContent className="flex-1 space-y-2">
+            <CardContent className="flex-1 space-y-2 overflow-y-auto min-h-0 py-2">
                 {applications.length === 0 ? (
                     <p className="text-sm text-muted-foreground">No applications yet.</p>
                 ) : (
@@ -45,12 +50,12 @@ export function KanbanColumn({ status, applications, onAddApplication, onSelect 
                 )}
             </CardContent>
 
-            <CardFooter>
+            {/* <CardFooter className="border-t">
                 <Button variant="outline" size="sm" className="w-full" onClick={onAddApplication}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Application
                 </Button>
-            </CardFooter>
+            </CardFooter> */}
         </Card>
     );
 }

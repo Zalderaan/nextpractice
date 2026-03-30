@@ -43,7 +43,6 @@ interface ApplicationCardProps {
 
 export function ApplicationCard({ application, onClick }: ApplicationCardProps) {
     const { company, role, workType, priority, salaryMin, salaryMax, location, appliedAt, notes } = application;
-    console.log("This is notes: ", notes);
 
     // Convert string dates to Date objects if necessary and format
     const dateToDisplay = appliedAt
@@ -104,8 +103,9 @@ export function ApplicationCard({ application, onClick }: ApplicationCardProps) 
 
             </CardContent>
 
-            {(salaryMin || salaryMax) && (
-                <CardFooter className="p-4 flex flex-col justify-start gap-1 text-xs font-light text-green-700 dark:text-green-500">
+            <CardFooter className="p-4 flex flex-col justify-start gap-1 text-xs font-light text-green-700 dark:text-green-500">
+
+                {(salaryMin || salaryMax) && (
                     <span className="flex space-x-2 w-full text-xs">
                         <span className="text-gray-">Est. </span>
                         <span>
@@ -114,17 +114,22 @@ export function ApplicationCard({ application, onClick }: ApplicationCardProps) 
                             {salaryMax && formatCurrency(salaryMax)}
                         </span>
                     </span>
+                )}
 
-                    {notes && (
-                        <>
-                            <Separator className="my-1" />
-                            <span className="text-muted-foreground italic line-clamp-2 w-full">
-                                {notes}
-                            </span>
-                        </>
-                    )}
-                </CardFooter>
-            )}
+                {
+                    (salaryMin || salaryMax) && notes && (
+                        <Separator className="my-1" />
+                    )
+                }
+
+                {notes && (
+                    <>
+                        <span className="text-muted-foreground italic line-clamp-2 w-full">
+                            {notes}
+                        </span>
+                    </>
+                )}
+            </CardFooter>
         </Card>
     );
 }
