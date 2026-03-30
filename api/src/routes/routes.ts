@@ -9,7 +9,7 @@ import { loginSchema, registerSchema } from "../modules/auth/user.validator";
 import { authenticate } from "../middleware/authCheck";
 import Application from "../modules/applications/Application.model";
 import { ApplicationController } from "../modules/applications/application.controller";
-import { createApplicationSchema } from "../modules/applications/application.validator";
+import { createApplicationSchema, updateApplicationSchema } from "../modules/applications/application.validator";
 
 const router = Router(); // for public routes
 const protected_router = Router(); // for protected routes
@@ -58,10 +58,7 @@ protected_router
 protected_router
     .route("/applications/:id")
     .get(ApplicationController.getApplication)
-    .put((req, res) => {
-        const { id } = req.params;
-        res.send(`Called PUT application id: ${id}`);
-    })
+    .patch(validate({body: updateApplicationSchema}), ApplicationController.updateApplication)
     .delete(ApplicationController.deleteApplication);
 
 export {

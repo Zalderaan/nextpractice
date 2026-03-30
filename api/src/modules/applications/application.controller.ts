@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { ApplicationService } from "./application.service";
 import { makeAppError } from "../../middleware/errorHandler";
-import { IApplication } from "./Application.model";
+import Application, { IApplication } from "./Application.model";
 import { HydratedDocument } from "mongoose";
+import { UpdateApplicationInput } from "./application.validator";
 
 export class ApplicationController {
   static async postApplication(
@@ -17,6 +18,7 @@ export class ApplicationController {
 
       if (!userId) throw makeAppError("Unauthorized", 401);
 
+      // ! NOT TYPE SAFE
       const input = req.body;
       console.log("This is input from req.body: ", input);
       if (!input || Object.keys(input).length === 0)
@@ -72,6 +74,8 @@ export class ApplicationController {
 
       if (!appId) throw makeAppError("Application not found", 404);
 
+      const update_appl_input = req.body;
+
       const application = await ApplicationService.findApplication(
         appId,
         userId,
@@ -83,6 +87,38 @@ export class ApplicationController {
         success: true,
         message: "Application fetched successfully",
         data: { application },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async updateApplication(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const user = (req as any).user;
+      const userId = user?.sub;
+      if (!userId) throw makeAppError("Unauthorized", 401);
+
+      const appId = req.params.id as string;
+      if (!appId) throw makeAppError("Application not found", 404);
+
+      const safeinput = req.body as UpdateApplicationInput;
+      const updated_application = await ApplicationService.updateApplication(
+        appId,
+        userId,
+        safeinput,
+      );
+
+      if (!updated_application) throw makeAppError( "Application not found or could not be updated", 404);
+      
+      res.status(200).json({
+        success: true,
+        message: "Application updated successfully",
+        data: updated_application,
       });
     } catch (error) {
       next(error);

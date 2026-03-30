@@ -4,10 +4,9 @@ import {
   CreateApplicationInput,
   CreateApplicationData,
   MoveApplicationInput,
-  UpdateApplicationInput,
+  UpdateApplicationInput
 } from "./application.validator";
 import { Types } from "mongoose";
-
 export class ApplicationService {
   /**
    * Create a new application for a user.
@@ -79,10 +78,23 @@ export class ApplicationService {
     const orig_application = await Application.find();
   }
 
-  static async updateApplication() {}
+  static async updateApplication(
+    appId: string,
+    userId: string,
+    updateData: UpdateApplicationInput,
+  ) {
+    const updated_application = await Application.findOneAndUpdate(
+      { _id: appId, userId: userId }, // filter ensures they only update their own app
+      { $set: updateData }, // applies only the fields provided
+      {
+        new: true, // returns the document AFTER the update
+        runValidators: true, // forces Mongoose to check ENUMs and constraints on update
+      },
+    );
+    return updated_application;
+  }
 
   static async deleteApplication(appId: string, userId: string) {
-
     const deletedApplication = await Application.findOneAndDelete({
       _id: appId,
       userId: userId,

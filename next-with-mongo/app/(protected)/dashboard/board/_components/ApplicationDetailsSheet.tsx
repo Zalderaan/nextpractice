@@ -1,0 +1,531 @@
+
+import React, { useState, useEffect } from 'react'
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Pencil, Link as LinkIcon, X, Save } from 'lucide-react'
+import Link from 'next/link'
+import { deleteApplicationAction, updateApplicationAction } from "@/app/(protected)/dashboard/board/actions"
+import { Application } from './ApplicationCard'
+import { fullFormSchema } from './AddApplicationDialog'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Controller, useForm } from 'react-hook-form'
+import z from 'zod'
+import { toast } from 'sonner'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Spinner } from '@/components/ui/spinner'
+
+type ApplicationSheetProps = {
+    selectedApp: Application | null;
+    onClose: () => void;
+}
+
+export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps) {
+    // 1. UI States
+    const [isEditing, setIsEditing] = useState(false);
+
+    const {
+        _id, userId, order,
+        company, role, priority,
+        jobUrl, workType, location, status, salaryMax, salaryMin,
+        notes, appliedAt,
+        createdAt, updatedAt
+    } = selectedApp || {};
+
+    const fullUpdateApplicationForm = useForm<z.infer<typeof fullFormSchema>>({
+        resolver: zodResolver(fullFormSchema),
+        defaultValues: {
+            company: company,
+            role: role,
+            jobUrl: jobUrl || undefined,
+            location: location,
+            workType: workType,  // Matches schema default
+            salaryMin: salaryMin,
+            salaryMax: salaryMax,
+            status: status,  // Matches schema default
+            priority: priority,  // Matches schema default
+            appliedAt: appliedAt ? new Date(appliedAt) : null,  // Convert string to Date if present
+            notes: notes
+        }
+    })
+
+    // Reset states when a new app is selected or sheet closes
+    useEffect(() => {
+        setIsEditing(false);
+        if (selectedApp) {
+            fullUpdateApplicationForm.reset({
+                company: company || '',
+                role: role || '',
+                jobUrl: jobUrl || undefined,
+                location: location || '',
+                workType: workType,
+                salaryMin: salaryMin || undefined,
+                salaryMax: salaryMax || undefined,
+                status: status,
+                priority: priority,
+                appliedAt: appliedAt ? new Date(appliedAt) : undefined,
+                notes: notes || ''
+            });
+        }
+    }, [selectedApp, fullUpdateApplicationForm]);
+
+    const { handleSubmit, control, formState: { isSubmitting } } = fullUpdateApplicationForm;
+    async function onSubmit(data: z.infer<typeof fullFormSchema>) {
+        console.log("Data submitted: ", data);
+        const _id = selectedApp?._id;
+        if (!_id) {
+            alert("No application selected to delete.");
+            return;
+        }
+
+        try {
+
+            const result = await updateApplicationAction(_id, data);
+            if (result.success) {
+                toast.success("Application updated successfully")
+            } else {
+                throw new Error(result.error);
+            }
+
+        } catch (error) {
+            console.error('An error occured while updating the application: ', error)
+            toast.error("Error updating application")
+        }
+    }
+
+
+    const handleDelete = async () => {
+        const _id = selectedApp?._id;
+        if (!_id) {
+            alert("No application selected to delete.");
+            return;
+        }
+
+        try {
+            const result = await deleteApplicationAction(_id);
+            if (result.success) {
+                onClose();  // Close the sheet
+                // Optional: Trigger a router.refresh() here if needed to update the UI
+            } else {
+                alert(result.error || "Failed to delete application.");
+            }
+        } catch (error) {
+            alert("An unexpected error occurred.");
+        }
+    };
+
+    return (
+        <Sheet open={!!selectedApp} onOpenChange={(open) => { if (!open) onClose() }}>
+            <SheetContent className="w-full sm:max-w-135 flex flex-col p-0 overflow-hidden">
+                {selectedApp && (
+                    <form
+                        id='update-application-form'
+                        onSubmit={handleSubmit(onSubmit)}
+                        className='flex flex-col h-full'
+                    >
+                        <SheetHeader className="px-6 py-4 border-b shrink-0">
+                            <div className="flex flex-row items-center space-x-3">
+                                {isEditing ? (
+                                    <Controller
+                                        name="company"
+                                        control={control}
+                                        render={({ field, fieldState }) => (
+                                            <Field data-invalid={fieldState.invalid}>
+                                                <FieldLabel htmlFor="company">Company *</FieldLabel>
+                                                <Input
+                                                    {...field}
+                                                    id="company"
+                                                    type="text"
+                                                    aria-invalid={fieldState.invalid}
+                                                    placeholder="Acme Corp."
+                                                    autoComplete="off"
+                                                    required
+                                                />
+                                                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                            </Field>
+                                        )}
+                                    />
+
+                                ) : (
+                                    <SheetTitle className="text-xl">{selectedApp.company}</SheetTitle>
+                                )}
+
+                                {!isEditing && (
+                                    <Badge variant={selectedApp.priority === 'high' ? 'destructive' : 'secondary'} className="capitalize">
+                                        {selectedApp.priority}
+                                    </Badge>
+                                )}
+                            </div>
+
+                            {isEditing ? (
+                                <Controller
+                                    name="role"
+                                    control={control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor="role">Role *</FieldLabel>
+                                            <Input
+                                                {...field}
+                                                id="role"
+                                                type="text"
+                                                aria-invalid={fieldState.invalid}
+                                                placeholder="Software Engineer"
+                                                autoComplete="off"
+                                                required
+                                            />
+                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                        </Field>
+                                    )}
+                                />
+                            ) : (
+                                <SheetDescription className="text-base font-medium text-primary/80">
+                                    {selectedApp.role}
+                                </SheetDescription>
+                            )}
+                        </SheetHeader>
+
+                        <main className="flex-1 overflow-y-autopx-6 p-4 space-y-8">
+                            {/* Action Buttons */}
+                            {!isEditing && (
+                                <section className="flex items-center w-full gap-3">
+                                    <Button className="flex-1" variant="secondary" onClick={() => setIsEditing(true)}>
+                                        <Pencil className="w-4 h-4 mr-2" />
+                                        Edit
+                                    </Button>
+
+                                    {selectedApp.jobUrl ? (
+                                        <Button asChild className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+                                            <Link href={selectedApp.jobUrl} target="_blank" rel="noopener noreferrer">
+                                                <LinkIcon className="w-4 h-4 mr-2" />
+                                                View Job
+                                            </Link>
+                                        </Button>
+                                    ) : (
+                                        <Button disabled variant="outline" className="flex-1">
+                                            <LinkIcon className="w-4 h-4 mr-2" />
+                                            No job URL
+                                        </Button>
+                                    )}
+                                </section>
+                            )}
+
+                            {/* Details Grid */}
+                            <section className="space-y-3">
+                                <h4 className="text-sm font-semibold text-foreground border-b pb-2">Details</h4>
+                                <div id='details-container' className="grid grid-cols-2 gap-4 text-sm">
+                                    <div className="space-y-1">
+                                        <span className="text-muted-foreground block">Status {isEditing && (<span className='text-red-500'>*</span>)}</span>
+                                        {isEditing ? (
+                                            <Controller
+                                                name="status"
+                                                control={control}
+                                                render={({ field, fieldState }) => (
+                                                    <Field data-invalid={fieldState.invalid}>
+                                                        {/* <FieldLabel htmlFor="status">Status *</FieldLabel> */}
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select status" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="wishlist">Wishlist</SelectItem>
+                                                                <SelectItem value="applied">Applied</SelectItem>
+                                                                <SelectItem value="interview">Interview</SelectItem>
+                                                                <SelectItem value="offer">Offer</SelectItem>
+                                                                <SelectItem value="rejected">Rejected</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                    </Field>
+                                                )}
+                                            />
+                                        ) : (
+                                            <span className="font-medium capitalize">{selectedApp.status}</span>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <span className="text-muted-foreground block">Location</span>
+                                        {isEditing ? (
+                                            <Controller
+                                                name="location"
+                                                control={control}
+                                                render={({ field, fieldState }) => (
+                                                    <Field data-invalid={fieldState.invalid}>
+                                                        <Input
+                                                            {...field}
+                                                            id="location"
+                                                            type="text"
+                                                            aria-invalid={fieldState.invalid}
+                                                            placeholder="Makati City, Manila, Philippines"
+                                                            autoComplete="off"
+                                                            required={workType !== 'remote'}
+                                                        />
+                                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                    </Field>
+                                                )}
+                                            />
+                                        ) : (
+                                            <span className="font-medium capitalize">
+                                                {
+                                                    location ? (
+                                                        <span>{location}</span>
+                                                    ) : (
+                                                        <span className='font-medium text-muted-foreground italic'>No location specified</span>
+                                                    )
+                                                }
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <span className="text-muted-foreground block">Work Type</span>
+                                        {isEditing ? (
+                                            <Controller
+                                                name="workType"
+                                                control={control}
+                                                render={({ field, fieldState }) => (
+                                                    <Field data-invalid={fieldState.invalid}>
+                                                        <Input
+                                                            {...field}
+                                                            id="workType"
+                                                            type="text"
+                                                            aria-invalid={fieldState.invalid}
+                                                            placeholder="Remote / Onsite / Hybrid"
+                                                            autoComplete="off"
+                                                            required
+                                                        />
+                                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                    </Field>
+                                                )}
+                                            />
+                                        ) : (
+                                            <span className="font-medium capitalize">
+                                                {
+                                                    workType ? (
+                                                        <span>{workType}</span>
+                                                    ) : (
+                                                        <span className='font-medium text-red-200'>This shouldn't be available-- workType is always required!</span>
+                                                    )
+                                                }
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <span className="text-muted-foreground block">Salary Range</span>
+                                        {isEditing ? (
+                                            <div className="flex items-start gap-2 w-full">
+                                                <Controller
+                                                    name="salaryMin"
+                                                    control={control}
+                                                    render={({ field, fieldState }) => (
+                                                        <Field data-invalid={fieldState.invalid} className="flex-1">
+                                                            <Input
+                                                                {...field}
+                                                                id="salaryMin"
+                                                                type="number"
+                                                                aria-invalid={fieldState.invalid}
+                                                                placeholder="Min"
+                                                                autoComplete="off"
+                                                                value={field.value || ''}
+                                                                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                                                            />
+                                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                        </Field>
+                                                    )}
+                                                />
+
+                                                <span className="text-muted-foreground mt-2">-</span>
+
+                                                <Controller
+                                                    name="salaryMax"
+                                                    control={control}
+                                                    render={({ field, fieldState }) => (
+                                                        <Field data-invalid={fieldState.invalid} className="flex-1">
+                                                            <Input
+                                                                {...field}
+                                                                id="salaryMax"
+                                                                type="number"
+                                                                aria-invalid={fieldState.invalid}
+                                                                placeholder="Max"
+                                                                autoComplete="off"
+                                                                value={field.value || ''}
+                                                                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                                                            />
+                                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                        </Field>
+                                                    )}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <span className="font-medium">
+                                                {salaryMin && salaryMax ? (
+                                                    <span>${salaryMin} - ${salaryMax}</span>
+                                                ) : salaryMin ? (
+                                                    <span>${salaryMin}</span>
+                                                ) : salaryMax ? (
+                                                    <span>${salaryMax}</span>
+                                                ) : (
+                                                    <span className="font-medium text-muted-foreground italic">Not specified</span>
+                                                )}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <span className="text-muted-foreground block">Priority</span>
+                                        {isEditing ? (
+                                            <Controller
+                                                name="priority"
+                                                control={control}
+                                                render={({ field, fieldState }) => (
+                                                    <Field data-invalid={fieldState.invalid}>
+                                                        <Input
+                                                            {...field}
+                                                            id="priority"
+                                                            type="text"
+                                                            aria-invalid={fieldState.invalid}
+                                                            placeholder="Medium"
+                                                            autoComplete="off"
+                                                            required
+                                                        />
+                                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                    </Field>
+                                                )}
+                                            />
+                                        ) : (
+                                            <span className="font-medium capitalize">
+                                                {
+                                                    priority ? (
+                                                        <span>{priority}</span>
+                                                    ) : (
+                                                        <span className='font-medium text-red-200'>This shouldn't be available-- priority defaults to medium!</span>
+                                                    )
+                                                }
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <span className="text-muted-foreground block">URL</span>
+                                        {isEditing ? (
+                                            <Controller
+                                                name="jobUrl"
+                                                control={control}
+                                                render={({ field, fieldState }) => (
+                                                    <Field data-invalid={fieldState.invalid}>
+                                                        <Input
+                                                            {...field}
+                                                            id="jobUrl"
+                                                            type="text"
+                                                            aria-invalid={fieldState.invalid}
+                                                            placeholder="https://example.com"
+                                                            autoComplete="off"
+                                                            value={field.value || ''}
+                                                            onChange={(e) => field.onChange(e.target.value.trim() === '' ? undefined : e.target.value)} />
+                                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                    </Field>
+                                                )}
+                                            />
+                                        ) : (
+                                            <span className="font-medium">{
+                                                jobUrl
+                                                    ? (<span>{jobUrl}</span>)
+                                                    : (<span className='font-medium text-muted-foreground italic'>Not specified</span>)
+                                            }</span>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <span className="text-muted-foreground block">Applied on</span>
+                                        {isEditing ? (
+                                            <Controller
+                                                name="appliedAt"
+                                                control={control}
+                                                render={({ field, fieldState }) => (
+                                                    <Field data-invalid={fieldState.invalid}>
+                                                        <FieldLabel htmlFor="appliedAt">Applied At</FieldLabel>
+                                                        <Input
+                                                            {...field}
+                                                            id="appliedAt"
+                                                            type="date"
+                                                            aria-invalid={fieldState.invalid}
+                                                            {...(field.value ? { value: field.value.toISOString().split('T')[0] } : { value: '' })}
+                                                            onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                                                        />
+                                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                    </Field>
+                                                )}
+                                            />
+                                        ) : (
+                                            <span className="font-medium">{
+                                                appliedAt
+                                                    ? (<span>{new Date(appliedAt).toLocaleDateString()}</span>)
+                                                    : (<span className='font-medium text-muted-foreground italic'>Not specified</span>)
+                                            }</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </section>
+
+
+                            {/* Notes Box */}
+                            <section className="space-y-3">
+                                <h4 className="text-sm font-semibold text-foreground border-b pb-2">Additional Notes</h4>
+                                {isEditing ? (
+                                    <Controller
+                                        name="notes"
+                                        control={control}
+                                        render={({ field, fieldState }) => (
+                                            <Field data-invalid={fieldState.invalid}>
+                                                <Textarea
+                                                    {...field}
+                                                    id="notes"
+                                                    aria-invalid={fieldState.invalid}
+                                                    placeholder="Any additional details..."
+                                                    rows={3}
+                                                />
+                                                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                            </Field>
+                                        )}
+                                    />
+                                ) : (
+                                    selectedApp.notes ? (
+                                        <div className="bg-muted/50 p-3 rounded-md text-sm text-muted-foreground whitespace-pre-wrap">
+                                            {selectedApp.notes}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground italic">No notes provided.</p>
+                                    )
+                                )}
+                            </section>
+                        </main>
+
+                        {/* FOOTER: Changes based on edit state */}
+                        <SheetFooter className="px-6 py-4 border-t shrink-0 flex flex-row items-center gap-3 sm:space-x-0">
+                            {isEditing ? (
+                                <>
+                                    <Button className="flex-1" variant="outline" onClick={() => setIsEditing(false)} disabled={isSubmitting}>
+                                        <X className="w-4 h-4 mr-2" />
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit" className="flex-1" disabled={isSubmitting}>
+                                        {isSubmitting ? <Spinner /> : <Save className="w-4 h-4 mr-2" />}
+                                        {isSubmitting ? "Saving..." : "Save Changes"}
+                                    </Button>
+                                </>
+                            ) : (
+                                <Button className="flex-1" variant="destructive" onClick={() => handleDelete()}>
+                                    Delete Application
+                                </Button>
+                            )}
+                        </SheetFooter>
+                    </form>
+                )}
+            </SheetContent>
+        </Sheet>
+    )
+}

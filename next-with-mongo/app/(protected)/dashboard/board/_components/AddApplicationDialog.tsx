@@ -1,13 +1,10 @@
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
-    DialogOverlay,
-    DialogPortal,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
@@ -25,19 +22,12 @@ import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { Spinner } from "@/components/ui/spinner"
-// import { useRouter } from "next/navigation"
-
 import { toast } from "sonner"
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { createApplicationAction } from "../actions";
-// import { authedFetch } from "@/lib/auth_fetch";
 
-// 1. Basic Job info - company, role, job URL
-// 2. Job Details - loc, type, salary_min, salary_max
-// 3. Application Status - status, prio, appliedAt
-// 4. Additional notes
 const basicJobInfoSchema = z.object({
     company: z.string().min(1, "Company is required").max(120),
     role: z.string().min(1, 'Role is required').max(120),
@@ -92,9 +82,7 @@ export const fullFormSchema = z.object({
     }
 });
 
-// TODO: Make this full form, then multi-step later when it's working
 export function AddApplicationDialog() {
-    const NEXT_PUBLIC_PROTECTED_API_URL = process.env.NEXT_PUBLIC_PROTECTED_API_URL;
     const fullAddApplicationForm = useForm<z.infer<typeof fullFormSchema>>({
         resolver: zodResolver(fullFormSchema),
         defaultValues: {
@@ -113,7 +101,6 @@ export function AddApplicationDialog() {
     });
 
     const { handleSubmit, control, formState: { isSubmitting }, reset } = fullAddApplicationForm;
-
 
     async function onSubmit(data: z.infer<typeof fullFormSchema>) {
         try {
@@ -153,7 +140,7 @@ export function AddApplicationDialog() {
                     className="flex flex-col space-y-6 max-h-96 overflow-y-auto"
                 >
                     {/* 1. Basic Job Info */}
-                    <fieldset className="space-y-4">
+                    <FieldGroup className="">
                         <legend className="text-sm font-semibold text-foreground">Basic Job Info</legend>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Controller
@@ -215,12 +202,12 @@ export function AddApplicationDialog() {
                                 </Field>
                             )}
                         />
-                    </fieldset>
+                    </FieldGroup>
 
                     <Separator />
 
                     {/* 2. Job Details */}
-                    <fieldset className="space-y-4">
+                    <FieldGroup className="space-y-4">
                         <legend className="text-sm font-semibold text-foreground">Job Details</legend>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Controller
@@ -302,12 +289,12 @@ export function AddApplicationDialog() {
                                 )}
                             />
                         </div>
-                    </fieldset>
+                    </FieldGroup>
 
                     <Separator />
 
                     {/* 3. Application Status */}
-                    <fieldset className="space-y-4">
+                    <FieldGroup className="">
                         <legend className="text-sm font-semibold text-foreground">Application Status</legend>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <Controller
@@ -363,7 +350,7 @@ export function AddApplicationDialog() {
                                             id="appliedAt"
                                             type="date"
                                             aria-invalid={fieldState.invalid}
-                                            value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                                            {...(field.value ? { value: field.value.toISOString().split('T')[0] } : { value: '' })}
                                             onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
                                         />
                                         {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -371,12 +358,12 @@ export function AddApplicationDialog() {
                                 )}
                             />
                         </div>
-                    </fieldset>
+                    </FieldGroup>
 
                     <Separator />
 
                     {/* 4. Additional Notes */}
-                    <fieldset className="space-y-4">
+                    <FieldGroup className="">
                         <legend className="text-sm font-semibold text-foreground">Additional Notes</legend>
                         <Controller
                             name="notes"
@@ -395,7 +382,7 @@ export function AddApplicationDialog() {
                                 </Field>
                             )}
                         />
-                    </fieldset>
+                    </FieldGroup>
                 </form>
 
                 <DialogFooter>
