@@ -45,10 +45,11 @@ export default function BoardView({ applications }: Props) {
             return;
         }
 
-        // 1. Get the list of applications in the destination column
+        // 1. Get the list of applications in the destination column, excluding the dragged item
         const destColumnApps = applications
-            .filter(app => app.status === destination.droppableId)
+            .filter(app => app.status === destination.droppableId && app._id !== draggableId)
             .sort((a, b) => a.order - b.order);
+
 
         let newOrder: number;
 
@@ -79,7 +80,7 @@ export default function BoardView({ applications }: Props) {
     return (
         <>
             <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
-                <BoardClient 
+                <BoardClient
                     className="min-w-0 flex-1 overflow-x-auto overflow-y-auto custom-scrollbar p-(--dashboard-pages-padding) select-none"
                     isDraggingCard={isDraggingCard}
                 >
@@ -88,7 +89,10 @@ export default function BoardView({ applications }: Props) {
                             <KanbanColumn
                                 key={status}
                                 status={status}
-                                applications={applications.filter((a) => a.status === status)}
+                                applications={applications
+                                    .filter((a) => a.status === status)
+                                    .sort((a, b) => a.order - b.order)  // Sort by order ascending
+                                }
                                 onSelect={handleSelect}
                             />
                         ))}

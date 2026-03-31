@@ -1,4 +1,5 @@
 import { cookies, headers } from 'next/headers';
+import {ApplicationsPageHeader} from "@/app/(protected)/dashboard/applications/_components/ApplicationsPageHeader"
 
 export default async function ApplicationsPage() {
     const NEXT_PUBLIC_PROTECTED_API_URL = process.env.NEXT_PUBLIC_PROTECTED_API_URL
@@ -26,11 +27,13 @@ export default async function ApplicationsPage() {
     const data = await res.json();
 
     return (
-        <main className='p-(--dashboard-pages-padding)'>
+        <main className="flex min-h-0 h-full flex-1 flex-col">
+            <ApplicationsPageHeader />
             <div>
                 <h1>Applications Data</h1>
                 <pre>{JSON.stringify(data, null, 2)}</pre>
             </div>
         </main>
+
     )
 }
