@@ -52,23 +52,27 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
         }
     })
 
+    const resetFormToOriginal = () => {
+        fullUpdateApplicationForm.reset({
+            company: company || '',
+            role: role || '',
+            jobUrl: jobUrl || undefined,
+            location: location || '',
+            workType: workType,
+            salaryMin: salaryMin || undefined,
+            salaryMax: salaryMax || undefined,
+            status: status,
+            priority: priority,
+            appliedAt: appliedAt ? new Date(appliedAt) : undefined,
+            notes: notes || ''
+        });
+    }
+
     // Reset states when a new app is selected or sheet closes
     useEffect(() => {
         setIsEditing(false);
         if (selectedApp) {
-            fullUpdateApplicationForm.reset({
-                company: company || '',
-                role: role || '',
-                jobUrl: jobUrl || undefined,
-                location: location || '',
-                workType: workType,
-                salaryMin: salaryMin || undefined,
-                salaryMax: salaryMax || undefined,
-                status: status,
-                priority: priority,
-                appliedAt: appliedAt ? new Date(appliedAt) : undefined,
-                notes: notes || ''
-            });
+            resetFormToOriginal();
         }
     }, [selectedApp, fullUpdateApplicationForm]);
 
@@ -89,10 +93,11 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
             } else {
                 throw new Error(result.error);
             }
-
         } catch (error) {
             console.error('An error occured while updating the application: ', error)
             toast.error("Error updating application")
+        } finally {
+            setIsEditing(false);
         }
     }
 
@@ -191,13 +196,13 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                             {/* Action Buttons */}
                             {!isEditing && (
                                 <section className="flex items-center w-full gap-3">
-                                    <Button className="flex-1" variant="secondary" onClick={() => setIsEditing(true)}>
+                                    <Button type="button" className="flex-1" variant="secondary" onClick={() => setIsEditing(true)}>
                                         <Pencil className="w-4 h-4 mr-2" />
                                         Edit
                                     </Button>
 
                                     {selectedApp.jobUrl ? (
-                                        <Button asChild className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+                                        <Button asChild type="button" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
                                             <Link href={selectedApp.jobUrl} target="_blank" rel="noopener noreferrer">
                                                 <LinkIcon className="w-4 h-4 mr-2" />
                                                 View Job
@@ -508,7 +513,13 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                         <SheetFooter className="px-6 py-4 border-t shrink-0 flex flex-row items-center gap-3 sm:space-x-0">
                             {isEditing ? (
                                 <>
-                                    <Button type="button" className="flex-1" variant="outline" onClick={() => setIsEditing(false)} disabled={isSubmitting}>
+                                    <Button type="button" className="flex-1" variant="outline" disabled={isSubmitting}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            resetFormToOriginal();
+                                            setIsEditing(false);
+                                        }}
+                                    >
                                         <X className="w-4 h-4 mr-2" />
                                         Cancel
                                     </Button>
@@ -518,7 +529,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                     </Button>
                                 </>
                             ) : (
-                                <Button className="flex-1" variant="destructive" onClick={() => handleDelete()}>
+                                <Button type='button' className="flex-1" variant="destructive" onClick={() => handleDelete()}>
                                     Delete Application
                                 </Button>
                             )}
