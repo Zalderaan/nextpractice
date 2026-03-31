@@ -9,7 +9,7 @@ import { loginSchema, registerSchema } from "../modules/auth/user.validator";
 import { authenticate } from "../middleware/authCheck";
 import Application from "../modules/applications/Application.model";
 import { ApplicationController } from "../modules/applications/application.controller";
-import { createApplicationSchema, updateApplicationSchema } from "../modules/applications/application.validator";
+import { createApplicationSchema, moveApplicationSchema, updateApplicationSchema } from "../modules/applications/application.validator";
 
 const router = Router(); // for public routes
 const protected_router = Router(); // for protected routes
@@ -60,6 +60,10 @@ protected_router
     .get(ApplicationController.getApplication)
     .patch(validate({body: updateApplicationSchema}), ApplicationController.updateApplication)
     .delete(ApplicationController.deleteApplication);
+
+protected_router
+    .route("/applications/:id/status")
+    .patch(validate({body: moveApplicationSchema}), ApplicationController.updateApplicationStatus)
 
 export {
     router,

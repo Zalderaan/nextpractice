@@ -212,8 +212,8 @@ export const updateApplicationSchema = z
 
 // ---------- move (kanban drag/drop persistence) ----------
 export const moveApplicationSchema = z.object({
-  status: z.enum(APPLICATION_STATUSES),
-  order: z.coerce.number().int().min(0),
+  newStatus: z.enum(APPLICATION_STATUSES),
+  newOrder: z.coerce.number().min(0)
 });
 
 // ---------- inferred types (only reflects pure forms) ----------

@@ -6,11 +6,12 @@ type Props = {
     children: React.ReactNode;
     className?: string;
     style?: React.CSSProperties;
+    isDraggingCard?: boolean
 };
 
-export default function BoardClient({ children, className = '', style }: Props) {
+export default function BoardClient({ isDraggingCard, children, className = '', style }: Props) {
     const scrollRef = React.useRef<HTMLDivElement | null>(null);
-    const dragging = useHorizontalDragScroll(scrollRef);
+    const dragging = useHorizontalDragScroll(scrollRef, isDraggingCard);
 
     return (
         <div

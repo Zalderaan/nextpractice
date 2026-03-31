@@ -67,15 +67,23 @@ export class ApplicationService {
     return application;
   }
 
-  static async changeApplicationStatus(
-    updateApplicationData: UpdateApplicationInput,
-  ) {
-    // extract user id
-    // const {} = user;
+  static async changeApplicationStatus(appId: string, userId: string, moveApplicationData: MoveApplicationInput) {
 
-    const {} = updateApplicationData;
-    // find application first
-    const orig_application = await Application.find();
+    const renamedData = {
+      status: moveApplicationData.newStatus,
+      order: moveApplicationData.newOrder
+    }
+
+    const changed_application = await Application.findOneAndUpdate(
+      { _id: appId, userId: userId }, // filters
+      { $set: renamedData },
+      {
+        returnDocument: "after",
+        runValidators: true,
+      },
+    );
+
+    return changed_application;
   }
 
   static async updateApplication(

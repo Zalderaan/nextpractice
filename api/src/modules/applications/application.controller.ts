@@ -3,7 +3,7 @@ import { ApplicationService } from "./application.service";
 import { makeAppError } from "../../middleware/errorHandler";
 import Application, { IApplication } from "./Application.model";
 import { HydratedDocument } from "mongoose";
-import { UpdateApplicationInput } from "./application.validator";
+import { MoveApplicationInput, UpdateApplicationInput } from "./application.validator";
 
 export class ApplicationController {
   static async postApplication(
@@ -113,8 +113,51 @@ export class ApplicationController {
         safeinput,
       );
 
-      if (!updated_application) throw makeAppError( "Application not found or could not be updated", 404);
-      
+      if (!updated_application)
+        throw makeAppError(
+          "Application not found or could not be updated",
+          404,
+        );
+
+      res.status(200).json({
+        success: true,
+        message: "Application updated successfully",
+        data: updated_application,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async updateApplicationStatus(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const user = (req as any).user;
+      const userId = user?.sub;
+      if (!userId) throw makeAppError("Unauthorized", 401);
+
+      const appId = req.params.id as string;
+      if (!appId) throw makeAppError("Application not found", 404);
+
+      const newStatusAndOrder = req.body as MoveApplicationInput;
+      console.log("Received from ctrlr: ", newStatusAndOrder)
+
+      const updated_application =
+        await ApplicationService.changeApplicationStatus(
+          appId,
+          userId,
+          newStatusAndOrder,
+        );
+
+      if (!updated_application)
+        throw makeAppError(
+          "Application not found or could not be updated",
+          404,
+        );
+
       res.status(200).json({
         success: true,
         message: "Application updated successfully",

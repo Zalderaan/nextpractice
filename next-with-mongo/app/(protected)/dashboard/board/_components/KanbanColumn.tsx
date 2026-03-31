@@ -1,16 +1,8 @@
 'use client'
 
-import {
-    Card,
-    CardAction,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus, PlusIcon } from "lucide-react";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Draggable, Droppable } from '@hello-pangea/dnd' // [!code ++]
+import { PlusIcon } from "lucide-react";
 import { ApplicationCard } from "./ApplicationCard";
 import { Application } from "./ApplicationCard";
 import { Badge } from "@/components/ui/badge";
@@ -18,11 +10,10 @@ import { Badge } from "@/components/ui/badge";
 interface KanbanColumnProps {
     status: string;
     applications: Application[];
-    onAddApplication?: () => void;
     onSelect: (app: Application) => void; // Make this required
 }
 
-export function KanbanColumn({ status, applications, onAddApplication, onSelect }: KanbanColumnProps) {
+export function KanbanColumn({ status, applications, onSelect }: KanbanColumnProps) {
     return (
         <Card className="flex flex-col min-w-[320px] max-h-full shrink-0 overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between shrink-0 border-b h-full">
@@ -36,26 +27,33 @@ export function KanbanColumn({ status, applications, onAddApplication, onSelect 
                 </CardAction>
             </CardHeader>
 
-            <CardContent className="flex-1 space-y-2 overflow-y-auto min-h-0 py-2">
-                {applications.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No applications yet.</p>
-                ) : (
-                    applications.map((app) => (
-                        <ApplicationCard
-                            key={app._id}
-                            application={app}
-                            onClick={() => onSelect(app)} // Pass to parent
-                        />
-                    ))
+            <Droppable droppableId={status}>
+                {(provided, snapshot) => (
+                    <CardContent
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        className={`flex-1 space-y-2 overflow-y-auto min-h-0 py-2 transition-colors ${snapshot.isDraggingOver ? 'bg-accent/50' : ''}`}
+                    >
+                        {applications.map((app, index) => (
+                            <Draggable key={app._id} draggableId={app._id} index={index}>
+                                {(provided) => (
+                                    <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                    >
+                                        <ApplicationCard
+                                            application={app}
+                                            onClick={() => onSelect(app)}
+                                        />
+                                    </div>
+                                )}
+                            </Draggable>
+                        ))}
+                        {provided.placeholder} {/* Required to keep space open */}
+                    </CardContent>
                 )}
-            </CardContent>
-
-            {/* <CardFooter className="border-t">
-                <Button variant="outline" size="sm" className="w-full" onClick={onAddApplication}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Application
-                </Button>
-            </CardFooter> */}
+            </Droppable>
         </Card>
     );
 }

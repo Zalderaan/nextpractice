@@ -46,6 +46,48 @@ export async function createApplicationAction(
   }
 }
 
+export async function updateApplicationStatusAction(
+  appId: string,
+  data: {
+    newOrder: number;
+    newStatus: string;
+  },
+) {
+  const cookieStore = await cookies();
+  const headersList = await headers();
+
+  let token = headersList.get("Authorization")?.split(" ")[1];
+  if (!token) token = cookieStore.get("accessToken")?.value;
+
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_PROTECTED_API_URL}/applications/${appId}/status`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      },
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.error || `Failed to update application ${res.status}`,
+        details: errorData.details || "No details provided",
+      };
+    }
+
+    revalidatePath("/dashboard/board");
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: "Network error occurred" };
+  }
+}
+
 export async function updateApplicationAction(
   appId: string,
   data: z.infer<typeof fullFormSchema>,
@@ -78,8 +120,7 @@ export async function updateApplicationAction(
       };
     }
 
-    revalidatePath('/dashboard/board');
-
+    revalidatePath("/dashboard/board");
     return { success: true };
   } catch (error) {
     return { success: false, error: "Network error occurred" };
@@ -112,10 +153,6 @@ export async function deleteApplicationAction(appId: string) {
           errorData.message || `Failed to delete application (${res.status})`,
       };
     }
-
-    //Force the page to re-fetch the latest data from the backend
-    revalidatePath("/dashboard/board");
-    return { success: true };
 
     //Force the page to re-fetch the latest data from the backend
     revalidatePath("/dashboard/board");
