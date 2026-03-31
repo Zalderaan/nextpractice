@@ -1,5 +1,6 @@
-
+'use client' // already a client component since BoardView.tsx imports it, but ok
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation';
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,15 +19,20 @@ import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
 
+// ? TODO LIST:
+// TODO: Loading state (skeleton)
+// TODO: Activity (what changes in the db for this?)
+// TODO: SheetContent overflow handling
+// TODO: Empty date defaulting to 01/01/1970 (fix in dialog date input)
+
 type ApplicationSheetProps = {
     selectedApp: Application | null;
     onClose: () => void;
 }
 
 export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps) {
-    // 1. UI States
+    const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
-
     const {
         _id, userId, order,
         company, role, priority,
@@ -90,6 +96,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
             const result = await updateApplicationAction(_id, data);
             if (result.success) {
                 toast.success("Application updated successfully")
+                router.refresh();
             } else {
                 throw new Error(result.error);
             }
@@ -381,40 +388,6 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                     </div>
 
                                     <div className="space-y-1">
-                                        <span className="text-muted-foreground block">Priority</span>
-                                        {isEditing ? (
-                                            <Controller
-                                                name="priority"
-                                                control={control}
-                                                render={({ field, fieldState }) => (
-                                                    <Field data-invalid={fieldState.invalid}>
-                                                        <Input
-                                                            {...field}
-                                                            id="priority"
-                                                            type="text"
-                                                            aria-invalid={fieldState.invalid}
-                                                            placeholder="Medium"
-                                                            autoComplete="off"
-                                                            required
-                                                        />
-                                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                                    </Field>
-                                                )}
-                                            />
-                                        ) : (
-                                            <span className="font-medium capitalize">
-                                                {
-                                                    priority ? (
-                                                        <span>{priority}</span>
-                                                    ) : (
-                                                        <span className='font-medium text-red-200'>This shouldn't be available-- priority defaults to medium!</span>
-                                                    )
-                                                }
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-1">
                                         <span className="text-muted-foreground block">URL</span>
                                         {isEditing ? (
                                             <Controller
@@ -452,7 +425,6 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                                 control={control}
                                                 render={({ field, fieldState }) => (
                                                     <Field data-invalid={fieldState.invalid}>
-                                                        <FieldLabel htmlFor="appliedAt">Applied At</FieldLabel>
                                                         <Input
                                                             {...field}
                                                             id="appliedAt"
@@ -471,6 +443,41 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                                     ? (<span>{new Date(appliedAt).toLocaleDateString()}</span>)
                                                     : (<span className='font-medium text-muted-foreground italic'>Not specified</span>)
                                             }</span>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-1" hidden={!isEditing}>
+                                        <span className="text-muted-foreground block">Priority</span>
+                                        {isEditing ? (
+                                            <Controller
+                                                name="priority"
+                                                control={control}
+                                                render={({ field, fieldState }) => (
+                                                    <Field data-invalid={fieldState.invalid}>
+                                                        <Input
+                                                            {...field}
+                                                            id="priority"
+                                                            type="text"
+                                                            aria-invalid={fieldState.invalid}
+                                                            placeholder="Medium"
+                                                            autoComplete="off"
+                                                            required
+                                                        />
+                                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                    </Field>
+                                                )}
+                                            />
+                                        ) : (
+                                            // <span className="font-medium capitalize">
+                                            //     {
+                                            //         priority ? (
+                                            //             <span>{priority}</span>
+                                            //         ) : (
+                                            //             <span className='font-medium text-red-200'>This shouldn't be available-- priority defaults to medium!</span>
+                                            //         )
+                                            //     }
+                                            // </span>
+                                            <></>
                                         )}
                                     </div>
                                 </div>

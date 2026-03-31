@@ -78,7 +78,7 @@ export async function updateApplicationAction(
       };
     }
 
-    revalidatePath('dashboard/board');
+    revalidatePath('/dashboard/board');
 
     return { success: true };
   } catch (error) {

@@ -1,3 +1,6 @@
+// already a client component since BoardView imports this
+
+
 import { Button } from "@/components/ui/button";
 import {
     Dialog,

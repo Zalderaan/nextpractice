@@ -11,12 +11,14 @@ type Props = {
 }
 
 export default function BoardView({ applications }: Props) {
-    const [selectedApp, setSelectedApp] = useState<Application | null>(null)
+    // const [selectedApp, setSelectedApp] = useState<Application | null>(null)
+    const [selectedAppId, setSelectedAppId] = useState<string | null>(null)
     const handleSelect = useCallback((app: Application) => {
-        setSelectedApp(app)
+        setSelectedAppId(app._id)
     }, [])
+    const selectedApp = applications.find(app => app._id === selectedAppId) || null;
 
-    const closeDrawer = useCallback(() => setSelectedApp(null), [])
+    const closeDrawer = useCallback(() => setSelectedAppId(null), [])
     const statuses = useMemo(() => ['wishlist', 'applied', 'interview', 'offer', 'rejected'] as const, [])
 
     return (
