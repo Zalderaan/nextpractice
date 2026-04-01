@@ -24,7 +24,7 @@ import { DeleteApplicationDialog } from './DeleteApplicationDialog';
 // TODO: Loading state (skeleton)
 // TODO: Activity (what changes in the db for this?)
 // TODO: SheetContent overflow handling
-// TODO: Empty date defaulting to 01/01/1970 (fix in dialog date input)
+// * DONE : Empty date defaulting to 01/01/1970 (fix in dialog date input)
 
 type ApplicationSheetProps = {
     selectedApp: Application | null;
@@ -120,7 +120,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
         try {
             const result = await deleteApplicationAction(_id);
             if (result.success) {
-                onClose();  // Close the sheet
+            onClose();  // Close the sheet
                 // Optional: Trigger a router.refresh() here if needed to update the UI
             } else {
                 alert(result.error || "Failed to delete application.");

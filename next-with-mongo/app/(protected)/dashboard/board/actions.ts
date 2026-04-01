@@ -38,6 +38,7 @@ export async function createApplicationAction(
     }
 
     // Force the page to re-fetch the latest data from the backend
+    revalidatePath("/dashboard/board");
     revalidatePath("/dashboard/applications");
 
     return { success: true };
@@ -121,6 +122,8 @@ export async function updateApplicationAction(
     }
 
     revalidatePath("/dashboard/board");
+    revalidatePath("/dashboard/applications");
+
     return { success: true };
   } catch (error) {
     return { success: false, error: "Network error occurred" };
@@ -156,6 +159,8 @@ export async function deleteApplicationAction(appId: string) {
 
     //Force the page to re-fetch the latest data from the backend
     revalidatePath("/dashboard/board");
+    revalidatePath("/dashboard/applications");
+
     return { success: true };
   } catch (error) {
     return { success: false, error: "Network error occurred" };

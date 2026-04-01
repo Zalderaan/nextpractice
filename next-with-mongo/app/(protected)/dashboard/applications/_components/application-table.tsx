@@ -11,6 +11,7 @@ import {
     TableRow
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { useState } from "react"
 
 // columns
 export const applicationTableColumns: ColumnDef<Application>[] = [
@@ -60,9 +61,9 @@ export const applicationTableColumns: ColumnDef<Application>[] = [
             const priority = row.getValue("priority") as string;
             return (
                 <Badge variant={"default"} className={
-                    priority === "high" ? "bg-red-300" 
-                    : priority === "medium" ? "bg-yellow-200" 
-                    : "bg-blue-200"
+                    priority === "high" ? "bg-red-300"
+                        : priority === "medium" ? "bg-yellow-200"
+                            : "bg-blue-200"
                 }>
                     {priority}
                 </Badge>
@@ -97,11 +98,13 @@ export const applicationTableColumns: ColumnDef<Application>[] = [
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    onSelectRow?: (row: TData) => void;  // Add this
 }
 
 export function ApplicationsTable<TData, TValue>({
     columns,
     data,
+    onSelectRow
 }: DataTableProps<TData, TValue>) {
     const table = useReactTable({
         data,
@@ -136,6 +139,8 @@ export function ApplicationsTable<TData, TValue>({
                             <TableRow
                                 key={row.id}
                                 data-state={row.getIsSelected() && "selected"}
+                                onClick={() => onSelectRow?.(row.original)}  // Add this
+                                className="cursor-pointer hover:bg-muted/50"
                             >
                                 {row.getVisibleCells().map((cell) => (
                                     <TableCell key={cell.id}>

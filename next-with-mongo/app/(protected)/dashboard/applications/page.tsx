@@ -1,6 +1,7 @@
 import { cookies, headers } from 'next/headers';
 import {ApplicationsPageHeader} from "@/app/(protected)/dashboard/applications/_components/ApplicationsPageHeader"
 import { ApplicationsTable, applicationTableColumns } from './_components/application-table';
+import { ApplicationsPageClient } from './_components/ApplicationsPageClient';
 
 export default async function ApplicationsPage() {
     const NEXT_PUBLIC_PROTECTED_API_URL = process.env.NEXT_PUBLIC_PROTECTED_API_URL
@@ -32,12 +33,8 @@ export default async function ApplicationsPage() {
         <div className="flex min-h-0 h-full flex-1 flex-col">
             <ApplicationsPageHeader />
             <main className='p-(--dashboard-pages-padding)'>
-                <ApplicationsTable columns={applicationTableColumns} data={applications}/>
-                
-                {/* For debug */}
-                {/* <pre>{JSON.stringify(data, null, 2)}</pre> */}
+                <ApplicationsPageClient applications={applications} />
             </main>
         </div>
-
     )
 }
