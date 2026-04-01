@@ -72,7 +72,7 @@ export const createApplicationSchema = z
 
     salaryMax: optionalNumberLike,
 
-    appliedAt: z.union([z.coerce.date(), z.null()]).optional(),
+    appliedAt: z.coerce.date().nullable().optional(),
 
     order: z.coerce.number().int().min(0).optional(),
   })
@@ -172,8 +172,7 @@ export const updateApplicationSchema = z
         return parsed;
       }),
 
-    appliedAt: z.union([z.coerce.date(), z.null()]).optional(),
-
+    appliedAt: z.coerce.date().nullable().optional(),
     order: z.coerce.number().int().min(0).optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {

@@ -20,6 +20,8 @@ export class ApplicationService {
     userId: string,
     payload: CreateApplicationInput,
   ) {
+
+    console.log("Payload in createApplication: ", payload);
     const normalizedUserId = new Types.ObjectId(userId);
     const targetStatus = payload.status ?? "wishlist";
 

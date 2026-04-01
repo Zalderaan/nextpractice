@@ -1,25 +1,24 @@
-import 'dotenv/config';
-import { UserService } from "./user.service"
-import { Response, Request, NextFunction, type CookieOptions } from "express"
+import "dotenv/config";
+import { UserService } from "./user.service";
+import { Response, Request, NextFunction, type CookieOptions } from "express";
 import { LoginInput, RegisterInput } from "./user.validator";
 import { AppError } from "../../types/types";
-import { verifyRefreshToken } from '../../utls/jwt';
-import { makeAppError } from '../../middleware/errorHandler';
-import { JwtPayload } from 'jsonwebtoken';
+import { verifyRefreshToken } from "../../utls/jwt";
+import { makeAppError } from "../../middleware/errorHandler";
+import { JwtPayload } from "jsonwebtoken";
 
 const isProduction = process.env.NODE_ENV === "production";
 console.log("from user.controller, this is isProduction: ", isProduction);
 const refreshTokenMaxAgeMs = 7 * 24 * 60 * 60 * 1000; // 7 days (in milliseconds)
-const accessTokenMaxAgeMs = 30 * 60 * 1000 // 30 minutes;
+const accessTokenMaxAgeMs = 30 * 60 * 1000; // 30 minutes;
 // const accessTokenMaxAgeMs = 15 * 1000 // 15 seconds; // ! FOR DEBUG ONLY
 
-
 const refreshCookieOptions: CookieOptions = {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-    maxAge: refreshTokenMaxAgeMs,
-    path: "/"
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+  maxAge: refreshTokenMaxAgeMs,
+  path: "/",
 };
 
 const accessTokenOptions: CookieOptions = {
@@ -109,6 +108,22 @@ export class UserController {
       next(error);
     } finally {
       // clean up
+    }
+  }
+
+  static async getMe(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.sub;
+      if (!userId)
+        return res.status(401).json({ success: false, error: "Unauthorized" });
+
+      const user = await UserService.getUserById(userId);
+      res.status(200).json({
+        success: true,
+        data: { user },
+      });
+    } catch (error) {
+      next(error);
     }
   }
 

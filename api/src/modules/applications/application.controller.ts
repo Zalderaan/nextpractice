@@ -20,6 +20,7 @@ export class ApplicationController {
 
       // ! NOT TYPE SAFE
       const input = req.body;
+      console.log("received input in ApplicationController: ", input)
       console.log("This is input from req.body: ", input);
       if (!input || Object.keys(input).length === 0)
         throw makeAppError("Missing application data", 400);
