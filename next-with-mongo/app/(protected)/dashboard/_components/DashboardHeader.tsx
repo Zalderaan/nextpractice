@@ -37,9 +37,9 @@ export function DashboardHeader() {
                 <Separator orientation="vertical" className="border-x" />
                 <div className="flex flex-row items-center space-x-2">
                     <div className="rounded-full bg-black text-white w-8 h-8 flex items-center justify-center">
-                        <span className="text-sm">{user?.username.charAt(0).toLocaleUpperCase()}</span>
+                        <span className="text-sm">{user?.username.charAt(0).toLocaleUpperCase() ?? "?"}</span>
                     </div>
-                    <span className="text-sm">{user?.username}</span>
+                    <span className="text-sm">{user?.username ?? "Loading..."}</span>
                 </div>
             </div>
 

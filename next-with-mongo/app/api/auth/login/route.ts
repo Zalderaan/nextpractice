@@ -16,8 +16,13 @@ export async function POST(req: Request) {
     const data = await backendRes.json();
     const res = NextResponse.json(data, { status: backendRes.status });
 
-    const setCookie = backendRes.headers.get("set-cookie");
-    if (setCookie) res.headers.set("set-cookie", setCookie);
+    const setCookies = backendRes.headers.getSetCookie();
+
+    if (setCookies && setCookies.length > 0) {
+      setCookies.forEach((cookie) => {
+        res.headers.append("Set-Cookie", cookie);
+      });
+    }
 
     return res;
 }

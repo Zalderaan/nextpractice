@@ -1,6 +1,7 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DashboardHeader } from "./_components/DashboardHeader";
+import { AuthBootstrap } from "./_components/AuthBootstrap";
 
 export default function DashboardLayout({
     children,
@@ -9,6 +10,7 @@ export default function DashboardLayout({
 }>) {
     return (
         <SidebarProvider>
+            <AuthBootstrap />
             <AppSidebar />
             <div className="flex min-h-0 flex-1 min-w-0 flex-col">
                 <DashboardHeader />
