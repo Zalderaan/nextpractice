@@ -353,7 +353,11 @@ export function AddApplicationDialog() {
                                             id="appliedAt"
                                             type="date"
                                             aria-invalid={fieldState.invalid}
-                                            {...(field.value ? { value: field.value.toISOString().split('T')[0] } : { value: '' })}
+                                            value={
+                                                field.value instanceof Date && !isNaN(field.value.getTime())
+                                                    ? field.value.toISOString().split('T')[0]
+                                                    : ''
+                                            }
                                             onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
                                         />
                                         {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
