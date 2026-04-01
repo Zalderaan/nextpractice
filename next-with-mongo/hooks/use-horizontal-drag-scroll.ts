@@ -15,12 +15,14 @@ export function useHorizontalDragScroll<T extends HTMLElement>(
     let scrollLeft = 0;
 
     const interactiveSelector =
-      "a, button, input, textarea, select, [data-no-drag]";
+      "a, button, input, textarea, select, [data-no-drag], [data-dnd-handle]";
 
     const onDown = (e: MouseEvent | TouchEvent) => {
       if (disabled) return;
       const target = (e as MouseEvent).target ?? (e as TouchEvent).target;
       if (!(target instanceof HTMLElement)) return;
+
+      // if  the target is or is inside a drag handle, abort the pan
       if (target.closest(interactiveSelector)) return;
       if (e instanceof MouseEvent && e.button !== 0) return;
 
