@@ -4,6 +4,7 @@
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
+    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
@@ -14,7 +15,6 @@ import {
 import { PlusIcon } from "lucide-react";
 import {
     Field,
-    FieldDescription,
     FieldError,
     FieldGroup,
     FieldLabel,
@@ -151,7 +151,7 @@ export function AddApplicationDialog() {
                                 control={control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor="company">Company *</FieldLabel>
+                                        <FieldLabel htmlFor="company">Company <span className="text-red-500">*</span></FieldLabel>
                                         <Input
                                             {...field}
                                             id="company"
@@ -170,7 +170,7 @@ export function AddApplicationDialog() {
                                 control={control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor="role">Role *</FieldLabel>
+                                        <FieldLabel htmlFor="role">Role <span className="text-red-500">*</span></FieldLabel>
                                         <Input
                                             {...field}
                                             id="role"
@@ -218,7 +218,7 @@ export function AddApplicationDialog() {
                                 control={control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor="location">Location</FieldLabel>
+                                        <FieldLabel>Location <span className="text-red-500">*</span></FieldLabel>
                                         <Input
                                             {...field}
                                             id="location"
@@ -236,7 +236,7 @@ export function AddApplicationDialog() {
                                 control={control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor="workType">Work Type *</FieldLabel>
+                                        <FieldLabel htmlFor="Work Type">Work Type <span className="text-red-500">*</span></FieldLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select work type" />
@@ -327,7 +327,7 @@ export function AddApplicationDialog() {
                                 control={control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor="priority">Priority *</FieldLabel>
+                                    <FieldLabel>Priority <span className="text-red-500">*</span></FieldLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select priority" />
@@ -389,7 +389,9 @@ export function AddApplicationDialog() {
                 </form>
 
                 <DialogFooter>
-                    <Button type="reset" form="add-application-form" onClick={() => reset()} variant="outline">Clear</Button>
+                    <DialogClose asChild>
+                        <Button type="reset" form="add-application-form" onClick={() => reset()} variant="outline">Clear</Button>
+                    </DialogClose>
                     <Button type="submit" form="add-application-form" disabled={isSubmitting}>
                         {isSubmitting ? <Spinner /> : null}
                         Add Application

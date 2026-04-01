@@ -18,6 +18,7 @@ import { toast } from 'sonner'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
+import { DeleteApplicationDialog } from './DeleteApplicationDialog';
 
 // ? TODO LIST:
 // TODO: Loading state (skeleton)
@@ -300,15 +301,16 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                                 control={control}
                                                 render={({ field, fieldState }) => (
                                                     <Field data-invalid={fieldState.invalid}>
-                                                        <Input
-                                                            {...field}
-                                                            id="workType"
-                                                            type="text"
-                                                            aria-invalid={fieldState.invalid}
-                                                            placeholder="Remote / Onsite / Hybrid"
-                                                            autoComplete="off"
-                                                            required
-                                                        />
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select work type" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="remote">Remote</SelectItem>
+                                                                <SelectItem value="hybrid">Hybrid</SelectItem>
+                                                                <SelectItem value="onsite">Onsite</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
                                                         {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                                                     </Field>
                                                 )}
@@ -387,7 +389,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                         )}
                                     </div>
 
-                                    <div className="space-y-1">
+                                    <div className="space-y-1 max-w-full overflow-hidden truncate">
                                         <span className="text-muted-foreground block">URL</span>
                                         {isEditing ? (
                                             <Controller
@@ -409,11 +411,11 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                                 )}
                                             />
                                         ) : (
-                                            <span className="font-medium">{
-                                                jobUrl
-                                                    ? (<span>{jobUrl}</span>)
-                                                    : (<span className='font-medium text-muted-foreground italic'>Not specified</span>)
-                                            }</span>
+                                            <span className="font-medium block truncate max-w-full">
+                                                {
+                                                    jobUrl ? jobUrl : <span className='font-medium text-muted-foreground italic'>Not specified</span>
+                                                }
+                                            </span>
                                         )}
                                     </div>
 
@@ -454,15 +456,16 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                                 control={control}
                                                 render={({ field, fieldState }) => (
                                                     <Field data-invalid={fieldState.invalid}>
-                                                        <Input
-                                                            {...field}
-                                                            id="priority"
-                                                            type="text"
-                                                            aria-invalid={fieldState.invalid}
-                                                            placeholder="Medium"
-                                                            autoComplete="off"
-                                                            required
-                                                        />
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select priority" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="low">Low</SelectItem>
+                                                                <SelectItem value="medium">Medium</SelectItem>
+                                                                <SelectItem value="high">High</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
                                                         {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                                                     </Field>
                                                 )}
@@ -536,9 +539,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                     </Button>
                                 </>
                             ) : (
-                                <Button type='button' className="flex-1" variant="destructive" onClick={() => handleDelete()}>
-                                    Delete Application
-                                </Button>
+                                <DeleteApplicationDialog application={selectedApp} onDeleteSuccess={onClose} />
                             )}
                         </SheetFooter>
                     </form>
