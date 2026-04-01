@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation"
 
 import { toast } from "sonner"
 import Link from "next/link"
-import { useAuthStore } from "@/app/(auth)/auth.stores"
+import { AuthUser, useAuthStore } from "@/app/(auth)/auth.stores"
 
 const loginFormSchema = z.object({
   email: z.email("Invalid email address"),
@@ -120,7 +120,7 @@ export function LoginForm({
       }
 
       const result: LoginSuccessResponse = parsedSuccess.data; // get access token
-      setAuth({ user: result.data.user,})
+      setAuth({ user: result.data.user as AuthUser,})
 
       toast.success("Login successful!")
       router.push("/dashboard")

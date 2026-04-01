@@ -38,6 +38,7 @@ export function ApplicationsPageHeader({ applications }: ApplicationsPageHeaderP
                     className="flex flex-row items-center px-2"
                     variant={'outline'}
                     onClick={handleExport}
+                    disabled={(applications.length < 1)}
                 >
                     <Download />
                     <span>Export</span>

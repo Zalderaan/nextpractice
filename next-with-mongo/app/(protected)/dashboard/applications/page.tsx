@@ -1,6 +1,5 @@
 import { cookies, headers } from 'next/headers';
 import {ApplicationsPageHeader} from "@/app/(protected)/dashboard/applications/_components/ApplicationsPageHeader"
-import { ApplicationsTable, applicationTableColumns } from './_components/application-table';
 import { ApplicationsPageClient } from './_components/ApplicationsPageClient';
 
 export default async function ApplicationsPage() {
@@ -32,7 +31,7 @@ export default async function ApplicationsPage() {
     return (
         <div className="flex min-h-0 h-full flex-1 flex-col">
             <ApplicationsPageHeader applications={applications}/>
-            <main className='p-(--dashboard-pages-padding)'>
+            <main className='h-full p-(--dashboard-pages-padding)'>
                 <ApplicationsPageClient applications={applications} />
             </main>
         </div>

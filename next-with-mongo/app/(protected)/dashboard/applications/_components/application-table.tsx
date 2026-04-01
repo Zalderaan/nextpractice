@@ -113,8 +113,8 @@ export function ApplicationsTable<TData, TValue>({
     })
 
     return (
-        <div className="overflow-hidden rounded-md border">
-            <Table>
+        <div className="overflow-hidden rounded-md border h-full">
+            <Table className="h-full bg-red-200">
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>
@@ -133,7 +133,7 @@ export function ApplicationsTable<TData, TValue>({
                         </TableRow>
                     ))}
                 </TableHeader>
-                <TableBody>
+                <TableBody className="h-full bg-red-200">
                     {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
                             <TableRow

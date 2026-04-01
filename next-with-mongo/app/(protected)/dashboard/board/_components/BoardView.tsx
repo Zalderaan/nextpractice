@@ -52,6 +52,7 @@ export default function BoardView({ applications }: Props) {
 
 
         let newOrder: number;
+        let newDate: Date;
 
         const prevApp = destColumnApps[destination.index - 1];
         const nextApp = destColumnApps[destination.index];
@@ -73,7 +74,12 @@ export default function BoardView({ applications }: Props) {
 
         // 2. Call server action
         // The droppableId will be the status name (e.g., "applied")
+        // TODO: Auto apply date when setting it to Applied
         const newStatus = destination.droppableId as ApplicationStatus;
+        if (newStatus === "applied") {
+            newDate = new Date()
+        }
+
         handleUpdateStatus(draggableId, newStatus, newOrder);
     };
 

@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 // type AuthUser = {};
 
-interface AuthUser {
+export interface AuthUser {
     _id: string;
     username: string;
     email: string;

@@ -2,6 +2,9 @@ import { BoardPageHeader } from './_components/BoardPageHeader';
 import { Application } from './_components/ApplicationCard';
 import { cookies, headers } from 'next/headers';
 import BoardView from './_components/BoardView';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { Button } from '@/components/ui/button';
+import { FolderOpen, Icon } from 'lucide-react';
 
 export default async function BoardPage() {
 
@@ -33,10 +36,30 @@ export default async function BoardPage() {
 
     const statuses = ['wishlist', 'applied', 'interview', 'offer', 'rejected'];
 
+    console.log("This is applications: ", applications)
+
     return (
         <main className="flex min-h-0 h-full flex-1 flex-col">
             <BoardPageHeader />
-            <BoardView applications={applications} />
+            {
+                applications.length > 0
+                    ? <BoardView applications={applications} />
+                    : (
+                        <Empty>
+                            <EmptyHeader>
+                                <EmptyMedia variant="icon">
+                                    <FolderOpen />
+                                </EmptyMedia>
+                                <EmptyTitle>You haven't entered any applications yet</EmptyTitle>
+                                <EmptyDescription>Add your first application now! </EmptyDescription>
+                            </EmptyHeader>
+                            <EmptyContent>
+                                <Button>Add Application</Button>
+                            </EmptyContent>
+                        </Empty>
+                    )
+            }
+
         </main>
     );
 }

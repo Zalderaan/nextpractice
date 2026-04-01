@@ -22,7 +22,7 @@ export function ApplicationsPageClient({ applications }: ApplicationsPageClientP
     }, []);
 
     return (
-        <>
+        <main className='h-full'>
             <ApplicationsTable
                 columns={applicationTableColumns}
                 data={applications}
@@ -32,6 +32,6 @@ export function ApplicationsPageClient({ applications }: ApplicationsPageClientP
                 selectedApp={selectedApp}
                 onClose={closeSheet}
             />
-        </>
+        </main>
     );
 }
