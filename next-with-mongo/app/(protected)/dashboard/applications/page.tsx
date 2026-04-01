@@ -31,7 +31,7 @@ export default async function ApplicationsPage() {
 
     return (
         <div className="flex min-h-0 h-full flex-1 flex-col">
-            <ApplicationsPageHeader />
+            <ApplicationsPageHeader applications={applications}/>
             <main className='p-(--dashboard-pages-padding)'>
                 <ApplicationsPageClient applications={applications} />
             </main>
