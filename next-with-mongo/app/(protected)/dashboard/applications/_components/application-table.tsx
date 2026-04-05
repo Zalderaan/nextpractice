@@ -93,7 +93,7 @@ export const applicationTableColumns: ColumnDef<Application>[] = [
 ]
 
 
-
+// TODO: trying to make this table span across the whole page
 // table stuff
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -113,8 +113,8 @@ export function ApplicationsTable<TData, TValue>({
     })
 
     return (
-        <div className="overflow-hidden rounded-md border h-full">
-            <Table className="h-full bg-red-200">
+        <div className="flex-1 min-h-0 overflow-auto rounded-md border">
+            <Table className="bg-red-200">
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>
@@ -133,7 +133,7 @@ export function ApplicationsTable<TData, TValue>({
                         </TableRow>
                     ))}
                 </TableHeader>
-                <TableBody className="h-full bg-red-200">
+                <TableBody className="bg-blue-200">
                     {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
                             <TableRow

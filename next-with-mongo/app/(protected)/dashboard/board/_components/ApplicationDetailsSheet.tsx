@@ -471,15 +471,6 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                                 )}
                                             />
                                         ) : (
-                                            // <span className="font-medium capitalize">
-                                            //     {
-                                            //         priority ? (
-                                            //             <span>{priority}</span>
-                                            //         ) : (
-                                            //             <span className='font-medium text-red-200'>This shouldn't be available-- priority defaults to medium!</span>
-                                            //         )
-                                            //     }
-                                            // </span>
                                             <></>
                                         )}
                                     </div>

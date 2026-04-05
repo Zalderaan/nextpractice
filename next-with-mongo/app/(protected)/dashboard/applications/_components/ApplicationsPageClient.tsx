@@ -22,7 +22,7 @@ export function ApplicationsPageClient({ applications }: ApplicationsPageClientP
     }, []);
 
     return (
-        <main className='h-full'>
+        <main className='flex h-full flex-1 min-h-0'>
             <ApplicationsTable
                 columns={applicationTableColumns}
                 data={applications}
