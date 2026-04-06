@@ -5,6 +5,7 @@ import * as React from "react"
 import {
     Sidebar,
     SidebarContent,
+    SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
     SidebarGroupLabel,
@@ -20,6 +21,8 @@ import Link from "next/link"
 import { FileUser, Home, MonitorCog, SidebarIcon, SquareKanban } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { NavUser } from "./nav-user"
+import { useAuthStore } from "@/app/(auth)/auth.stores"
 
 // This is sample data.
 const data = {
@@ -55,6 +58,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     const isCollapsed = state === 'collapsed';
     const shouldShow = isCollapsed && hoverHeader;
+
+    const { user } = useAuthStore();
 
     return (
         <Sidebar {...props} collapsible="icon"
@@ -101,6 +106,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarGroup>
                 ))}
             </SidebarContent>
+            <SidebarFooter>
+                <NavUser user={user} />
+            </SidebarFooter>
             <SidebarRail />
         </Sidebar>
     )

@@ -9,6 +9,7 @@ export interface AuthUser {
     role: "user" | "admin";
     createdAt: Date;
     updatedAt: Date; // Add this to match Mongoose timestamps
+    avatar: string;
 }
 
 type AuthState = {

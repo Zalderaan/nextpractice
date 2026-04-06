@@ -3,6 +3,25 @@
 import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/app/(auth)/auth.stores";
 import { Separator } from "@/components/ui/separator";
+import {
+    DropdownMenu,
+    DropdownMenuPortal,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuLabel,
+    DropdownMenuItem,
+    DropdownMenuCheckboxItem,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuShortcut,
+    DropdownMenuSub,
+    DropdownMenuSubTrigger,
+    DropdownMenuSubContent,
+} from "@/components/ui/dropdown-menu";
+import { LogOutIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function DashboardHeader() {
     const pathname = usePathname();
@@ -35,15 +54,21 @@ export function DashboardHeader() {
 
             <div className="flex flex-row items-center space-x-4">
                 <Separator orientation="vertical" className="border-x" />
-                <div className="flex flex-row items-center space-x-2">
-                    <div className="rounded-full bg-black text-white w-8 h-8 flex items-center justify-center">
-                        <span className="text-sm">{user?.username.charAt(0).toLocaleUpperCase() ?? "?"}</span>
-                    </div>
-                    <span className="text-sm">{user?.username ?? "Loading..."}</span>
-                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant={"outline"} className="rounded-xl h-8 w-8 bg-black text-white flex items-center justify-center shrink-0 text-xs">
+                            {user?.username.charAt(0).toLocaleUpperCase() ?? "?"}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-full">
+                        <span className="text-sm">{user?.username ?? "Loading..."}</span>
+                        <DropdownMenuItem>
+                            <LogOutIcon />
+                            Logout
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
-
-
         </header>
     );
 }

@@ -30,7 +30,7 @@ router.post('/register', validate({ body: registerSchema }), UserController.regi
 router.post('/login', validate({ body: loginSchema }), UserController.login)
 router.post('/refresh', UserController.refreshTokens)
 protected_router.get("/me", UserController.getMe);
-
+protected_router.post("/logout", UserController.logout)
 
 // ---------------------- PROTECTED ---------------------
 protected_router.get('/protected', (req, res) => {
