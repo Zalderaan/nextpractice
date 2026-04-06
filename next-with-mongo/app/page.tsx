@@ -2,6 +2,7 @@ import AppHeader from "@/components/app-header";
 import { LandingFeatureCardContainer } from "@/components/LandingFeatureCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -38,8 +39,22 @@ export default function Home() {
         </section>
 
         {/* CTA */}
+        <section className="flex flex-col items-center justify-center h-2/5 space-y-4 bg-red-200">
+          <div className="flex flex-col items-center space-y">
+            <h2 className="text-xl font-semibold">Ready to organize your job search?</h2>
+            <p>Start tracking your applications with a low-fidelity, high-productivity tool designed for desktop workflow.</p>
+          </div>
+          <Button>
+            Open Dashboard
+            <ArrowRight />
+          </Button>
+        </section>
 
         {/* Footer */}
+        <footer className="flex flex-row justify-between py-8 px-(--landing-pages-padding)">
+          <span>footer test</span>
+          <span>test</span>
+        </footer>
       </main>
     </>
   );
