@@ -12,6 +12,9 @@ type Props = {
     applications: Application[];
 }
 
+// ! TODO: Refactor to use dnd-kit && auto-scroll
+// TODO: shouldNotDrag is delayed
+// TODO: dragging thru kanban board does not automatically set appliedAt if it's from 'wishlist'
 export default function BoardView({ applications }: Props) {
     const [selectedAppId, setSelectedAppId] = useState<string | null>(null)
     const [isDraggingCard, setIsDraggingCard] = useState(false);
@@ -74,7 +77,6 @@ export default function BoardView({ applications }: Props) {
 
         // 2. Call server action
         // The droppableId will be the status name (e.g., "applied")
-        // TODO: Auto apply date when setting it to Applied
         const newStatus = destination.droppableId as ApplicationStatus;
         if (newStatus === "applied") {
             newDate = new Date()

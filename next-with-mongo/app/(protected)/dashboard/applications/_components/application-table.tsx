@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
+import { cn } from "@/lib/utils"
 
 // columns
 export const applicationTableColumns: ColumnDef<Application>[] = [
@@ -93,7 +94,6 @@ export const applicationTableColumns: ColumnDef<Application>[] = [
 ]
 
 
-// TODO: trying to make this table span across the whole page
 // table stuff
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -114,7 +114,7 @@ export function ApplicationsTable<TData, TValue>({
 
     return (
         <div className="flex-1 min-h-0 overflow-auto rounded-md border">
-            <Table className="bg-red-200">
+            <Table className={cn(!data.length && "h-full")}>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>

@@ -83,6 +83,13 @@ export const fullFormSchema = z.object({
             path: ["appliedAt"],
         });
     }
+    if (data.workType !== 'remote' && !data.location) {
+        ctx.addIssue({
+            code: 'custom',
+            path: ['location'],
+            message: 'Location is required for onsite and hybrid roles',
+        });
+    }
 });
 
 export function AddApplicationDialog() {
@@ -103,7 +110,14 @@ export function AddApplicationDialog() {
         }
     });
 
-    const { handleSubmit, control, formState: { isSubmitting }, reset } = fullAddApplicationForm;
+    const { handleSubmit, control, watch, setValue, getValues, formState: { isSubmitting }, reset } = fullAddApplicationForm;
+
+    // conditionally require loc fields according to workType
+    const watched_workType = watch('workType');
+    const watched_status = watch('status')
+
+    const isApplyDateRequired = watched_status === 'applied'
+    const isLocationRequired = watched_workType === 'onsite' || watched_workType === 'hybrid';
 
     async function onSubmit(data: z.infer<typeof fullFormSchema>) {
         try {
@@ -218,14 +232,19 @@ export function AddApplicationDialog() {
                                 control={control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel>Location <span className="text-red-500">*</span></FieldLabel>
+                                        <FieldLabel>
+                                            Location
+                                            {isLocationRequired && <span className="text-red-500">*</span>}
+                                        </FieldLabel>
                                         <Input
                                             {...field}
                                             id="location"
                                             type="text"
                                             aria-invalid={fieldState.invalid}
+                                            aria-required={isLocationRequired}
                                             placeholder="Olongapo City, Philippines"
                                             autoComplete="off"
+                                            required={isLocationRequired}
                                         />
                                         {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                                     </Field>
@@ -305,8 +324,31 @@ export function AddApplicationDialog() {
                                 control={control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor="status">Status *</FieldLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FieldLabel htmlFor="status">Status {isApplyDateRequired && (<span className="text-red-500">*</span>)}</FieldLabel>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const previousStatus = field.value;
+                                                field.onChange(value);
+
+                                                const appliedAt = getValues('appliedAt');
+
+                                                if (previousStatus === 'wishlist' && value !== 'wishlist' && !appliedAt) {
+                                                    setValue('appliedAt', new Date(), {
+                                                        shouldDirty: true,
+                                                        shouldValidate: true,
+                                                    });
+                                                }
+
+                                                // clear date if setting it as wishlist again
+                                                if (previousStatus !== 'wishlist' && value === 'wishlist') {
+                                                    setValue('appliedAt', null, {
+                                                        shouldDirty: true,
+                                                        shouldValidate: true,
+                                                    });
+                                                }
+                                            }}
+                                            defaultValue={field.value}
+                                        >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select status" />
                                             </SelectTrigger>
@@ -327,7 +369,7 @@ export function AddApplicationDialog() {
                                 control={control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel>Priority <span className="text-red-500">*</span></FieldLabel>
+                                        <FieldLabel>Priority <span className="text-red-500">*</span></FieldLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select priority" />
@@ -371,13 +413,12 @@ export function AddApplicationDialog() {
 
                     {/* 4. Additional Notes */}
                     <FieldGroup className="">
-                        <legend className="text-sm font-semibold text-foreground">Additional Notes</legend>
                         <Controller
                             name="notes"
                             control={fullAddApplicationForm.control}
                             render={({ field, fieldState }) => (
                                 <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel htmlFor="notes">Notes</FieldLabel>
+                                    <FieldLabel htmlFor="notes">Additional Notes</FieldLabel>
                                     <Textarea
                                         {...field}
                                         id="notes"

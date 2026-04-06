@@ -83,7 +83,13 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
         }
     }, [selectedApp, fullUpdateApplicationForm]);
 
-    const { handleSubmit, control, formState: { isSubmitting } } = fullUpdateApplicationForm;
+    const { handleSubmit, control, watch, setValue, getValues, formState: { isSubmitting } } = fullUpdateApplicationForm;
+    const watched_worktype = watch('workType');
+    const watched_status = watch('status')
+    
+    const isApplyDateRequired = watched_status === 'applied'
+    const isLocationRequired = watched_worktype === 'onsite' || watched_worktype === 'hybrid';
+    
     async function onSubmit(data: z.infer<typeof fullFormSchema>) {
         console.log("Data submitted: ", data);
         const _id = selectedApp?._id;
@@ -120,7 +126,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
         try {
             const result = await deleteApplicationAction(_id);
             if (result.success) {
-            onClose();  // Close the sheet
+                onClose();  // Close the sheet
                 // Optional: Trigger a router.refresh() here if needed to update the UI
             } else {
                 alert(result.error || "Failed to delete application.");
@@ -139,7 +145,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                         onSubmit={handleSubmit(onSubmit)}
                         className='flex flex-col h-full'
                     >
-                        <SheetHeader className="px-6 py-4 border-b shrink-0 max-h-full">
+                        <SheetHeader className="px-6 py-4 space-y-2 border-b shrink-0 max-h-full">
                             <div className="flex flex-row items-center space-x-3">
                                 {isEditing ? (
                                     <Controller
@@ -238,7 +244,30 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                                 render={({ field, fieldState }) => (
                                                     <Field data-invalid={fieldState.invalid}>
                                                         {/* <FieldLabel htmlFor="status">Status *</FieldLabel> */}
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <Select 
+                                                            onValueChange={(value) => {
+                                                                const previousStatus = field.value;
+                                                                field.onChange(value);
+
+                                                                const appliedAt = getValues('appliedAt');
+
+                                                                if (previousStatus === 'wishlist' && value !== 'wishlist' && !appliedAt) {
+                                                                    setValue('appliedAt', new Date(), {
+                                                                        shouldDirty: true,
+                                                                        shouldValidate: true,
+                                                                    });
+                                                                }
+
+                                                                // clear date if setting it as wishlist again
+                                                                if (previousStatus !== 'wishlist' && value === 'wishlist') {
+                                                                    setValue('appliedAt', null, {
+                                                                        shouldDirty: true,
+                                                                        shouldValidate: true,
+                                                                    });
+                                                                }
+                                                            }}
+                                                            defaultValue={field.value}
+                                                        >
                                                             <SelectTrigger>
                                                                 <SelectValue placeholder="Select status" />
                                                             </SelectTrigger>
@@ -260,7 +289,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                     </div>
 
                                     <div className="space-y-1">
-                                        <span className="text-muted-foreground block">Location</span>
+                                        <span className="text-muted-foreground block">Location {isEditing && isLocationRequired && (<span className='text-red-500'>*</span>) }</span>
                                         {isEditing ? (
                                             <Controller
                                                 name="location"
@@ -272,9 +301,9 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                                             id="location"
                                                             type="text"
                                                             aria-invalid={fieldState.invalid}
-                                                            placeholder="Makati City, Manila, Philippines"
+                                                            aria-required={isLocationRequired}
+                                                            placeholder="Olongapo City, Philippines"
                                                             autoComplete="off"
-                                                            required={workType !== 'remote'}
                                                         />
                                                         {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                                                     </Field>
@@ -294,14 +323,28 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                     </div>
 
                                     <div className="space-y-1">
-                                        <span className="text-muted-foreground block">Work Type</span>
+                                        <span className="text-muted-foreground block"> Work Type {isEditing && (<span className='text-red-500'>*</span>)}</span>
                                         {isEditing ? (
                                             <Controller
                                                 name="workType"
                                                 control={control}
                                                 render={({ field, fieldState }) => (
                                                     <Field data-invalid={fieldState.invalid}>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <Select 
+                                                            onValueChange={(value) => {
+                                                                const previousWorkType = field.value;
+                                                                field.onChange(value);
+
+                                                                if (previousWorkType !== 'remote' && value === 'remote') {
+                                                                    setValue('location', '', {
+                                                                        shouldDirty: true,
+                                                                        shouldValidate: true
+                                                                    })
+                                                                }
+                                                            }
+                                                        } 
+                                                            defaultValue={field.value}
+                                                        >
                                                             <SelectTrigger>
                                                                 <SelectValue placeholder="Select work type" />
                                                             </SelectTrigger>
@@ -420,7 +463,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                     </div>
 
                                     <div className="space-y-1">
-                                        <span className="text-muted-foreground block">Applied on</span>
+                                        <span className="text-muted-foreground block">Applied on {isEditing && isApplyDateRequired && (<span className='text-red-500'>*</span>)}</span>
                                         {isEditing ? (
                                             <Controller
                                                 name="appliedAt"
