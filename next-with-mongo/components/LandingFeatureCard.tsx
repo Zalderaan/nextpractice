@@ -25,7 +25,14 @@ export function LandingFeatureCard() {
             <p className="text-muted-foreground">
                 Visualize your applications across five stages: Wishlist, Applied, Interview, Offer, and Rejected. Drag and drop cards as your applications progress.
             </p>
-            <Image src={"https://placehold.co/200x350.png"} alt={"Hero section image"} height={100} width={100}/>
+            <div className="relative w-full aspect-video">
+                <Image
+                    src="https://placehold.co/250x150.png"
+                    alt="Hero section image"
+                    fill
+                    className="object-cover"
+                />
+            </div>
         </div>
     )
 }
