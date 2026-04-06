@@ -59,63 +59,143 @@ export default function BoardView({ applications }: Props) {
         if (app) setActiveApp(app);
     }
     
+    // const onDragEnd = (event: DragEndEvent) => {
+    //     setIsDraggingCard(false);
+    //     setActiveApp(null);
+
+    //     const { active, over } = event;
+    //     if (!over || active.id === over.id) return;
+
+    //     const activeStatus = active.data.current?.status as ApplicationStatus;
+    //     const overStatus = over.data.current?.status as ApplicationStatus;
+    //     const overType = over.data.current?.type;
+
+    //     if (!overStatus || !activeStatus) return;
+
+    //     // Get the column containing the item (with the item included)
+    //     const columnApps = applications
+    //         .filter(app => app.status === activeStatus)
+    //         .sort((a, b) => a.order - b.order);
+
+    //     const activeIndex = columnApps.findIndex(app => app._id === active.id);
+    //     let targetIndex: number;
+
+    //     if (activeStatus === overStatus && overType !== "Column") {
+    //         const overIndex = columnApps.findIndex(app => app._id === over.id);
+
+    //         if (overIndex >= 0) {
+    //             // Dragging upward: insert BEFORE the target
+    //             // Dragging downward: insert AFTER the target
+    //             targetIndex = activeIndex < overIndex
+    //                 ? overIndex + 1  // Moving down → insert after
+    //                 : overIndex;     // Moving up → insert before
+    //         } else {
+    //             targetIndex = columnApps.length - 1;
+    //         }
+    //     } else {
+    //         // ❌ CROSS-COLUMN: Existing logic
+    //         const destColumnApps = applications
+    //             .filter(app => app.status === overStatus && app._id !== active.id)
+    //             .sort((a, b) => a.order - b.order);
+
+    //         if (overType === "Column") {
+    //             const lastApp = destColumnApps[destColumnApps.length - 1];
+    //             const newOrder = lastApp ? lastApp.order + 1000 : 1000;
+    //             handleUpdateStatus(active.id as string, overStatus, newOrder);
+    //             return;
+    //         }
+
+    //         const overIndex = destColumnApps.findIndex(app => app._id === over.id);
+    //         if (overIndex < 0) {
+    //             const lastApp = destColumnApps[destColumnApps.length - 1];
+    //             const newOrder = lastApp ? lastApp.order + 1000 : 1000;
+    //             handleUpdateStatus(active.id as string, overStatus, newOrder);
+    //             return;
+    //         }
+
+    //         targetIndex = overIndex;
+    //     }
+
+    //     // ✅ Calculate new order based on target position in the column
+    //     const prevApp = columnApps[targetIndex - 1];
+    //     const nextApp = columnApps[targetIndex];
+    //     let newOrder: number;
+
+    //     if (!prevApp && !nextApp) {
+    //         newOrder = 1000;
+    //     } else if (!prevApp) {
+    //         newOrder = nextApp!.order / 2;
+    //     } else if (!nextApp) {
+    //         newOrder = prevApp.order + 1000;
+    //     } else {
+    //         newOrder = (prevApp.order + nextApp.order) / 2;
+    //     }
+
+    //     handleUpdateStatus(active.id as string, overStatus, newOrder);
+    // };
+
     const onDragEnd = (event: DragEndEvent) => {
         setIsDraggingCard(false);
         setActiveApp(null);
-        
+
         const { active, over } = event;
-        if (!over) return;
+        if (!over || active.id === over.id) return;
 
-        const activeId = active.id;
-        const overId = over.id;
-
-        if (activeId === overId) return;
-
-        const activeType = active.data.current?.type;
-        const overType = over.data.current?.type;
+        const activeStatus = active.data.current?.status as ApplicationStatus;
         const overStatus = over.data.current?.status as ApplicationStatus;
+        const overType = over.data.current?.type;
 
-        if (!overStatus) return; // Make sure we dropped over a valid zone
+        if (!overStatus || !activeStatus) return;
 
-        // 1. Get apps in destination column
-        const destColumnApps = applications
-            .filter(app => app.status === overStatus && app._id !== activeId)
+        const sourceColumnApps = applications
+            .filter(app => app.status === activeStatus)
             .sort((a, b) => a.order - b.order);
 
-        let newOrder: number;
+        const isWithinColumn = activeStatus === overStatus;
+        let targetApps = isWithinColumn ? sourceColumnApps : applications
+            .filter(app => app.status === overStatus && app._id !== active.id)
+            .sort((a, b) => a.order - b.order);
+
+        let targetIndex: number;
 
         if (overType === "Column") {
-            // Dropped onto an empty column or directly on the column background
-            // Add to the end of the column
-            const lastApp = destColumnApps[destColumnApps.length - 1];
-            newOrder = lastApp ? lastApp.order + 1000 : 1000;
+            // Dropping on empty column header → append to end
+            targetIndex = targetApps.length;
         } else {
-            // Dropped over another item
-            // We need to find its index in destColumnApps
-            const overIndex = destColumnApps.findIndex(app => app._id === overId);
-            
-            if (overIndex >= 0) {
-                // Determine if we should place above or below based on position in list
-                // For simplicity, we can just insert before the hovered item
-                // However dnd-kit gives rect info, but we can utilize index approach
-                // We'll calculate order similar to before
-                const prevApp = destColumnApps[overIndex - 1];
-                const nextApp = destColumnApps[overIndex]; // The item we dropped ON
+            // Dropping on a card → find position relative to that card
+            const overIndex = targetApps.findIndex(app => app._id === over.id);
 
-                if (!prevApp) {
-                    // Dropped at top
-                    newOrder = nextApp.order / 2;
-                } else {
-                    // Dropped between
-                    newOrder = (prevApp.order + nextApp.order) / 2;
-                }
+            if (isWithinColumn) {
+                // Same column: insert before if moving up, after if moving down
+                const activeIndex = sourceColumnApps.findIndex(app => app._id === active.id);
+                targetIndex = activeIndex < overIndex ? overIndex + 1 : overIndex;
             } else {
-                const lastApp = destColumnApps[destColumnApps.length - 1];
-                newOrder = lastApp ? lastApp.order + 1000 : 1000;
+                // Cross-column: insert before the target, UNLESS it's the last card (then append)
+                if (overIndex >= 0) {
+                    const isLastCard = overIndex === targetApps.length - 1;
+                    targetIndex = isLastCard ? overIndex + 1 : overIndex;
+                } else {
+                    targetIndex = targetApps.length;
+                }
             }
         }
 
-        handleUpdateStatus(activeId as string, overStatus, newOrder);
+        // Calculate new order using the correct target column's apps
+        const prevApp = targetApps[targetIndex - 1];
+        const nextApp = targetApps[targetIndex];
+        let newOrder: number;
+
+        if (!prevApp && !nextApp) {
+            newOrder = 1000;
+        } else if (!prevApp) {
+            newOrder = nextApp!.order / 2;
+        } else if (!nextApp) {
+            newOrder = prevApp.order + 1000;
+        } else {
+            newOrder = (prevApp.order + nextApp.order) / 2;
+        }
+
+        handleUpdateStatus(active.id as string, overStatus, newOrder);
     };
 
     const dropAnimation = {

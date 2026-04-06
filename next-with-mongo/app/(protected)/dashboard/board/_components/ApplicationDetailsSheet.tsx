@@ -19,11 +19,12 @@ import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
 import { DeleteApplicationDialog } from './DeleteApplicationDialog';
+import { ApplicationSheetSkeleton } from "./ApplicationSheetSkeleton"
 
 // ? TODO LIST:
 // TODO: Loading state (skeleton)
 // TODO: Activity (what changes in the db for this?)
-// TODO: SheetContent overflow handling
+// * DONE : SheetContent overflow handling (ok na pala)
 // * DONE : Empty date defaulting to 01/01/1970 (fix in dialog date input)
 
 type ApplicationSheetProps = {
@@ -32,8 +33,10 @@ type ApplicationSheetProps = {
 }
 
 export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps) {
-    const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const router = useRouter();
+
     const {
         _id, userId, order,
         company, role, priority,
@@ -78,6 +81,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
     // Reset states when a new app is selected or sheet closes
     useEffect(() => {
         setIsEditing(false);
+        setIsRefreshing(false);
         if (selectedApp) {
             resetFormToOriginal();
         }
@@ -86,10 +90,10 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
     const { handleSubmit, control, watch, setValue, getValues, formState: { isSubmitting } } = fullUpdateApplicationForm;
     const watched_worktype = watch('workType');
     const watched_status = watch('status')
-    
+
     const isApplyDateRequired = watched_status === 'applied'
     const isLocationRequired = watched_worktype === 'onsite' || watched_worktype === 'hybrid';
-    
+
     async function onSubmit(data: z.infer<typeof fullFormSchema>) {
         console.log("Data submitted: ", data);
         const _id = selectedApp?._id;
@@ -99,10 +103,10 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
         }
 
         try {
-
             const result = await updateApplicationAction(_id, data);
             if (result.success) {
                 toast.success("Application updated successfully")
+                setIsRefreshing(true);
                 router.refresh();
             } else {
                 throw new Error(result.error);
@@ -110,36 +114,18 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
         } catch (error) {
             console.error('An error occured while updating the application: ', error)
             toast.error("Error updating application")
+            setIsRefreshing(false);
         } finally {
             setIsEditing(false);
         }
     }
 
-
-    const handleDelete = async () => {
-        const _id = selectedApp?._id;
-        if (!_id) {
-            alert("No application selected to delete.");
-            return;
-        }
-
-        try {
-            const result = await deleteApplicationAction(_id);
-            if (result.success) {
-                onClose();  // Close the sheet
-                // Optional: Trigger a router.refresh() here if needed to update the UI
-            } else {
-                alert(result.error || "Failed to delete application.");
-            }
-        } catch (error) {
-            alert("An unexpected error occurred.");
-        }
-    };
-
     return (
         <Sheet open={!!selectedApp} onOpenChange={(open) => { if (!open) onClose() }}>
             <SheetContent className="w-full sm:max-w-135 flex flex-col p-0 overflow-hidden">
-                {selectedApp && (
+                {isRefreshing ? (
+                    <ApplicationSheetSkeleton />
+                ) : selectedApp && (
                     <form
                         id='update-application-form'
                         onSubmit={handleSubmit(onSubmit)}
@@ -244,7 +230,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                                 render={({ field, fieldState }) => (
                                                     <Field data-invalid={fieldState.invalid}>
                                                         {/* <FieldLabel htmlFor="status">Status *</FieldLabel> */}
-                                                        <Select 
+                                                        <Select
                                                             onValueChange={(value) => {
                                                                 const previousStatus = field.value;
                                                                 field.onChange(value);
@@ -289,7 +275,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                     </div>
 
                                     <div className="space-y-1">
-                                        <span className="text-muted-foreground block">Location {isEditing && isLocationRequired && (<span className='text-red-500'>*</span>) }</span>
+                                        <span className="text-muted-foreground block">Location {isEditing && isLocationRequired && (<span className='text-red-500'>*</span>)}</span>
                                         {isEditing ? (
                                             <Controller
                                                 name="location"
@@ -330,7 +316,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                                 control={control}
                                                 render={({ field, fieldState }) => (
                                                     <Field data-invalid={fieldState.invalid}>
-                                                        <Select 
+                                                        <Select
                                                             onValueChange={(value) => {
                                                                 const previousWorkType = field.value;
                                                                 field.onChange(value);
@@ -342,7 +328,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                                                     })
                                                                 }
                                                             }
-                                                        } 
+                                                            }
                                                             defaultValue={field.value}
                                                         >
                                                             <SelectTrigger>
@@ -551,6 +537,31 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                     )
                                 )}
                             </section>
+
+                            {/* Insert the activity logs here */}
+                            {/* <section className='flex flex-col'>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                                <span>test</span>
+                            </section> */}
                         </main>
 
                         {/* FOOTER: Changes based on edit state */}

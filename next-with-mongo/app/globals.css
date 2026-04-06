@@ -85,6 +85,7 @@
   --header-py: 0.25rem;
   --header-px: 1rem;  
   --dashboard-pages-padding: 1rem;
+  --landing-pages-padding: 12rem;
 }
 
 .dark {
