@@ -37,6 +37,7 @@ export function SortableApplicationCard({ application, onClick }: SortableApplic
             {...attributes}
             {...listeners}
             data-dnd-handle="true"
+            data-no-drag
         >
             <ApplicationCard application={application} onClick={onClick} />
         </div>
