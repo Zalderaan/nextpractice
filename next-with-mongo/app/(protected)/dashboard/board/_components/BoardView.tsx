@@ -13,7 +13,8 @@ import {
     useSensor,
     useSensors,
     DragOverlay,
-    defaultDropAnimationSideEffects
+    defaultDropAnimationSideEffects,
+    DragOverEvent
 } from '@dnd-kit/core'
 import { ApplicationCard } from './ApplicationCard' // For the DragOverlay
 import { updateApplicationStatusAction } from '../actions'
@@ -26,7 +27,8 @@ export default function BoardView({ applications }: Props) {
     const [selectedAppId, setSelectedAppId] = useState<string | null>(null)
     const [activeApp, setActiveApp] = useState<Application | null>(null);
     const [isDraggingCard, setIsDraggingCard] = useState(false);
-    
+    const [insertAfterId, setInsertAfterId] = useState<string | null>(null);
+
     const handleSelect = useCallback((app: Application) => {
         setSelectedAppId(app._id)
     }, [])
@@ -58,6 +60,25 @@ export default function BoardView({ applications }: Props) {
         const app = applications.find(app => app._id === active.id);
         if (app) setActiveApp(app);
     }
+    
+    const onDragOver = (event: DragOverEvent) => {
+        const { active, over } = event;
+        if (!over) { setInsertAfterId(null); return; }
+
+        const activeStatus = active.data.current?.status as ApplicationStatus;
+        const overStatus = over.data.current?.status as ApplicationStatus;
+        const overType = over.data.current?.type;
+
+        if (!overStatus || activeStatus === overStatus) { setInsertAfterId(null); return; }
+        if (overType !== "Application") { setInsertAfterId(null); return; }
+
+        const overRect = over.rect;
+        const translatedTop = active.rect.current.translated?.top ?? 0;
+        const pointerY = translatedTop + (active.rect.current.translated?.height ?? 0) / 2;
+        const isLowerHalf = pointerY > overRect.top + overRect.height / 2;
+
+        setInsertAfterId(isLowerHalf ? over.id as string : null);
+    };
 
     const onDragEnd = (event: DragEndEvent) => {
         setIsDraggingCard(false);
@@ -95,14 +116,16 @@ export default function BoardView({ applications }: Props) {
                 const activeIndex = sourceColumnApps.findIndex(app => app._id === active.id);
                 targetIndex = activeIndex < overIndex ? overIndex + 1 : overIndex;
             } else {
-                // Cross-column: insert before the target, UNLESS it's the last card (then append)
                 if (overIndex >= 0) {
-                    const isLastCard = overIndex === targetApps.length - 1;
-                    targetIndex = isLastCard ? overIndex + 1 : overIndex;
+                    // If pointer was on lower half of the card, insert after it
+                    targetIndex = insertAfterId === over.id ? overIndex + 1 : overIndex;
                 } else {
                     targetIndex = targetApps.length;
                 }
             }
+
+            // Reset after use
+            setInsertAfterId(null);
         }
 
         // Calculate new order using the correct target column's apps
@@ -132,6 +155,7 @@ export default function BoardView({ applications }: Props) {
             <DndContext
                 sensors={sensors}
                 onDragStart={onDragStart}
+                onDragOver={onDragOver}
                 onDragEnd={onDragEnd}
             >
                 <BoardClient
@@ -158,7 +182,7 @@ export default function BoardView({ applications }: Props) {
                         <div className="opacity-90 shadow-2xl rotate-2 transition-transform cursor-grabbing touch-none">
                             <ApplicationCard
                                 application={activeApp}
-                                onClick={() => {}}
+                                onClick={() => { }}
                             />
                         </div>
                     ) : null}
