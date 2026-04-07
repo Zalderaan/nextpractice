@@ -4,9 +4,9 @@ import {
   CreateApplicationInput,
   CreateApplicationData,
   MoveApplicationInput,
-  UpdateApplicationInput
+  UpdateApplicationInput,
 } from "./application.validator";
-import { Types } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 export class ApplicationService {
   /**
    * Create a new application for a user.
@@ -20,7 +20,6 @@ export class ApplicationService {
     userId: string,
     payload: CreateApplicationInput,
   ) {
-
     console.log("Payload in createApplication: ", payload);
     const normalizedUserId = new Types.ObjectId(userId);
     const targetStatus = payload.status ?? "wishlist";
@@ -61,7 +60,10 @@ export class ApplicationService {
     return user_applications;
   }
 
-  static async findApplication(appId: string, userId: string) {
+  static async findApplication(
+    appId: string,
+    userId: string,
+  ): Promise<HydratedDocument<IApplication>> {
     const application = await Application.findOne({ _id: appId, userId })
       .orFail(() => makeAppError("Application not found", 404))
       .exec();
@@ -69,23 +71,57 @@ export class ApplicationService {
     return application;
   }
 
-  static async changeApplicationStatus(appId: string, userId: string, moveApplicationData: MoveApplicationInput) {
+  static async changeApplicationStatus(
+    appId: string,
+    userId: string,
+    moveApplicationData: MoveApplicationInput,
+  ) {
+    const changedApplication = await Application.findOneAndUpdate(
+      { _id: appId, userId },
+      [
+        {
+          $set: {
+            status: moveApplicationData.newStatus,
+            order: moveApplicationData.newOrder,
+            appliedAt: {
+              $switch: {
+                branches: [
+                  {
+                    // from wishlist --> other status, set as today
+                    case: {
+                      $and: [
+                        { $eq: ["$status", "wishlist"] },
+                        { $ne: [moveApplicationData.newStatus, "wishlist"] },
+                      ],
+                    },
+                    then: new Date(),
+                  },
+                  {
 
-    const renamedData = {
-      status: moveApplicationData.newStatus,
-      order: moveApplicationData.newOrder
-    }
-
-    const changed_application = await Application.findOneAndUpdate(
-      { _id: appId, userId: userId }, // filters
-      { $set: renamedData },
+                    // from other status --> wishlist, clear it
+                    case: {
+                      $and: [
+                        { $ne: ["$status", "wishlist"] },
+                        { $eq: [moveApplicationData.newStatus, "wishlist"] },
+                      ],
+                    },
+                    then: null,
+                  },
+                ],
+                // otherwise, keep as-is
+                default: "$appliedAt",
+              },
+            },
+          },
+        },
+      ],
       {
         returnDocument: "after",
         runValidators: true,
       },
     );
 
-    return changed_application;
+    return changedApplication;
   }
 
   static async updateApplication(
@@ -97,7 +133,7 @@ export class ApplicationService {
       { _id: appId, userId: userId }, // filter ensures they only update their own app
       { $set: updateData }, // applies only the fields provided
       {
-        returnDocument: 'after', // returns the document AFTER the update
+        returnDocument: "after", // returns the document AFTER the update
         runValidators: true, // forces Mongoose to check ENUMs and constraints on update
       },
     );

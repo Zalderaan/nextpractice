@@ -25,7 +25,7 @@ export function SortableApplicationCard({ application, onClick, index }: Sortabl
             data-no-drag
             className={[
                 'transition-[transform,opacity,box-shadow] duration-150',
-                isDragging ? 'opacity-0' : 'opacity-100'
+                isDragging ? 'opacity-35' : 'opacity-100'
             ].join(' ')}
 
         >

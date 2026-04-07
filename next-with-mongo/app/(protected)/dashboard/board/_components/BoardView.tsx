@@ -1,6 +1,6 @@
 'use client'
 
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react'
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import BoardClient from '../../_components/BoardClient'
 import { KanbanColumn } from './KanbanColumn'
 import { Application, ApplicationStatus } from './ApplicationCard'
@@ -50,6 +50,11 @@ export default function BoardView({ applications }: Props) {
 
     const itemsByStatusRef = useRef<Record<ApplicationStatus, string[]>>(initialItemsByStatus);
     const beforeDragRef = useRef<Record<ApplicationStatus, string[]> | null>(null);
+
+    useEffect(() => {
+        setItemsByStatus(initialItemsByStatus);
+        itemsByStatusRef.current = initialItemsByStatus;
+    }, [initialItemsByStatus]);
 
     const [selectedAppId, setSelectedAppId] = useState<string | null>(null)
     const [isDraggingCard, setIsDraggingCard] = useState(false);
@@ -182,8 +187,8 @@ export default function BoardView({ applications }: Props) {
 
     return (
         <>
-            <DragDropProvider onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd} >
-                <BoardClient className="min-w-0 flex-1 overflow-x-auto overflow-y-auto custom-scrollbar p-(--dashboard-pages-padding) select-none" isDraggingCard={isDraggingCard} >
+            <DragDropProvider onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd}>
+                <BoardClient className="min-w-0 flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar scrollbar-gutter:stable p-(--dashboard-pages-padding) select-none" isDraggingCard={isDraggingCard} >
                     <div className="flex w-max flex-row items-start gap-4 h-full">
                         {statuses.map((status) => (
                             <MemoizedKanbanColumn key={status} status={status} applications={applicationsByStatus[status]} onSelect={handleSelect} />

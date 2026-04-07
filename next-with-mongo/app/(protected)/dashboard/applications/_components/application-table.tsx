@@ -133,7 +133,7 @@ export function ApplicationsTable<TData, TValue>({
                         </TableRow>
                     ))}
                 </TableHeader>
-                <TableBody className="bg-blue-200">
+                <TableBody>
                     {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
                             <TableRow
