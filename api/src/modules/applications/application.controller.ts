@@ -154,6 +154,8 @@ export class ApplicationController {
           newStatusAndOrder,
         );
 
+      console.log('This is updated_application: ', updated_application)
+
       if (!updated_application)
         throw makeAppError(
           "Application not found or could not be updated",
@@ -166,6 +168,7 @@ export class ApplicationController {
         data: updated_application,
       });
     } catch (error) {
+      console.error('Error in updateApplicationStatus:', error);
       next(error);
     }
   }

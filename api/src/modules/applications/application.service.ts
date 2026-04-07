@@ -76,8 +76,10 @@ export class ApplicationService {
     userId: string,
     moveApplicationData: MoveApplicationInput,
   ) {
+    console.log('changeApplicationStatus called!')
+    const normalizedUserId = new Types.ObjectId(userId);
     const changedApplication = await Application.findOneAndUpdate(
-      { _id: appId, userId },
+      { _id: appId, userId: normalizedUserId },
       [
         {
           $set: {
@@ -118,6 +120,7 @@ export class ApplicationService {
       {
         returnDocument: "after",
         runValidators: true,
+        updatePipeline: true,
       },
     );
 

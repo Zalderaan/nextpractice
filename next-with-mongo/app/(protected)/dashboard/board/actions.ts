@@ -84,7 +84,9 @@ export async function updateApplicationStatusAction(
       };
     }
 
-    // revalidatePath("/dashboard/board");
+    revalidatePath("/dashboard/board");
+    revalidatePath("/dashboard/applications");
+
     return { success: true };
   } catch (error) {
     return { success: false, error: "Network error occurred" };
