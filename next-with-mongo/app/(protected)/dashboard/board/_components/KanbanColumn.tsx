@@ -2,7 +2,7 @@
 
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useDroppable } from '@dnd-kit/core';
+import { useDroppable } from '@dnd-kit/react';
 import { PlusIcon } from "lucide-react";
 import { ApplicationCard, Application } from "./ApplicationCard";
 import { SortableApplicationCard } from "./SortableApplicationCard";
@@ -15,15 +15,18 @@ interface KanbanColumnProps {
 }
 
 export function KanbanColumn({ status, applications, onSelect }: KanbanColumnProps) {
-    const { setNodeRef, isOver } = useDroppable({
+    const { isDropTarget, ref } = useDroppable({
         id: status,
+        type: 'column',
+        accept: 'application',
         data: {
             type: "Column",
             status: status
         }
     });
 
-    const applicationIds = applications.map((app) => app._id);
+    const style = isDropTarget ? { background: '#00000030' } : undefined;
+    // const applicationIds = applications.map((app) => app._id);
 
     return (
         <Card className="flex flex-col min-w-[320px] max-h-full shrink-0 overflow-hidden">
@@ -39,20 +42,19 @@ export function KanbanColumn({ status, applications, onSelect }: KanbanColumnPro
             </CardHeader>
 
             <div
-                ref={setNodeRef}
-                className={`flex-1 overflow-y-auto min-h-0 py-2 transition-colors ${isOver ? 'bg-accent/50' : ''}`}
+                ref={ref}
+                className={`droppable overflow-y-auto ${isDropTarget ? "active" : ""}`}
             >
-                <SortableContext items={applicationIds} strategy={verticalListSortingStrategy}>
-                    <CardContent className="space-y-2 pb-8">
-                        {applications.map((app) => (
-                            <SortableApplicationCard
-                                key={app._id}
-                                application={app}
-                                onClick={() => onSelect(app)}
-                            />
-                        ))}
-                    </CardContent>
-                </SortableContext>
+                <CardContent className="space-y-2 pb-8">
+                    {applications.map((app, index) => (
+                        <SortableApplicationCard
+                            key={app._id}
+                            index={index}
+                            application={app}
+                            onClick={() => onSelect(app)}
+                        />
+                    ))}
+                </CardContent>
             </div>
         </Card>
     );

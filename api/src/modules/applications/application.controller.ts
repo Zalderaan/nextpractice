@@ -136,6 +136,7 @@ export class ApplicationController {
     next: NextFunction,
   ) {
     try {
+      console.log('updateApplicationStatus called!');
       const user = (req as any).user;
       const userId = user?.sub;
       if (!userId) throw makeAppError("Unauthorized", 401);

@@ -1,198 +1,211 @@
 'use client'
 
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react'
 import BoardClient from '../../_components/BoardClient'
 import { KanbanColumn } from './KanbanColumn'
 import { Application, ApplicationStatus } from './ApplicationCard'
 import { ApplicationSheet } from './ApplicationDetailsSheet'
+import { move } from '@dnd-kit/helpers';
+
 import {
-    DndContext,
-    DragEndEvent,
-    DragStartEvent,
-    PointerSensor,
-    useSensor,
-    useSensors,
+    DragDropProvider,
     DragOverlay,
-    defaultDropAnimationSideEffects,
-    DragOverEvent
-} from '@dnd-kit/core'
-import { ApplicationCard } from './ApplicationCard' // For the DragOverlay
+} from '@dnd-kit/react'
+
+import type {
+    DragStartEvent,
+    DragEndEvent,
+    DragOverEvent,
+} from '@dnd-kit/react'
+
+import { ApplicationCard } from './ApplicationCard'
 import { updateApplicationStatusAction } from '../actions'
 
 type Props = {
     applications: Application[];
 }
 
+const MemoizedKanbanColumn = memo(KanbanColumn);
+
 export default function BoardView({ applications }: Props) {
+    const statuses = useMemo(
+        () => ['wishlist', 'applied', 'interview', 'offer', 'rejected'] as const,
+        []
+    );
+
+    const initialItemsByStatus = useMemo(
+        () =>
+            statuses.reduce((acc, status) => {
+                acc[status] = applications
+                    .filter((a) => a.status === status)
+                    .sort((a, b) => a.order - b.order)
+                    .map((a) => a._id);
+                return acc;
+            }, {} as Record<ApplicationStatus, string[]>),
+        [applications, statuses]
+    );
+
+    const [itemsByStatus, setItemsByStatus] =
+        useState<Record<ApplicationStatus, string[]>>(initialItemsByStatus);
+
+    const itemsByStatusRef = useRef<Record<ApplicationStatus, string[]>>(initialItemsByStatus);
+    const beforeDragRef = useRef<Record<ApplicationStatus, string[]> | null>(null);
+
     const [selectedAppId, setSelectedAppId] = useState<string | null>(null)
-    const [activeApp, setActiveApp] = useState<Application | null>(null);
     const [isDraggingCard, setIsDraggingCard] = useState(false);
-    const [insertAfterId, setInsertAfterId] = useState<string | null>(null);
+
+    const appById = useMemo(() => {
+        const map = new Map<string, Application>();
+        for (const app of applications) map.set(app._id, app);
+        return map;
+    }, [applications]);
+
+    const cloneItems = useCallback((items: Record<ApplicationStatus, string[]>) => {
+        return statuses.reduce((acc, status) => {
+            acc[status] = [...items[status]];
+            return acc;
+        }, {} as Record<ApplicationStatus, string[]>);
+    }, [statuses]);
 
     const handleSelect = useCallback((app: Application) => {
         setSelectedAppId(app._id)
     }, [])
-    const selectedApp = applications.find(app => app._id === selectedAppId) || null;
 
+    const selectedApp = applications.find((app) => app._id === selectedAppId) || null;
     const closeDrawer = useCallback(() => setSelectedAppId(null), [])
 
-    const handleUpdateStatus = async (id: string, newStatus: ApplicationStatus, newOrder: number) => {
-        // Optimistic UI updates or error handling would go here
-        const result = await updateApplicationStatusAction(id, { newStatus, newOrder });
-        if (!result.success) {
-            console.error('Update failed:', result.error);
-        }
-    };
-    const statuses = useMemo(() => ['wishlist', 'applied', 'interview', 'offer', 'rejected'] as const, [])
-
-    // Sensors to differentiate click/drag from horizontal scroll
-    const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 5, // Require 5px movement before drag activates (allows clicks and horizontal scrolling)
-            },
-        })
+    const handleUpdateStatus = useCallback(
+        async (id: string, newStatus: ApplicationStatus, newOrder: number) => {
+            console.log('Persisting:', { id, newStatus, newOrder });
+            return await updateApplicationStatusAction(id, { newStatus, newOrder });
+        },
+        []
     );
 
-    const onDragStart = (event: DragStartEvent) => {
-        setIsDraggingCard(true)
-        const { active } = event;
-        const app = applications.find(app => app._id === active.id);
-        if (app) setActiveApp(app);
-    }
-    
-    const onDragOver = (event: DragOverEvent) => {
-        const { active, over } = event;
-        if (!over) { setInsertAfterId(null); return; }
-
-        const activeStatus = active.data.current?.status as ApplicationStatus;
-        const overStatus = over.data.current?.status as ApplicationStatus;
-        const overType = over.data.current?.type;
-
-        if (!overStatus || activeStatus === overStatus) { setInsertAfterId(null); return; }
-        if (overType !== "Application") { setInsertAfterId(null); return; }
-
-        const overRect = over.rect;
-        const translatedTop = active.rect.current.translated?.top ?? 0;
-        const pointerY = translatedTop + (active.rect.current.translated?.height ?? 0) / 2;
-        const isLowerHalf = pointerY > overRect.top + overRect.height / 2;
-
-        setInsertAfterId(isLowerHalf ? over.id as string : null);
+    const onDragStart: DragStartEvent = (_event, _manager) => {
+        try {
+            beforeDragRef.current = cloneItems(itemsByStatusRef.current);
+            setIsDraggingCard(true);
+        } catch (error) {
+            console.error('onDragStart failed:', error);
+        }
     };
 
-    const onDragEnd = (event: DragEndEvent) => {
-        setIsDraggingCard(false);
-        setActiveApp(null);
+    const onDragOver: DragOverEvent = (event, _manager) => {
+        try {
+            setItemsByStatus((current) => {
+                const next = move(current, event);
+                itemsByStatusRef.current = next;
+                return next;
+            });
+        } catch (error) {
+            console.error('onDragOver failed:', error, { event });
+        }
+    };
 
-        const { active, over } = event;
-        if (!over || active.id === over.id) return;
-
-        const activeStatus = active.data.current?.status as ApplicationStatus;
-        const overStatus = over.data.current?.status as ApplicationStatus;
-        const overType = over.data.current?.type;
-
-        if (!overStatus || !activeStatus) return;
-
-        const sourceColumnApps = applications
-            .filter(app => app.status === activeStatus)
-            .sort((a, b) => a.order - b.order);
-
-        const isWithinColumn = activeStatus === overStatus;
-        let targetApps = isWithinColumn ? sourceColumnApps : applications
-            .filter(app => app.status === overStatus && app._id !== active.id)
-            .sort((a, b) => a.order - b.order);
-
-        let targetIndex: number;
-
-        if (overType === "Column") {
-            // Dropping on empty column header → append to end
-            targetIndex = targetApps.length;
-        } else {
-            // Dropping on a card → find position relative to that card
-            const overIndex = targetApps.findIndex(app => app._id === over.id);
-
-            if (isWithinColumn) {
-                // Same column: insert before if moving up, after if moving down
-                const activeIndex = sourceColumnApps.findIndex(app => app._id === active.id);
-                targetIndex = activeIndex < overIndex ? overIndex + 1 : overIndex;
-            } else {
-                if (overIndex >= 0) {
-                    // If pointer was on lower half of the card, insert after it
-                    targetIndex = insertAfterId === over.id ? overIndex + 1 : overIndex;
-                } else {
-                    targetIndex = targetApps.length;
-                }
+    const onDragEnd: DragEndEvent = async (event, _manager) => {
+        try {
+            const { source } = event.operation;
+            if (!source) {
+                console.error('onDragEnd skipped: missing source', { event });
+                return;
             }
 
-            // Reset after use
-            setInsertAfterId(null);
+            const activeId = String(source.id);
+            const latest = itemsByStatusRef.current;
+
+            const destinationStatus = statuses.find((status) =>
+                latest[status].includes(activeId)
+            );
+
+            if (!destinationStatus) {
+                console.error('onDragEnd skipped: active id not present in any column', {
+                    activeId,
+                    latest,
+                });
+                return;
+            }
+
+            const ids = latest[destinationStatus];
+            const targetIndex = ids.indexOf(activeId);
+            if (targetIndex < 0) {
+                console.error('onDragEnd skipped: active id not found in destination list', {
+                    activeId,
+                    destinationStatus,
+                    ids,
+                });
+                return;
+            }
+
+            const prevId = ids[targetIndex - 1];
+            const nextId = ids[targetIndex + 1];
+            const prevApp = prevId ? appById.get(prevId) : undefined;
+            const nextApp = nextId ? appById.get(nextId) : undefined;
+
+            let newOrder: number;
+            if (!prevApp && !nextApp) newOrder = 1000;
+            else if (!prevApp) newOrder = nextApp!.order / 2;
+            else if (!nextApp) newOrder = prevApp.order + 1000;
+            else newOrder = (prevApp.order + nextApp.order) / 2;
+
+            const result = await handleUpdateStatus(activeId, destinationStatus, newOrder);
+
+            if (!result.success) {
+                console.error('Update failed, rolling back UI:', result.error);
+
+                if (beforeDragRef.current) {
+                    setItemsByStatus(beforeDragRef.current);
+                    itemsByStatusRef.current = beforeDragRef.current;
+                }
+            }
+        } catch (error) {
+            console.error('onDragEnd failed:', error, { event });
+
+            if (beforeDragRef.current) {
+                setItemsByStatus(beforeDragRef.current);
+                itemsByStatusRef.current = beforeDragRef.current;
+            }
+        } finally {
+            setIsDraggingCard(false);
+            beforeDragRef.current = null;
         }
-
-        // Calculate new order using the correct target column's apps
-        const prevApp = targetApps[targetIndex - 1];
-        const nextApp = targetApps[targetIndex];
-        let newOrder: number;
-
-        if (!prevApp && !nextApp) {
-            newOrder = 1000;
-        } else if (!prevApp) {
-            newOrder = nextApp!.order / 2;
-        } else if (!nextApp) {
-            newOrder = prevApp.order + 1000;
-        } else {
-            newOrder = (prevApp.order + nextApp.order) / 2;
-        }
-
-        handleUpdateStatus(active.id as string, overStatus, newOrder);
     };
 
-    const dropAnimation = {
-        sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.4' } } }),
-    };
+    const applicationsByStatus = useMemo(() => {
+        return statuses.reduce((acc, status) => {
+            acc[status] = itemsByStatus[status]
+                .map((id) => appById.get(id))
+                .filter((app): app is Application => Boolean(app));
+            return acc;
+        }, {} as Record<ApplicationStatus, Application[]>);
+    }, [itemsByStatus, appById, statuses]);
 
     return (
         <>
-            <DndContext
-                sensors={sensors}
-                onDragStart={onDragStart}
-                onDragOver={onDragOver}
-                onDragEnd={onDragEnd}
-            >
-                <BoardClient
-                    className="min-w-0 flex-1 overflow-x-auto overflow-y-auto custom-scrollbar p-(--dashboard-pages-padding) select-none"
-                    isDraggingCard={isDraggingCard}
-                >
+            <DragDropProvider onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd} >
+                <BoardClient className="min-w-0 flex-1 overflow-x-auto overflow-y-auto custom-scrollbar p-(--dashboard-pages-padding) select-none" isDraggingCard={isDraggingCard} >
                     <div className="flex w-max flex-row items-start gap-4 h-full">
                         {statuses.map((status) => (
-                            <KanbanColumn
-                                key={status}
-                                status={status}
-                                applications={applications
-                                    .filter((a) => a.status === status)
-                                    .sort((a, b) => a.order - b.order)  // Sort by order ascending
-                                }
-                                onSelect={handleSelect}
-                            />
+                            <MemoizedKanbanColumn key={status} status={status} applications={applicationsByStatus[status]} onSelect={handleSelect} />
                         ))}
                     </div>
                 </BoardClient>
 
-                <DragOverlay dropAnimation={dropAnimation}>
-                    {activeApp ? (
-                        <div className="opacity-90 shadow-2xl rotate-2 transition-transform cursor-grabbing touch-none">
-                            <ApplicationCard
-                                application={activeApp}
-                                onClick={() => { }}
-                            />
-                        </div>
-                    ) : null}
+                <DragOverlay>
+                    {(source) => {
+                        const app = appById.get(String(source.id));
+                        if (!app) return null;
+
+                        return (
+                            <div className="opacity-90 shadow-2xl rotate-2 transition-transform cursor-grabbing touch-none">
+                                <ApplicationCard application={app} onClick={() => { }} />
+                            </div>
+                        );
+                    }}
                 </DragOverlay>
 
-                <ApplicationSheet
-                    selectedApp={selectedApp}
-                    onClose={closeDrawer}
-                />
-            </DndContext>
+                <ApplicationSheet selectedApp={selectedApp} onClose={closeDrawer} />
+            </DragDropProvider>
         </>
     )
 }

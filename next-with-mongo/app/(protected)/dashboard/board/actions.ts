@@ -54,6 +54,8 @@ export async function updateApplicationStatusAction(
     newStatus: string;
   },
 ) {
+  console.log("calling update!")
+
   const cookieStore = await cookies();
   const headersList = await headers();
 
@@ -82,7 +84,7 @@ export async function updateApplicationStatusAction(
       };
     }
 
-    revalidatePath("/dashboard/board");
+    // revalidatePath("/dashboard/board");
     return { success: true };
   } catch (error) {
     return { success: false, error: "Network error occurred" };

@@ -1,43 +1,33 @@
-import React from 'react'; // remove unused "use"
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { useSortable } from '@dnd-kit/react/sortable';
 import { ApplicationCard, Application } from './ApplicationCard';
 
 interface SortableApplicationCardProps {
     application: Application;
+    index: number;
     onClick: () => void;
 }
 
-export function SortableApplicationCard({ application, onClick }: SortableApplicationCardProps) {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging,
-    } = useSortable({
+export function SortableApplicationCard({ application, onClick, index }: SortableApplicationCardProps) {
+    const {ref, isDragging} = useSortable({
         id: application._id,
+        index,
+        type: 'application',
+        accept: 'application',
         data: {
             type: "Application",
-            status: application.status
         }
     });
 
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0 : 1, // key change
-    };
-
     return (
         <div
-            ref={setNodeRef}
-            style={style}
-            {...attributes}
-            {...listeners}
+            ref={ref}
             data-dnd-handle="true"
             data-no-drag
+            className={[
+                'transition-[transform,opacity,box-shadow] duration-150',
+                isDragging ? 'opacity-0' : 'opacity-100'
+            ].join(' ')}
+
         >
             <ApplicationCard application={application} onClick={onClick} />
         </div>
