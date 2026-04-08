@@ -78,7 +78,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             <span className="rounded-lg" tabIndex={0} >
                                 {shouldShow ? <SidebarIcon /> : <MonitorCog />}
                             </span>
-                            <span>Slaver</span>
+                            <span>The Hire Wire</span>
                         </div>
                     </SidebarMenuButton>
                     <SidebarTrigger className="h-full" hidden={isCollapsed} />

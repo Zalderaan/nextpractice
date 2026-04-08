@@ -1,34 +1,46 @@
-'use client'
+import { getApplications } from "@/lib/applications";
+import { getAuthContext } from "@/lib/auth";
+import { ApplicationsByStage } from "./_components/ApplicationsByStage";
+import { Suspense } from "react";
+import { StatCards } from "./_components/StatCards";
 
-import { Button } from "@/components/ui/button"
-// import { authedFetch } from "@/lib/auth_fetch"
-
-export default function ProtectedPage() {
-
-    const NEXT_PUBLIC_PROTECTED_API_URL = process.env.NEXT_PUBLIC_PROTECTED_API_URL;
+export default async function DashboardHomePage() {
     return (
-        <main className="flex flex-col flex-1 h-full items-center justify-start space-y-2 p-(--dashboard-pages-padding)">
-
-            {/* Header section */}
-            <section className="w-full">
-                <h1 className="text-4xl font-semibold">Home</h1>
-                <p>Subtitles here</p>
-            </section>
-
-            {/* Quick actions section */}
-            <section className="bg-accent py-4 px-2 rounded-lg w-full">
-                <span>Quick actions here</span>
-            </section>
-
-
-            {/* Main analytics section */}
-            <section className="w-full">
-                {/* <Button onClick={() => testSend()}> */}
-
-                <Button>
-                    testing
-                </Button>
-            </section>
+        <main className="h-full w-full p-(--dashboard-pages-padding)">
+            <Suspense fallback={<div>Loading...</div>}>
+                <DashboardHomePageContent />
+            </Suspense>
         </main>
-    )
+    );
+}
+
+async function DashboardHomePageContent() {
+    const { userId, token } = await getAuthContext();
+    const data = await getApplications(userId, token);
+    const applications = data.data.applications;
+
+    return (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-6 xl:grid-cols-12 auto-rows-[minmax(180px,auto)] bg-blue-200">
+            <section className="col-span-full bg-red-200">
+                <StatCards applications={applications}/>
+            </section>
+
+            <section className="md:col-span-6 xl:col-span-8 bg-yellow-200">
+                <ApplicationsByStage applications={applications} />
+            </section>
+
+            <section className="md:col-span-6 xl:col-span-4 bg-red-200">
+                {/* Side widget */}
+            </section>
+
+
+            <section className="md:col-span-3 xl:col-span-6 bg-violet-200">
+                {/* Secondary widget */}
+            </section>
+
+            <section className="md:col-span-3 xl:col-span-6 bg-orange-200">
+                {/* Secondary widget */}
+            </section>
+        </div>
+    );
 }

@@ -43,9 +43,9 @@ export function KanbanColumn({ status, applications, onSelect }: KanbanColumnPro
 
             <div
                 ref={ref}
-                className={`droppable overflow-y-auto ${isDropTarget ? "active" : ""}`}
+                className={`h-full droppable overflow-y-auto ${isDropTarget ? "active" : ""}`}
             >
-                <CardContent className="space-y-2 py-4">
+                <CardContent className="space-y-2 py-4 h-full">
                     {applications.map((app, index) => (
                         <SortableApplicationCard
                             key={app._id}
