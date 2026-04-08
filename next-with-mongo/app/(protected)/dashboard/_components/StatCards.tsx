@@ -9,14 +9,6 @@ import {
 } from "@/components/ui/card";
 import { Application } from "../board/types/application.types";
 
-const statistics = [
-    "Total applications",
-    "Applied this week",
-    "Interviews",
-    "Offers",
-    "Interview rate"
-]
-
 type StatisticsType = {
     title: string,
     value: number,
@@ -38,7 +30,7 @@ function countAppliedInLastDays(applications: Application[], days: number) {
 
 export function StatCards({ applications }: StatCardsProps) {
     const total = applications.length;
-    const applied_week_count = countAppliedInLastDays(applications, 7).length;
+    const applied_week_count = countAppliedInLastDays(applications, 7).length; //! not calculating correctly at the moment
     const interview_count = applications.filter((app) => {
         return app.status === "interview"
     }).length

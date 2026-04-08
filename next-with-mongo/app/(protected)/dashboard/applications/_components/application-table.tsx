@@ -52,10 +52,10 @@ export const applicationTableColumns: ColumnDef<Application>[] = [
         cell: ({ row }) => {
             const priority = row.getValue("priority") as string;
             return (
-                <Badge variant={"default"} className={
-                    priority === "high" ? "bg-red-300"
-                        : priority === "medium" ? "bg-yellow-200"
-                            : "bg-blue-200"
+                <Badge variant={priority === "low" ? "outline" : "default"} className={
+                    priority === "high" ? "bg-black"
+                    : priority === "medium" ? "bg-gray-500"
+                    : "bg-gray-100"
                 }>
                     {priority}
                 </Badge>
