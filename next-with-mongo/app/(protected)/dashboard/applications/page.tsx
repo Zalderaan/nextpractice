@@ -1,31 +1,23 @@
 import { cookies, headers } from 'next/headers';
 import {ApplicationsPageHeader} from "@/app/(protected)/dashboard/applications/_components/ApplicationsPageHeader"
 import { ApplicationsPageClient } from './_components/ApplicationsPageClient';
+import { getApplications } from '@/lib/applications';
+import { decodeJwt } from 'jose';
+import { redirect } from 'next/navigation';
 
 export default async function ApplicationsPage() {
-    const NEXT_PUBLIC_PROTECTED_API_URL = process.env.NEXT_PUBLIC_PROTECTED_API_URL
-
     const cookieStore = await cookies();
     const headersList = await headers();
     let token = headersList.get("Authorization")?.split(" ")[1];
-    if (!token) {
-        token = cookieStore.get("accessToken")?.value
-    }
-    const res = await fetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/applications`, {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-        // Optional: cache control if data changes frequently
-        cache: 'no-store'
-    });
+    if (!token) token = cookieStore.get("accessToken")?.value
 
-    if (!res.ok) {
-        console.error("Error fetching applications! MORE LOGGING ERRORS NEEDED HERE")
+    const {sub: userId} = decodeJwt(token!)
+
+    if (!token || !userId) {
+        redirect('/login');
     }
 
-    const data = await res.json();
+    const data = await getApplications(userId, token)
     const applications = data.data.applications;
 
     return (

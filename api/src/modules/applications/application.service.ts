@@ -20,7 +20,7 @@ export class ApplicationService {
     userId: string,
     payload: CreateApplicationInput,
   ) {
-    console.log("Payload in createApplication: ", payload);
+    // console.log("Payload in createApplication: ", payload);
     const normalizedUserId = new Types.ObjectId(userId);
     const targetStatus = payload.status ?? "wishlist";
 
@@ -76,7 +76,6 @@ export class ApplicationService {
     userId: string,
     moveApplicationData: MoveApplicationInput,
   ) {
-    console.log('changeApplicationStatus called!')
     const normalizedUserId = new Types.ObjectId(userId);
     const changedApplication = await Application.findOneAndUpdate(
       { _id: appId, userId: normalizedUserId },

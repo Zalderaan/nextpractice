@@ -23,7 +23,7 @@ export async function POST() {
       },
     );
 
-	console.log("This is backendResponse in logout route.ts: ", backendResponse)
+	// console.log("This is backendResponse in logout route.ts: ", backendResponse)
 
     if (!backendResponse.ok) {
       throw new Error("Backend logout failed");

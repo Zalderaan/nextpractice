@@ -75,10 +75,10 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         throw new Error(result.message);
       }
 
-      console.log("signup result: ", result);
+      // console.log("signup result: ", result);
       toast.success("Sign up successful!")
       router.push('/login');
-      console.log("Submitted the following values: ", data);
+      // console.log("Submitted the following values: ", data);
 
     } catch (error) {
       const message = error instanceof Error ? error.message : `Something went wrong: ${error}`

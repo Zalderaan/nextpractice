@@ -54,7 +54,6 @@ export async function updateApplicationStatusAction(
     newStatus: string;
   },
 ) {
-  console.log("calling update!")
 
   const cookieStore = await cookies();
   const headersList = await headers();

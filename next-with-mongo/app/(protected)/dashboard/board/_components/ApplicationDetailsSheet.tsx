@@ -95,7 +95,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
     const isLocationRequired = watched_worktype === 'onsite' || watched_worktype === 'hybrid';
 
     async function onSubmit(data: z.infer<typeof fullFormSchema>) {
-        console.log("Data submitted: ", data);
+        // console.log("Data submitted: ", data);
         const _id = selectedApp?._id;
         if (!_id) {
             alert("No application selected to delete.");

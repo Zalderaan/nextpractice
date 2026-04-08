@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 export function DashboardHeader() {
     const pathname = usePathname();
     const { user } = useAuthStore();
-    console.log("this is user: ", user)
+    // console.log("this is user: ", user)
 
     // Define page data with title and description for each route
     const pageData = {

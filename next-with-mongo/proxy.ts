@@ -74,7 +74,7 @@ export async function proxy(req: NextRequest) {
       // 9. Extract the new access token from the JSON body
       const res_data = await refreshRes.json();
       const newAccessToken = res_data.data?.accessToken;
-      console.log("This is the newAccessToken: ", newAccessToken)
+      // console.log("This is the newAccessToken: ", newAccessToken)
 
       if (!newAccessToken) {
         // Failsafe: Backend responded 200 OK, but JSON is missing the token
@@ -86,7 +86,7 @@ export async function proxy(req: NextRequest) {
 
       // 10. Inject the new token into the headers for Next.js SSR requests
       const requestHeaders = new Headers(req.headers);
-      console.log("newAccessToken in step 10:", newAccessToken)
+      // console.log("newAccessToken in step 10:", newAccessToken)
       requestHeaders.set("Authorization", `Bearer ${newAccessToken}`);
       
       const response = NextResponse.next({

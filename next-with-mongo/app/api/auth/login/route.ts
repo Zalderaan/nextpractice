@@ -4,7 +4,6 @@ const NEXT_PUBLIC_BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
 
 export async function POST(req: Request) {
     const body = await req.json();
-    console.log("this is NEXT_public_BASE_api_url: ", NEXT_PUBLIC_BASE_API_URL)
 
     const backendRes = await fetch(`${NEXT_PUBLIC_BASE_API_URL}/login`, {
         method: "POST",

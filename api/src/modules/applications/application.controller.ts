@@ -20,8 +20,8 @@ export class ApplicationController {
 
       // ! NOT TYPE SAFE
       const input = req.body;
-      console.log("received input in ApplicationController: ", input)
-      console.log("This is input from req.body: ", input);
+      // console.log("received input in ApplicationController: ", input)
+      // console.log("This is input from req.body: ", input);
       if (!input || Object.keys(input).length === 0)
         throw makeAppError("Missing application data", 400);
 
@@ -70,8 +70,8 @@ export class ApplicationController {
 
       const appId = req.params.id as string;
 
-      console.log(`This is userId: ${userId}`);
-      console.log(`This is appId: ${appId}`);
+      // console.log(`This is userId: ${userId}`);
+      // console.log(`This is appId: ${appId}`);
 
       if (!appId) throw makeAppError("Application not found", 404);
 
@@ -82,7 +82,7 @@ export class ApplicationController {
         userId,
       );
 
-      console.log(`This is application: ${application} `);
+      // console.log(`This is application: ${application} `);
 
       res.status(200).json({
         success: true,
@@ -136,7 +136,6 @@ export class ApplicationController {
     next: NextFunction,
   ) {
     try {
-      console.log('updateApplicationStatus called!');
       const user = (req as any).user;
       const userId = user?.sub;
       if (!userId) throw makeAppError("Unauthorized", 401);
@@ -145,7 +144,6 @@ export class ApplicationController {
       if (!appId) throw makeAppError("Application not found", 404);
 
       const newStatusAndOrder = req.body as MoveApplicationInput;
-      console.log("Received from ctrlr: ", newStatusAndOrder)
 
       const updated_application =
         await ApplicationService.changeApplicationStatus(
@@ -153,8 +151,6 @@ export class ApplicationController {
           userId,
           newStatusAndOrder,
         );
-
-      console.log('This is updated_application: ', updated_application)
 
       if (!updated_application)
         throw makeAppError(
@@ -192,8 +188,6 @@ export class ApplicationController {
         appId,
         userId,
       );
-
-      console.log(`This is application: ${application} `);
 
       res.status(200).json({
         success: true,
