@@ -17,7 +17,6 @@ export async function getApplications(userId: string, token: string) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`, // Attach token here
     },
-    next: { tags: ["applications"] }, // smart caching
   });
 
   if (!res.ok) {

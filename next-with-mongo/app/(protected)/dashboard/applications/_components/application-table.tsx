@@ -35,15 +35,6 @@ export const applicationTableColumns: ColumnDef<Application>[] = [
         header: "Location"
     },
     {
-        accessorKey: "appliedAt",
-        header: "Date Applied",
-        cell: ({ row }) => {
-            const date = row.getValue("appliedAt");
-            if (!date) return "N/A";
-            return new Date(date as string).toLocaleDateString();
-        }
-    },
-    {
         accessorKey: "workType",
         header: "Work Type",
         cell: ({ row }) => {
@@ -69,6 +60,15 @@ export const applicationTableColumns: ColumnDef<Application>[] = [
                     {priority}
                 </Badge>
             )
+        }
+    },
+    {
+        accessorKey: "appliedAt",
+        header: "Date Applied",
+        cell: ({ row }) => {
+            const date = row.getValue("appliedAt");
+            if (!date) return "N/A";
+            return new Date(date as string).toLocaleDateString();
         }
     },
     {

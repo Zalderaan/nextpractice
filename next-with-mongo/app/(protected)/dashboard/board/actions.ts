@@ -1,20 +1,16 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import * as z from "zod";
 import { fullFormSchema } from "./_components/AddApplicationDialog";
+import { getAuthContext } from "@/lib/auth";
 // Optional: Import your Zod schema here to re-validate on the server for ultimate security,
 // though your backend probably already validates it too.
 
 export async function createApplicationAction(
   data: z.infer<typeof fullFormSchema>,
 ) {
-  const cookieStore = await cookies();
-  const headersList = await headers();
-
-  let token = headersList.get("Authorization")?.split(" ")[1];
-  if (!token) token = cookieStore.get("accessToken")?.value;
+  const { token, userId } = await getAuthContext(); // ← gets both
 
   try {
     const res = await fetch(
@@ -38,8 +34,8 @@ export async function createApplicationAction(
     }
 
     // Force the page to re-fetch the latest data from the backend
-    revalidatePath("/dashboard/board");
-    revalidatePath("/dashboard/applications");
+    updateTag(`applications-${userId}`);
+    // revalidatePath('/dashboard/board');
 
     return { success: true };
   } catch (error) {
@@ -54,12 +50,7 @@ export async function updateApplicationStatusAction(
     newStatus: string;
   },
 ) {
-
-  const cookieStore = await cookies();
-  const headersList = await headers();
-
-  let token = headersList.get("Authorization")?.split(" ")[1];
-  if (!token) token = cookieStore.get("accessToken")?.value;
+  const { token, userId } = await getAuthContext(); // ← gets both
 
   try {
     const res = await fetch(
@@ -83,8 +74,7 @@ export async function updateApplicationStatusAction(
       };
     }
 
-    revalidatePath("/dashboard/board");
-    revalidatePath("/dashboard/applications");
+    updateTag(`applications-${userId}`);
 
     return { success: true };
   } catch (error) {
@@ -96,11 +86,7 @@ export async function updateApplicationAction(
   appId: string,
   data: z.infer<typeof fullFormSchema>,
 ) {
-  const cookieStore = await cookies();
-  const headersList = await headers();
-
-  let token = headersList.get("Authorization")?.split(" ")[1];
-  if (!token) token = cookieStore.get("accessToken")?.value;
+  const { token, userId } = await getAuthContext(); // ← gets both
 
   try {
     const res = await fetch(
@@ -124,8 +110,7 @@ export async function updateApplicationAction(
       };
     }
 
-    revalidatePath("/dashboard/board");
-    revalidatePath("/dashboard/applications");
+    updateTag(`applications-${userId}`);
 
     return { success: true };
   } catch (error) {
@@ -134,10 +119,7 @@ export async function updateApplicationAction(
 }
 
 export async function deleteApplicationAction(appId: string) {
-  const cookieStore = await cookies();
-  const headersList = await headers();
-  let token = headersList.get("Authorization")?.split(" ")[1];
-  if (!token) token = cookieStore.get("accessToken")?.value;
+  const { token, userId } = await getAuthContext(); // ← gets both
 
   try {
     const res = await fetch(
@@ -161,8 +143,7 @@ export async function deleteApplicationAction(appId: string) {
     }
 
     //Force the page to re-fetch the latest data from the backend
-    revalidatePath("/dashboard/board");
-    revalidatePath("/dashboard/applications");
+    updateTag(`applications-${userId}`);
 
     return { success: true };
   } catch (error) {
