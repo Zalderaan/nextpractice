@@ -2,10 +2,8 @@
 
 import { updateTag } from "next/cache";
 import * as z from "zod";
-import { fullFormSchema } from "./_components/AddApplicationDialog";
 import { getAuthContext } from "@/lib/auth";
-// Optional: Import your Zod schema here to re-validate on the server for ultimate security,
-// though your backend probably already validates it too.
+import { fullFormSchema } from "./types/application-form.schema";
 
 export async function createApplicationAction(
   data: z.infer<typeof fullFormSchema>,

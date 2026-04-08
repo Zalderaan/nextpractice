@@ -10,7 +10,7 @@ import { Pencil, Link as LinkIcon, X, Save } from 'lucide-react'
 import Link from 'next/link'
 import { deleteApplicationAction, updateApplicationAction } from "@/app/(protected)/dashboard/board/actions"
 import { Application } from './ApplicationCard'
-import { fullFormSchema } from './AddApplicationDialog'
+import { fullFormSchema } from '../types/application-form.schema';
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
