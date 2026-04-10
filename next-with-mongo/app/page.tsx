@@ -32,6 +32,7 @@ export default function Home() {
                 src="https://placehold.co/1180x720.png"
                 alt="Hero section image"
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 512px"
                 className="object-cover rounded-lg"
               />
             </div>

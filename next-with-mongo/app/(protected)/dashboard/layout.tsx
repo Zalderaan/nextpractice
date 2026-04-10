@@ -1,5 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { DashboardHeader } from "./_components/DashboardHeader";
 import { AuthBootstrap } from "./_components/AuthBootstrap";
 
@@ -12,12 +12,12 @@ export default function DashboardLayout({
         <SidebarProvider>
             <AuthBootstrap />
             <AppSidebar />
-            <div className="flex min-h-0 flex-1 min-w-0 flex-col">
+            <SidebarInset className="flex flex-col min-w-0 flex-1 overflow-x-hidden">
                 <DashboardHeader />
-                <main className="w-full flex-1 overflow-x-hidden">
+                <main className="w-full flex-1 overflow-x-hidden overflow-y-auto">
                     {children}
                 </main>
-            </div>
+            </SidebarInset>
         </SidebarProvider>
     )
 }

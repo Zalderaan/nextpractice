@@ -55,7 +55,7 @@ interface NeedsAttentionItemProps {
     company: string,
     role: string,
     status: string
-    // day_count: string
+    day_count?: string
 }
 
 function NeedsAttentionItem({ company, day_count, role, status }: NeedsAttentionItemProps) {
@@ -67,7 +67,7 @@ function NeedsAttentionItem({ company, day_count, role, status }: NeedsAttention
             </CardHeader>
             <CardFooter className="flex flex-row items-center justify-center">
                 <span>{status}</span>
-                <span>{day_count}</span>
+                <span>{day_count ?? 'day_count missing'}</span>
             </CardFooter>
         </Card>
     )
