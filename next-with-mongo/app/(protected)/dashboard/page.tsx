@@ -6,6 +6,7 @@ import { StatCards } from "./_components/StatCards";
 import DashboardHomeLoading from "./loading";
 import { Application } from "./board/types/application.types";
 import { NeedsAttention } from "./_components/NeedsAttention";
+import { ApplicationsOverTime } from "./_components/ApplicationsOverTime";
 
 export default function DashboardHomePage() {
     return (
@@ -34,7 +35,9 @@ async function DashboardHomeContent() {
                 <section className="md:col-span-6 xl:col-span-4 bg-yellow-200" >
                     <NeedsAttention applications={applications} />
                 </section>
-                <section className="md:col-span-3 xl:col-span-6 bg-yellow-200" />
+                <section className="md:col-span-3 xl:col-span-6 bg-yellow-200" >
+                    <ApplicationsOverTime applications={applications}/>
+                </section>
                 <section className="md:col-span-3 xl:col-span-6 bg-yellow-200" />
             </div>
         </main>

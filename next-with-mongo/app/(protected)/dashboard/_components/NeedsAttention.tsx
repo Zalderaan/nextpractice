@@ -9,10 +9,46 @@ import {
     CardContent,
 } from "@/components/ui/card"
 import { Application } from "../board/types/application.types"
+import { Button } from "@/components/ui/button";
 
 interface NeedsAttentionProps {
     applications: Application[]
 }
+
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+type NeedsAttentionApp = Application & {
+    day_count: number;
+}
+
+function parseTimestamp(value: Application["appliedAt"]): number | null {
+    if (!value) return null;
+    const ts = value instanceof Date ? value.getTime() : new Date(value).getTime();
+    return Number.isNaN(ts) ? null : ts;
+}
+
+function getDayCount(appliedAt: Application["appliedAt"], nowMs: number): number | null {
+    const ts = parseTimestamp(appliedAt);
+    if (ts === null) return null;
+
+    // Clamp to 0 in case of future timestamps from bad data/timezone mismatch
+    return Math.max(0, Math.floor((nowMs - ts) / DAY_IN_MS));
+}
+
+function getStaleAppliedApplications(applications: Application[], staleDays: number): NeedsAttentionApp[] {
+    const nowMs = Date.now();
+
+    return applications.flatMap((app) => {
+        if (app.status !== "applied") return [];
+
+        const day_count = getDayCount(app.appliedAt, nowMs);
+        if (day_count === null) return [];
+        if (day_count < staleDays) return [];
+
+        return [{ ...app, day_count }];
+    });
+}
+
 
 export function NeedsAttention({ applications }: NeedsAttentionProps) {
     /** 
@@ -30,28 +66,20 @@ export function NeedsAttention({ applications }: NeedsAttentionProps) {
      * TODO:    - 14-day stale | action: nudge + mark as nudged (stays in the needs attention)
      *          - 30-day stale | action: move to archive (?) | would need to implement ghosted status
     */
-    const filtered_apps = applications.filter((app) => {
-        // no filter for now
-        return app
-    })
+    const filtered_apps = getStaleAppliedApplications(applications, 14);
 
     return (
         <Card className="w-full h-full">
             <CardHeader className="flex flex-row justify-between w-full">
                 <CardTitle> Needs Attention </CardTitle>
-                <Badge> 2 </Badge>
+                <Badge>{filtered_apps.length}</Badge>
             </CardHeader>
             <CardContent className="flex flex-col space-y-2">
                 {filtered_apps.map((app) => {
-                    // const now = new Date();
-                    // const day_count = now.getDate() - app.appliedAt?
                     return (
                         <NeedsAttentionItem
                             key={app._id}
-                            company={app.company}
-                            role={app.role}
-                            status={app.status}
-                        // day_count={app.salaryMax}
+                            application={app}
                         />
                     )
                 })}
@@ -61,21 +89,47 @@ export function NeedsAttention({ applications }: NeedsAttentionProps) {
 }
 
 interface NeedsAttentionItemProps {
-    company: string,
-    role: string,
-    status: string
-    day_count?: string
+    application: NeedsAttentionApp;
 }
 
-function NeedsAttentionItem({ company, day_count, role, status }: NeedsAttentionItemProps) {
+function NeedsAttentionItem({ application }: NeedsAttentionItemProps) {
+    const { company, role, status, day_count } = application;
+    const nudgedAt = true;
     return (
         <Card className="bg-gray-50 border rounded-sm">
-            <CardHeader>
-                <CardTitle>{company}</CardTitle>
-                <CardDescription className="text-xs">{role}</CardDescription>
-                <div className="flex flex-row items-center justify-between text-xs">
-                    <span>{status}</span>
-                    <span>{day_count ?? 'day_count missing'}</span>
+            <CardHeader className="flex flex-col w-full">
+                {/* Top row */}
+                <div className="flex flex-row w-full items-start justify-between">
+                    <span>
+                        <CardTitle>{company}</CardTitle>
+                        <CardDescription className="text-xs">{role}</CardDescription>
+                    </span>
+                    <span>
+                        {nudgedAt === null ? (
+                            <CardAction>
+                                <Button size={"xs"}>
+                                    Mark as nudged
+                                </Button>
+                            </CardAction>
+                        ) : (
+                            <Badge>
+                                Nudged
+                            </Badge>
+                        )}
+                    </span>
+                </div>
+                {/* Bottom Row */}
+                <div className="flex flex-row w-full items-center justify-between">
+                    <div className="flex flex-row w-full items-center justify-between text-xs">
+                        <span>{status.charAt(0).toLocaleUpperCase() + status.slice(1)}</span>
+                        <span>
+                            {
+                                day_count
+                                    ? <span>{`${day_count} days ago`}</span>
+                                    : "?? days ago"
+                            }
+                        </span>
+                    </div>
                 </div>
             </CardHeader>
         </Card>
