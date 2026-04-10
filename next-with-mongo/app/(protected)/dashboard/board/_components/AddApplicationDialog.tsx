@@ -349,6 +349,54 @@ export function AddApplicationDialog() {
                         </div>
                     </FieldGroup>
 
+                    {watched_status === "applied" && (
+                        <FieldGroup>
+                            <legend className="text-sm font-semibold text-foreground">Assessment</legend>
+                            {/* assessmentStatus dropdown */}
+                            {/* assessmentDeadline date picker */}
+                        </FieldGroup>
+                    )}
+
+                    {watched_status === "interview" && (
+                        <FieldGroup>
+                            <legend className="text-sm font-semibold text-foreground">Interview Tracking</legend>
+                            {/* lastInterviewAt date picker */}
+                            {/* nextInterviewAt date picker */}
+                            {/* thankYouEmailSent checkbox */}
+                            {/* assessmentStatus dropdown */}
+                            {/* assessmentDeadline date picker */}
+                        </FieldGroup>
+                    )}
+
+                    {watched_status === "offer" && (
+                        <FieldGroup>
+                            <legend className="text-sm font-semibold text-foreground">Offer Details</legend>
+                            {/* offerDeadline date picker */}
+                            <Controller
+                                name="offerDeadline"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="offerDeadline">Offer Deadline</FieldLabel>
+                                        <Input
+                                            {...field}
+                                            id="offerDeadline"
+                                            type="date"
+                                            aria-invalid={fieldState.invalid}
+                                            value={
+                                                field.value instanceof Date && !isNaN(field.value.getTime())
+                                                    ? field.value.toISOString().split('T')[0]
+                                                    : ''
+                                            }
+                                            onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                                        />
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </Field>
+                                )}
+                            />
+                        </FieldGroup>
+                    )}
+
                     <Separator />
 
                     {/* 4. Additional Notes */}

@@ -33,6 +33,17 @@ const applicationStatusSchema = z
     path: ["appliedAt"],
   });
 
+const statusConditionalSchema = z.object({
+  assessmentStatus: z
+    .enum(["none", "pending", "completed", "missed"])
+    .optional(),
+  assessmentDeadline: z.union([z.date(), z.null()]).optional(),
+  nextInterviewAt: z.union([z.date(), z.null()]).optional(),
+  lastInterviewAt: z.union([z.date(), z.null()]).optional(),
+  thankYouEmailSent: z.boolean().optional(),
+  offerDeadline: z.union([z.date(), z.null()]).optional(),
+});
+
 const additionalSchema = z.object({
   notes: z.string().max(5000).optional(),
 });
@@ -43,6 +54,7 @@ export const fullFormSchema = z
     ...basicJobInfoSchema.shape,
     ...jobDetailsSchema.shape,
     ...applicationStatusSchema.shape,
+    ...statusConditionalSchema.shape,
     ...additionalSchema.shape,
   })
   .superRefine((data, ctx) => {
@@ -53,6 +65,30 @@ export const fullFormSchema = z
         code: "custom",
         message: "Max salary must be >= min salary",
         path: ["salaryMax"],
+      });
+    }
+
+    if (
+      data.status === "applied" &&
+      data.assessmentDeadline &&
+      data.assessmentDeadline < new Date()
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Assessment deadline must be in the future",
+        path: ["assessmentDeadline"],
+      });
+    }
+
+    if (
+      data.status === "offer" &&
+      data.offerDeadline &&
+      data.offerDeadline < new Date()
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Offer deadline must be in the future",
+        path: ["offerDeadline"],
       });
     }
     if (data.status !== "wishlist" && !data.appliedAt) {
