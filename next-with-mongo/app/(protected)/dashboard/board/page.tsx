@@ -6,24 +6,10 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import { Button } from '@/components/ui/button';
 import { FolderOpen } from 'lucide-react';
 import { getApplications } from "@/lib/applications"
-import { decodeJwt } from "jose";
-import { redirect } from 'next/navigation';
 import { getAuthContext } from '@/lib/auth';
 
 
 export default async function BoardPage() {
-
-    // const cookieStore = await cookies();
-    // const headersList = await headers();
-    // let token = headersList.get("Authorization")?.split(" ")[1];
-    // if (!token) {
-    //     token = cookieStore.get("accessToken")?.value
-    // }
-    // const { sub: userId } = decodeJwt(token!) 
-
-    // if (!token || !userId) {
-    //     redirect('/login');
-    // }
     const { token, userId } = await getAuthContext(); // handles all edge cases
     const data = await getApplications(userId, token)
     const applications: Application[] = data.data.applications;

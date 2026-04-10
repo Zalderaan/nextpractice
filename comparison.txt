@@ -1,0 +1,485 @@
+diff --git a/api/src/middleware/authCheck.ts b/api/src/middleware/authCheck.ts
+index 94821a5..01b5e60 100644
+--- a/api/src/middleware/authCheck.ts
++++ b/api/src/middleware/authCheck.ts
+@@ -6,13 +6,13 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
+     // const allHeaders = req.headers;
+     // console.log("All headers: ", allHeaders);
+     const authHeader = req.headers.authorization;
+-    console.log("This is authHeader: ", authHeader)
++    // console.log("This is authHeader: ", authHeader)
+     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+         return next(makeAppError('Access token missing', 401));
+     }
+ 
+     const token = authHeader.split(' ')[1];
+-    console.log("This is token: ", token);
++    // console.log("This is token: ", token);
+     try {
+         const decoded = verifyAccessToken(token);
+         // ! NOT TYPE SAFE
+diff --git a/api/src/middleware/validate.ts b/api/src/middleware/validate.ts
+index d5283b3..8bdda35 100644
+--- a/api/src/middleware/validate.ts
++++ b/api/src/middleware/validate.ts
+@@ -13,7 +13,7 @@ export const validate = (schemas: Schemas) => {
+     return (req: Request, res: Response, next: NextFunction): void => {
+         try {
+             if (schemas.body) {
+-                console.log("This is req.body: ", req.body)
++                // console.log("This is req.body: ", req.body)
+                 req.body = schemas.body.parse(req.body);
+             }
+ 
+diff --git a/api/src/modules/applications/application.controller.ts b/api/src/modules/applications/application.controller.ts
+index 35d57f5..4c032e6 100644
+--- a/api/src/modules/applications/application.controller.ts
++++ b/api/src/modules/applications/application.controller.ts
+@@ -20,8 +20,8 @@ export class ApplicationController {
+ 
+       // ! NOT TYPE SAFE
+       const input = req.body;
+-      console.log("received input in ApplicationController: ", input)
+-      console.log("This is input from req.body: ", input);
++      // console.log("received input in ApplicationController: ", input)
++      // console.log("This is input from req.body: ", input);
+       if (!input || Object.keys(input).length === 0)
+         throw makeAppError("Missing application data", 400);
+ 
+@@ -70,8 +70,8 @@ export class ApplicationController {
+ 
+       const appId = req.params.id as string;
+ 
+-      console.log(`This is userId: ${userId}`);
+-      console.log(`This is appId: ${appId}`);
++      // console.log(`This is userId: ${userId}`);
++      // console.log(`This is appId: ${appId}`);
+ 
+       if (!appId) throw makeAppError("Application not found", 404);
+ 
+@@ -82,7 +82,7 @@ export class ApplicationController {
+         userId,
+       );
+ 
+-      console.log(`This is application: ${application} `);
++      // console.log(`This is application: ${application} `);
+ 
+       res.status(200).json({
+         success: true,
+@@ -136,7 +136,6 @@ export class ApplicationController {
+     next: NextFunction,
+   ) {
+     try {
+-      console.log('updateApplicationStatus called!');
+       const user = (req as any).user;
+       const userId = user?.sub;
+       if (!userId) throw makeAppError("Unauthorized", 401);
+@@ -145,7 +144,6 @@ export class ApplicationController {
+       if (!appId) throw makeAppError("Application not found", 404);
+ 
+       const newStatusAndOrder = req.body as MoveApplicationInput;
+-      console.log("Received from ctrlr: ", newStatusAndOrder)
+ 
+       const updated_application =
+         await ApplicationService.changeApplicationStatus(
+@@ -154,8 +152,6 @@ export class ApplicationController {
+           newStatusAndOrder,
+         );
+ 
+-      console.log('This is updated_application: ', updated_application)
+-
+       if (!updated_application)
+         throw makeAppError(
+           "Application not found or could not be updated",
+@@ -193,8 +189,6 @@ export class ApplicationController {
+         userId,
+       );
+ 
+-      console.log(`This is application: ${application} `);
+-
+       res.status(200).json({
+         success: true,
+         message: "Application fetched successfully",
+diff --git a/api/src/modules/applications/application.service.ts b/api/src/modules/applications/application.service.ts
+index a02b3cb..725b942 100644
+--- a/api/src/modules/applications/application.service.ts
++++ b/api/src/modules/applications/application.service.ts
+@@ -20,7 +20,7 @@ export class ApplicationService {
+     userId: string,
+     payload: CreateApplicationInput,
+   ) {
+-    console.log("Payload in createApplication: ", payload);
++    // console.log("Payload in createApplication: ", payload);
+     const normalizedUserId = new Types.ObjectId(userId);
+     const targetStatus = payload.status ?? "wishlist";
+ 
+@@ -76,7 +76,6 @@ export class ApplicationService {
+     userId: string,
+     moveApplicationData: MoveApplicationInput,
+   ) {
+-    console.log('changeApplicationStatus called!')
+     const normalizedUserId = new Types.ObjectId(userId);
+     const changedApplication = await Application.findOneAndUpdate(
+       { _id: appId, userId: normalizedUserId },
+diff --git a/api/src/modules/auth/user.controller.ts b/api/src/modules/auth/user.controller.ts
+index 8b30c32..bd44970 100644
+--- a/api/src/modules/auth/user.controller.ts
++++ b/api/src/modules/auth/user.controller.ts
+@@ -8,7 +8,7 @@ import { makeAppError } from "../../middleware/errorHandler";
+ import { JwtPayload } from "jsonwebtoken";
+ 
+ const isProduction = process.env.NODE_ENV === "production";
+-console.log("from user.controller, this is isProduction: ", isProduction);
++// console.log("from user.controller, this is isProduction: ", isProduction);
+ const refreshTokenMaxAgeMs = 7 * 24 * 60 * 60 * 1000; // 7 days (in milliseconds)
+ const accessTokenMaxAgeMs = 30 * 60 * 1000; // 30 minutes;
+ // const accessTokenMaxAgeMs = 15 * 1000 // 15 seconds; // ! FOR DEBUG ONLY
+@@ -73,10 +73,10 @@ export class UserController {
+ 
+   static async refreshTokens(req: Request, res: Response, next: NextFunction) {
+     try {
+-      console.log("refresh token hit!");
++      // console.log("refresh token hit!");
+       // read cookie
+       const refresh_cookie = req.cookies?.refreshToken;
+-      console.log("refresh_cookie: ", refresh_cookie);
++      // console.log("refresh_cookie: ", refresh_cookie);
+ 
+       // no cookie, return 401
+       if (!refresh_cookie) {
+diff --git a/next-with-mongo/app/(protected)/dashboard/_components/DashboardHeader.tsx b/next-with-mongo/app/(protected)/dashboard/_components/DashboardHeader.tsx
+index ff687c9..3c9eb02 100644
+--- a/next-with-mongo/app/(protected)/dashboard/_components/DashboardHeader.tsx
++++ b/next-with-mongo/app/(protected)/dashboard/_components/DashboardHeader.tsx
+@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
+ export function DashboardHeader() {
+     const pathname = usePathname();
+     const { user } = useAuthStore();
+-    console.log("this is user: ", user)
++    // console.log("this is user: ", user)
+ 
+     // Define page data with title and description for each route
+     const pageData = {
+diff --git a/next-with-mongo/app/(protected)/dashboard/applications/page.tsx b/next-with-mongo/app/(protected)/dashboard/applications/page.tsx
+index 774797e..8adfd86 100644
+--- a/next-with-mongo/app/(protected)/dashboard/applications/page.tsx
++++ b/next-with-mongo/app/(protected)/dashboard/applications/page.tsx
+@@ -1,31 +1,23 @@
+ import { cookies, headers } from 'next/headers';
+ import {ApplicationsPageHeader} from "@/app/(protected)/dashboard/applications/_components/ApplicationsPageHeader"
+ import { ApplicationsPageClient } from './_components/ApplicationsPageClient';
++import { getApplications } from '@/lib/applications';
++import { decodeJwt } from 'jose';
++import { redirect } from 'next/navigation';
+ 
+ export default async function ApplicationsPage() {
+-    const NEXT_PUBLIC_PROTECTED_API_URL = process.env.NEXT_PUBLIC_PROTECTED_API_URL
+-
+     const cookieStore = await cookies();
+     const headersList = await headers();
+     let token = headersList.get("Authorization")?.split(" ")[1];
+-    if (!token) {
+-        token = cookieStore.get("accessToken")?.value
+-    }
+-    const res = await fetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/applications`, {
+-        method: 'GET',
+-        headers: {
+-            Authorization: `Bearer ${token}`,
+-            'Content-Type': 'application/json',
+-        },
+-        // Optional: cache control if data changes frequently
+-        cache: 'no-store'
+-    });
++    if (!token) token = cookieStore.get("accessToken")?.value
++
++    const {sub: userId} = decodeJwt(token!)
+ 
+-    if (!res.ok) {
+-        console.error("Error fetching applications! MORE LOGGING ERRORS NEEDED HERE")
++    if (!token || !userId) {
++        redirect('/login');
+     }
+ 
+-    const data = await res.json();
++    const data = await getApplications(userId, token)
+     const applications = data.data.applications;
+ 
+     return (
+diff --git a/next-with-mongo/app/(protected)/dashboard/board/_components/ApplicationDetailsSheet.tsx b/next-with-mongo/app/(protected)/dashboard/board/_components/ApplicationDetailsSheet.tsx
+index f805b83..ed63a43 100644
+--- a/next-with-mongo/app/(protected)/dashboard/board/_components/ApplicationDetailsSheet.tsx
++++ b/next-with-mongo/app/(protected)/dashboard/board/_components/ApplicationDetailsSheet.tsx
+@@ -95,7 +95,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
+     const isLocationRequired = watched_worktype === 'onsite' || watched_worktype === 'hybrid';
+ 
+     async function onSubmit(data: z.infer<typeof fullFormSchema>) {
+-        console.log("Data submitted: ", data);
++        // console.log("Data submitted: ", data);
+         const _id = selectedApp?._id;
+         if (!_id) {
+             alert("No application selected to delete.");
+diff --git a/next-with-mongo/app/(protected)/dashboard/board/actions.ts b/next-with-mongo/app/(protected)/dashboard/board/actions.ts
+index f585210..bdd213a 100644
+--- a/next-with-mongo/app/(protected)/dashboard/board/actions.ts
++++ b/next-with-mongo/app/(protected)/dashboard/board/actions.ts
+@@ -54,7 +54,6 @@ export async function updateApplicationStatusAction(
+     newStatus: string;
+   },
+ ) {
+-  console.log("calling update!")
+ 
+   const cookieStore = await cookies();
+   const headersList = await headers();
+diff --git a/next-with-mongo/app/(protected)/dashboard/board/loading.tsx b/next-with-mongo/app/(protected)/dashboard/board/loading.tsx
+new file mode 100644
+index 0000000..86b88cd
+--- /dev/null
++++ b/next-with-mongo/app/(protected)/dashboard/board/loading.tsx
+@@ -0,0 +1,7 @@
++export default function LoadingBoardPage() {
++    return (
++        <>
++            loading
++        </>
++    )
++}
+\ No newline at end of file
+diff --git a/next-with-mongo/app/(protected)/dashboard/board/page.tsx b/next-with-mongo/app/(protected)/dashboard/board/page.tsx
+index 8a9778a..db28f17 100644
+--- a/next-with-mongo/app/(protected)/dashboard/board/page.tsx
++++ b/next-with-mongo/app/(protected)/dashboard/board/page.tsx
+@@ -4,11 +4,13 @@ import { cookies, headers } from 'next/headers';
+ import BoardView from './_components/BoardView';
+ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+ import { Button } from '@/components/ui/button';
+-import { FolderOpen, Icon } from 'lucide-react';
++import { FolderOpen } from 'lucide-react';
++import { getApplications } from "@/lib/applications"
++import { decodeJwt } from "jose";
++import { redirect } from 'next/navigation';
+ 
+-export default async function BoardPage() {
+ 
+-    const NEXT_PUBLIC_PROTECTED_API_URL = process.env.NEXT_PUBLIC_PROTECTED_API_URL
++export default async function BoardPage() {
+ 
+     const cookieStore = await cookies();
+     const headersList = await headers();
+@@ -16,28 +18,17 @@ export default async function BoardPage() {
+     if (!token) {
+         token = cookieStore.get("accessToken")?.value
+     }
++    const { sub: userId } = decodeJwt(token!) 
+ 
+-    const res = await fetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/applications`, {
+-        method: 'GET',
+-        headers: {
+-            'Content-Type': 'application/json',
+-            Authorization: `Bearer ${token}`, // Attach token here
+-        },
+-        // Optional: cache control if data changes frequently
+-        cache: 'no-store'
+-    })
+-
+-    if (!res.ok) {
+-        console.error("Error fetching applications! MORE LOGGING ERRORS NEEDED HERE")
++    if (!token || !userId) {
++        redirect('/login');
+     }
+-
+-    const data = await res.json();
++    
++    const data = await getApplications(userId, token)
+     const applications: Application[] = data.data.applications;
+ 
+     const statuses = ['wishlist', 'applied', 'interview', 'offer', 'rejected'];
+ 
+-    console.log("This is applications: ", applications)
+-
+     return (
+         <main className="flex min-h-0 h-full flex-1 flex-col">
+             <BoardPageHeader />
+diff --git a/next-with-mongo/app/(protected)/dashboard/page.tsx b/next-with-mongo/app/(protected)/dashboard/page.tsx
+index 84a4efa..0d3dbeb 100644
+--- a/next-with-mongo/app/(protected)/dashboard/page.tsx
++++ b/next-with-mongo/app/(protected)/dashboard/page.tsx
+@@ -6,23 +6,6 @@ import { Button } from "@/components/ui/button"
+ export default function ProtectedPage() {
+ 
+     const NEXT_PUBLIC_PROTECTED_API_URL = process.env.NEXT_PUBLIC_PROTECTED_API_URL;
+-
+-    // async function testSend() {
+-    //     try {
+-    //         console.log("testSend called");
+-    //         const res = await authedFetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/test_protected`);
+-    //         console.log("Fetch completed, status:", res.status);
+-    //         if (res.ok) {
+-    //             const data = await res.json();
+-    //             console.log("This is data: ", data);
+-    //         } else {
+-    //             console.error("Fetch failed with status:", res.status, res.statusText);
+-    //         }
+-    //     } catch (error) {
+-    //         console.error("Error in testSend:", error);
+-    //     }
+-    // }
+-
+     return (
+         <main className="flex flex-col flex-1 h-full items-center justify-start space-y-2 p-(--dashboard-pages-padding)">
+ 
+diff --git a/next-with-mongo/app/api/auth/login/route.ts b/next-with-mongo/app/api/auth/login/route.ts
+index 466ad62..fc6f0cf 100644
+--- a/next-with-mongo/app/api/auth/login/route.ts
++++ b/next-with-mongo/app/api/auth/login/route.ts
+@@ -4,7 +4,6 @@ const NEXT_PUBLIC_BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
+ 
+ export async function POST(req: Request) {
+     const body = await req.json();
+-    console.log("this is NEXT_public_BASE_api_url: ", NEXT_PUBLIC_BASE_API_URL)
+ 
+     const backendRes = await fetch(`${NEXT_PUBLIC_BASE_API_URL}/login`, {
+         method: "POST",
+diff --git a/next-with-mongo/app/api/auth/logout/route.ts b/next-with-mongo/app/api/auth/logout/route.ts
+index 02e7418..69f3f5e 100644
+--- a/next-with-mongo/app/api/auth/logout/route.ts
++++ b/next-with-mongo/app/api/auth/logout/route.ts
+@@ -23,7 +23,7 @@ export async function POST() {
+       },
+     );
+ 
+-	console.log("This is backendResponse in logout route.ts: ", backendResponse)
++	// console.log("This is backendResponse in logout route.ts: ", backendResponse)
+ 
+     if (!backendResponse.ok) {
+       throw new Error("Backend logout failed");
+diff --git a/next-with-mongo/components/signup-form.tsx b/next-with-mongo/components/signup-form.tsx
+index facc989..495617e 100644
+--- a/next-with-mongo/components/signup-form.tsx
++++ b/next-with-mongo/components/signup-form.tsx
+@@ -75,10 +75,10 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
+         throw new Error(result.message);
+       }
+ 
+-      console.log("signup result: ", result);
++      // console.log("signup result: ", result);
+       toast.success("Sign up successful!")
+       router.push('/login');
+-      console.log("Submitted the following values: ", data);
++      // console.log("Submitted the following values: ", data);
+ 
+     } catch (error) {
+       const message = error instanceof Error ? error.message : `Something went wrong: ${error}`
+diff --git a/next-with-mongo/lib/applications.ts b/next-with-mongo/lib/applications.ts
+new file mode 100644
+index 0000000..494ec07
+--- /dev/null
++++ b/next-with-mongo/lib/applications.ts
+@@ -0,0 +1,44 @@
++/**
++ *  shared util between /board and /applications
++ * lib/applications.ts
++ **/
++
++import { cacheTag, cacheLife } from "next/cache";
++
++const NEXT_PUBLIC_PROTECTED_API_URL = process.env.NEXT_PUBLIC_PROTECTED_API_URL;
++export async function getApplications(userId: string, token: string) {
++  "use cache";
++  cacheTag("applications", `applications-${userId}`);
++  cacheLife("minutes"); // stale: 5min, revalidate: 1min
++
++  const res = await fetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/applications`, {
++    method: "GET",
++    headers: {
++      "Content-Type": "application/json",
++      Authorization: `Bearer ${token}`, // Attach token here
++    },
++    next: { tags: ["applications"] }, // smart caching
++  });
++
++  if (!res.ok) {
++    console.error(
++      "Error fetching applications! MORE LOGGING ERRORS NEEDED HERE",
++    );
++  }
++  return res.json();
++}
++
++// const res = await fetch(`${NEXT_PUBLIC_PROTECTED_API_URL}/applications`, {
++//   method: "GET",
++//   headers: {
++//     "Content-Type": "application/json",
++//     Authorization: `Bearer ${token}`, // Attach token here
++//   },
++//   next: { tags: ["applications"] }, // smart caching
++// });
++
++// if (!res.ok) {
++//   console.error("Error fetching applications! MORE LOGGING ERRORS NEEDED HERE");
++// }
++
++// const data = await res.json();
+diff --git a/next-with-mongo/next.config.ts b/next-with-mongo/next.config.ts
+index 335bbba..3921c82 100644
+--- a/next-with-mongo/next.config.ts
++++ b/next-with-mongo/next.config.ts
+@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
+ 
+ const nextConfig: NextConfig = {
+   /* config options here */
++  cacheComponents: true,
+   images: {
+     remotePatterns: [
+       {
+diff --git a/next-with-mongo/package-lock.json b/next-with-mongo/package-lock.json
+index 97adbe2..e5af19b 100644
+--- a/next-with-mongo/package-lock.json
++++ b/next-with-mongo/package-lock.json
+@@ -1010,9 +1010,9 @@
+       "license": "MIT"
+     },
+     "node_modules/@hono/node-server": {
+-      "version": "1.19.11",
+-      "resolved": "https://registry.npmjs.org/@hono/node-server/-/node-server-1.19.11.tgz",
+-      "integrity": "sha512-dr8/3zEaB+p0D2n/IUrlPF1HZm586qgJNXK1a9fhg/PzdtkK7Ksd5l312tJX2yBuALqDYBlG20QEbayqPyxn+g==",
++      "version": "1.19.13",
++      "resolved": "https://registry.npmjs.org/@hono/node-server/-/node-server-1.19.13.tgz",
++      "integrity": "sha512-TsQLe4i2gvoTtrHje625ngThGBySOgSK3Xo2XRYOdqGN1teR8+I7vchQC46uLJi8OF62YTYA3AhSpumtkhsaKQ==",
+       "license": "MIT",
+       "engines": {
+         "node": ">=18.14.1"
+@@ -7231,9 +7231,9 @@
+       }
+     },
+     "node_modules/hono": {
+-      "version": "4.12.8",
+-      "resolved": "https://registry.npmjs.org/hono/-/hono-4.12.8.tgz",
+-      "integrity": "sha512-VJCEvtrezO1IAR+kqEYnxUOoStaQPGrCmX3j4wDTNOcD1uRPFpGlwQUIW8niPuvHXaTUxeOUl5MMDGrl+tmO9A==",
++      "version": "4.12.12",
++      "resolved": "https://registry.npmjs.org/hono/-/hono-4.12.12.tgz",
++      "integrity": "sha512-p1JfQMKaceuCbpJKAPKVqyqviZdS0eUxH9v82oWo1kb9xjQ5wA6iP3FNVAPDFlz5/p7d45lO+BpSk1tuSZMF4Q==",
+       "license": "MIT",
+       "engines": {
+         "node": ">=16.9.0"
+diff --git a/next-with-mongo/proxy.ts b/next-with-mongo/proxy.ts
+index fb736d8..057c7b5 100644
+--- a/next-with-mongo/proxy.ts
++++ b/next-with-mongo/proxy.ts
+@@ -74,7 +74,7 @@ export async function proxy(req: NextRequest) {
+       // 9. Extract the new access token from the JSON body
+       const res_data = await refreshRes.json();
+       const newAccessToken = res_data.data?.accessToken;
+-      console.log("This is the newAccessToken: ", newAccessToken)
++      // console.log("This is the newAccessToken: ", newAccessToken)
+ 
+       if (!newAccessToken) {
+         // Failsafe: Backend responded 200 OK, but JSON is missing the token
+@@ -86,7 +86,7 @@ export async function proxy(req: NextRequest) {
+ 
+       // 10. Inject the new token into the headers for Next.js SSR requests
+       const requestHeaders = new Headers(req.headers);
+-      console.log("newAccessToken in step 10:", newAccessToken)
++      // console.log("newAccessToken in step 10:", newAccessToken)
+       requestHeaders.set("Authorization", `Bearer ${newAccessToken}`);
+       
+       const response = NextResponse.next({
