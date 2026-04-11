@@ -5,27 +5,19 @@ import { useAuthStore } from "@/app/(auth)/auth.stores";
 import { Separator } from "@/components/ui/separator";
 import {
     DropdownMenu,
-    DropdownMenuPortal,
     DropdownMenuTrigger,
     DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuLabel,
     DropdownMenuItem,
-    DropdownMenuCheckboxItem,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
-    DropdownMenuSeparator,
-    DropdownMenuShortcut,
-    DropdownMenuSub,
-    DropdownMenuSubTrigger,
-    DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { LogOutIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function DashboardHeader() {
     const pathname = usePathname();
     const { user } = useAuthStore();
+    const isMobile = useIsMobile();
     // console.log("this is user: ", user)
 
     // Define page data with title and description for each route
@@ -47,9 +39,13 @@ export function DashboardHeader() {
 
     return (
         <header className="flex flex-row items-center justify-between px-(--header-px) border-b bg-sidebar h-(--header-height)">
-            <div className="flex flex-col justify-center space-y-0">
-                <h1 className="text-lg font-semibold">{currentPage.title}</h1>
-                <p className="text-xs">{currentPage.desc}</p>
+
+            <div className="flex flex-row items-center space-x-2">
+                <SidebarTrigger className={isMobile ? "" : "hidden"}/>
+                <div className="flex flex-col justify-center space-y-0">
+                    <h1 className="text-lg font-semibold">{currentPage.title}</h1>
+                    <p className="text-xs">{currentPage.desc}</p>
+                </div>
             </div>
 
             <div className="flex flex-row items-center space-x-4">
