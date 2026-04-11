@@ -3,8 +3,10 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import BoardClient from '../../_components/BoardClient'
 import { KanbanColumn } from './KanbanColumn'
-import { Application, ApplicationStatus } from './ApplicationCard'
-import { ApplicationSheet } from './ApplicationDetailsSheet'
+import { ApplicationStatus } from './ApplicationCard'
+import { Application } from '../types/application.types'
+// import { ApplicationSheet } from './ApplicationDetailsSheet'
+import { ApplicationSheet } from '../../applications/_components/app_sheet/ApplicationSheet'
 import { move } from '@dnd-kit/helpers';
 
 import {

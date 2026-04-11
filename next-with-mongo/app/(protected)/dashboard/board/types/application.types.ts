@@ -45,3 +45,4 @@ export interface Application {
   offerDeadline?: Date | null;
   nudgedAt?: Date | null;
 }
+

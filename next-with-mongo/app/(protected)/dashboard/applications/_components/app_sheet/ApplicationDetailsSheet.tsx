@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Pencil, Link as LinkIcon, X, Save } from 'lucide-react'
 import Link from 'next/link'
 import { deleteApplicationAction, updateApplicationAction } from "@/app/(protected)/dashboard/board/actions"
-import { fullFormSchema } from '../types/application-form.schema';
+import { fullFormSchema } from '../../../board/types/application-form.schema';
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
@@ -17,16 +17,14 @@ import { toast } from 'sonner'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
-import { DeleteApplicationDialog } from './DeleteApplicationDialog';
-import { ApplicationSheetSkeleton } from "./ApplicationSheetSkeleton"
-import { Application } from '../types/application.types';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DeleteApplicationDialog } from '../../../board/_components/DeleteApplicationDialog';
+import { ApplicationSheetSkeleton } from '../../../board/_components/ApplicationSheetSkeleton';
+import { Application } from '../../../board/types/application.types';
 
 // ? TODO LIST:
 // TODO: Loading state (skeleton)
 // TODO: Activity (what changes in the db for this?)
-// * DONE : SheetContent overflow handling (ok na pala)
-// * DONE : Empty date defaulting to 01/01/1970 (fix in dialog date input)
 
 type ApplicationSheetProps = {
     selectedApp: Application | null;

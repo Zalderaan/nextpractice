@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Download, Filter } from "lucide-react";
 import { AddApplicationDialog } from "../../board/_components/AddApplicationDialog";
-import { Application } from "../../board/_components/ApplicationCard";
+import { Application } from "../../board/types/application.types";
 import { toast } from "sonner";
 import ExcelJS from "exceljs";
 
