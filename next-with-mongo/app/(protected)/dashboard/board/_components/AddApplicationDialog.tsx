@@ -49,6 +49,7 @@ export function AddApplicationDialog() {
             appliedAt: null,
             notes: '',
             // === new fields ===
+            nudgedAt: null,
             assessmentStatus: "none",
             assessmentDeadline: null,
             nextInterviewAt: null,
@@ -360,6 +361,29 @@ export function AddApplicationDialog() {
 
                     {watched_status === "applied" && (
                         <FieldGroup>
+                            {/* nudgedAt */}
+                            <Controller
+                                name="nudgedAt"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="nudgedAt"></FieldLabel>
+                                        <Input
+                                            {...field}
+                                            id="nudgedAt"
+                                            type="date"
+                                            aria-invalid={fieldState.invalid}
+                                            value={
+                                                field.value instanceof Date && !isNaN(field.value.getTime())
+                                                    ? field.value.toISOString().split('T')[0]
+                                                    : ''
+                                            }
+                                            onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                                        />
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </Field>
+                                )}
+                            />
                             {/* assessmentStatus dropdown */}
                             <Controller
                                 name="assessmentStatus"

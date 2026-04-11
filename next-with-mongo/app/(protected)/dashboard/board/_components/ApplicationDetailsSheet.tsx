@@ -64,6 +64,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
             appliedAt: appliedAt ? new Date(appliedAt) : null,  // Convert string to Date if present
             notes: notes,
             // === new fields ===
+            nudgedAt: nudgedAt,
             assessmentStatus: assessmentStatus,
             assessmentDeadline: assessmentDeadline,
             nextInterviewAt: nextInterviewAt,
@@ -88,6 +89,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
             appliedAt: appliedAt ? new Date(appliedAt) : undefined,
             notes: notes || '',
             // === new fields ===
+            nudgedAt: nudgedAt,
             assessmentStatus: assessmentStatus,
             assessmentDeadline: assessmentDeadline,
             nextInterviewAt: nextInterviewAt,
@@ -537,6 +539,39 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                     <div id="status-specific-details-container">
                                         {watched_status === "applied" && (
                                             <FieldGroup>
+                                                <div className='space-y-1'>
+                                                    {isEditing ? (
+                                                        <Controller
+                                                            name="nudgedAt"
+                                                            control={control}
+                                                            render={({ field, fieldState }) => (
+                                                                <Field data-invalid={fieldState.invalid}>
+                                                                    <FieldLabel htmlFor="nudgedAt">Last nudged</FieldLabel>
+                                                                    <Input
+                                                                        {...field}
+                                                                        id="nudgedAt"
+                                                                        type="date"
+                                                                        aria-invalid={fieldState.invalid}
+                                                                        value={
+                                                                            field.value instanceof Date && !isNaN(field.value.getTime())
+                                                                                ? field.value.toISOString().split('T')[0]
+                                                                                : ''
+                                                                        }
+                                                                        onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                                                                    />
+                                                                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                                </Field>
+                                                            )}
+                                                        />
+                                                    ) : (
+                                                        <span className="font-medium capitalize">
+                                                            {selectedApp.nudgedAt ? new Date(selectedApp.nudgedAt).toLocaleDateString()
+                                                                : "Not specified"}
+                                                        </span>
+                                                    )}
+
+                                                </div>
+
                                                 <div className="space-y-1">
                                                     <span className="text-muted-foreground block">Assessment Status</span>
                                                     {isEditing ? (

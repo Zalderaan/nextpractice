@@ -34,6 +34,7 @@ const applicationStatusSchema = z
   });
 
 const statusConditionalSchema = z.object({
+  nudgedAt: z.union([z.date(), z.null()]).optional(),
   assessmentStatus: z
     .enum(["none", "pending", "completed", "missed"])
     .optional(),

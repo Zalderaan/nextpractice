@@ -121,7 +121,8 @@ function NeedsAttentionItem({ application }: NeedsAttentionItemProps) {
                 {/* Bottom Row */}
                 <div className="flex flex-row w-full items-center justify-between">
                     <div className="flex flex-row w-full items-center justify-between text-xs">
-                        <span>{status.charAt(0).toLocaleUpperCase() + status.slice(1)}</span>
+                        {/* <span className="capitalize">{status.charAt(0).toLocaleUpperCase() + status.slice(1)}</span> */}
+                        <span className="capitalize">{status}</span>
                         <span>
                             {
                                 day_count
