@@ -31,6 +31,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { createApplicationAction } from "../actions";
 import { fullFormSchema } from "../types/application-form.schema";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function AddApplicationDialog() {
     const fullAddApplicationForm = useForm<z.infer<typeof fullFormSchema>>({
@@ -46,7 +47,14 @@ export function AddApplicationDialog() {
             status: 'wishlist',  // Matches schema default
             priority: 'medium',  // Matches schema default
             appliedAt: null,
-            notes: ''
+            notes: '',
+            // === new fields ===
+            assessmentStatus: "none",
+            assessmentDeadline: null,
+            nextInterviewAt: null,
+            lastInterviewAt: null,
+            thankYouEmailSent: false,
+            offerDeadline: null
         }
     });
 
@@ -119,6 +127,7 @@ export function AddApplicationDialog() {
                                     </Field>
                                 )}
                             />
+
                             <Controller
                                 name="role"
                                 control={control}
@@ -404,14 +413,14 @@ export function AddApplicationDialog() {
                             <legend className="text-sm font-semibold text-foreground">Interview Tracking</legend>
                             {/* lastInterviewAt date picker */}
                             <Controller
-                                name="assessmentDeadline"
+                                name="lastInterviewAt"
                                 control={control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor="assessmentDeadline">Assessment Deadline</FieldLabel>
+                                        <FieldLabel htmlFor="lastInterviewAt">Last Interview</FieldLabel>
                                         <Input
                                             {...field}
-                                            id="assessmentDeadline"
+                                            id="lastInterviewAt"
                                             type="date"
                                             aria-invalid={fieldState.invalid}
                                             value={
@@ -428,14 +437,14 @@ export function AddApplicationDialog() {
 
                             {/* nextInterviewAt date picker */}
                             <Controller
-                                name="assessmentDeadline"
+                                name="nextInterviewAt"
                                 control={control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor="assessmentDeadline">Assessment Deadline</FieldLabel>
+                                        <FieldLabel htmlFor="nextInterviewAt">Next Interview</FieldLabel>
                                         <Input
                                             {...field}
-                                            id="assessmentDeadline"
+                                            id="nextInterviewAt"
                                             type="date"
                                             aria-invalid={fieldState.invalid}
                                             value={
@@ -451,55 +460,18 @@ export function AddApplicationDialog() {
                             />
 
                             {/* thankYouEmailSent checkbox */}
-
-                            {/* assessmentStatus dropdown */}
                             <Controller
-                                name="status"
+                                name="thankYouEmailSent"
                                 control={control}
                                 render={({ field, fieldState }) => (
-                                    <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor="status">Status {isApplyDateRequired && (<span className="text-red-500">*</span>)}</FieldLabel>
-                                        <Select
-                                            onValueChange={(value) => {
-                                                const previousStatus = field.value;
-                                                field.onChange(value);
-
-                                                const appliedAt = getValues('appliedAt');
-
-                                                if (previousStatus === 'wishlist' && value !== 'wishlist' && !appliedAt) {
-                                                    setValue('appliedAt', new Date(), {
-                                                        shouldDirty: true,
-                                                        shouldValidate: true,
-                                                    });
-                                                }
-
-                                                // clear date if setting it as wishlist again
-                                                if (previousStatus !== 'wishlist' && value === 'wishlist') {
-                                                    setValue('appliedAt', null, {
-                                                        shouldDirty: true,
-                                                        shouldValidate: true,
-                                                    });
-                                                }
-                                            }}
-                                            defaultValue={field.value}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select status" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="wishlist">Wishlist</SelectItem>
-                                                <SelectItem value="applied">Applied</SelectItem>
-                                                <SelectItem value="interview">Interview</SelectItem>
-                                                <SelectItem value="offer">Offer</SelectItem>
-                                                <SelectItem value="rejected">Rejected</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    <Field data-invalid={fieldState.invalid} orientation="horizontal">
+                                        <Checkbox id="ty-email-sent-checkbox" />
+                                        <FieldLabel>Sent "thank you" email</FieldLabel>
                                     </Field>
                                 )}
                             />
 
-                            {/* assessmentDeadline date picker */}
+
                         </FieldGroup>
                     )}
 
@@ -556,9 +528,7 @@ export function AddApplicationDialog() {
                 </form>
 
                 <DialogFooter>
-                    <DialogClose asChild>
-                        <Button type="reset" form="add-application-form" onClick={() => reset()} variant="outline">Clear</Button>
-                    </DialogClose>
+                    <Button type="reset" form="add-application-form" onClick={() => reset()} variant="outline">Clear</Button>
                     <Button type="submit" form="add-application-form" disabled={isSubmitting}>
                         {isSubmitting ? <Spinner /> : null}
                         Add Application

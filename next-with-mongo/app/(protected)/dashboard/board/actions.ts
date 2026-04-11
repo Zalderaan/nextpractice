@@ -103,8 +103,9 @@ export async function updateApplicationAction(
       const errorData = await res.json().catch(() => ({}));
       return {
         success: false,
+        status: res.status,
         error:
-          errorData.message || `Failed to update application (${res.status})`,
+          errorData.details || `Failed to update application (${res.status})`,
       };
     }
 

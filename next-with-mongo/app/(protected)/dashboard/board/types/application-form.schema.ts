@@ -24,7 +24,7 @@ const jobDetailsSchema = z
 
 const applicationStatusSchema = z
   .object({
-    status: z.enum(["wishlist", "applied", "interview", "offer", "rejected"]), // Removed .default()
+    status: z.enum(["wishlist", "applied", "interview", "offer", "rejected", "ghosted"]), // Removed .default()
     priority: z.enum(["low", "medium", "high"]), // Removed .default()
     appliedAt: z.union([z.date(), z.null()]).optional(),
   })

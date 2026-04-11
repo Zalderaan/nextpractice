@@ -9,17 +9,18 @@ import { Textarea } from '@/components/ui/textarea'
 import { Pencil, Link as LinkIcon, X, Save } from 'lucide-react'
 import Link from 'next/link'
 import { deleteApplicationAction, updateApplicationAction } from "@/app/(protected)/dashboard/board/actions"
-import { Application } from './ApplicationCard'
 import { fullFormSchema } from '../types/application-form.schema';
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
 import { toast } from 'sonner'
-import { Field, FieldError, FieldLabel } from '@/components/ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
 import { DeleteApplicationDialog } from './DeleteApplicationDialog';
 import { ApplicationSheetSkeleton } from "./ApplicationSheetSkeleton"
+import { Application } from '../types/application.types';
+import { Checkbox } from '@/components/ui/checkbox';
 
 // ? TODO LIST:
 // TODO: Loading state (skeleton)
@@ -42,6 +43,9 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
         company, role, priority,
         jobUrl, workType, location, status, salaryMax, salaryMin,
         notes, appliedAt,
+        nudgedAt, assessmentStatus, assessmentDeadline,
+        lastInterviewAt, nextInterviewAt, thankYouEmailSent,
+        offerDeadline,
         createdAt, updatedAt
     } = selectedApp || {};
 
@@ -58,7 +62,15 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
             status: status,  // Matches schema default
             priority: priority,  // Matches schema default
             appliedAt: appliedAt ? new Date(appliedAt) : null,  // Convert string to Date if present
-            notes: notes
+            notes: notes,
+            // === new fields ===
+            assessmentStatus: assessmentStatus,
+            assessmentDeadline: assessmentDeadline,
+            nextInterviewAt: nextInterviewAt,
+            lastInterviewAt: lastInterviewAt,
+            thankYouEmailSent: thankYouEmailSent,
+            offerDeadline: offerDeadline
+
         }
     })
 
@@ -74,7 +86,14 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
             status: status,
             priority: priority,
             appliedAt: appliedAt ? new Date(appliedAt) : undefined,
-            notes: notes || ''
+            notes: notes || '',
+            // === new fields ===
+            assessmentStatus: assessmentStatus,
+            assessmentDeadline: assessmentDeadline,
+            nextInterviewAt: nextInterviewAt,
+            lastInterviewAt: lastInterviewAt,
+            thankYouEmailSent: thankYouEmailSent,
+            offerDeadline: offerDeadline
         });
     }
 
@@ -109,7 +128,12 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                 setIsRefreshing(true);
                 router.refresh();
             } else {
-                throw new Error(result.error);
+                const details = Array.isArray((result as any).details) ? (result as any).details : [];
+
+                if (details.length > 0) {
+                    const first = details[0];
+                    const msg = first?.message || result.error || "Error updating application";
+                }
             }
         } catch (error) {
             console.error('An error occured while updating the application: ', error)
@@ -166,25 +190,49 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                             </div>
 
                             {isEditing ? (
-                                <Controller
-                                    name="role"
-                                    control={control}
-                                    render={({ field, fieldState }) => (
-                                        <Field data-invalid={fieldState.invalid}>
-                                            <FieldLabel htmlFor="role">Role {isEditing && (<span className='text-red-500'>*</span>)}</FieldLabel>
-                                            <Input
-                                                {...field}
-                                                id="role"
-                                                type="text"
-                                                aria-invalid={fieldState.invalid}
-                                                placeholder="Software Engineer"
-                                                autoComplete="off"
-                                                required
-                                            />
-                                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                        </Field>
-                                    )}
-                                />
+                                <FieldGroup className='flex flex-row items-center justify-between'>
+                                    <Controller
+                                        name="role"
+                                        control={control}
+                                        render={({ field, fieldState }) => (
+                                            <Field data-invalid={fieldState.invalid}>
+                                                <FieldLabel htmlFor="role">Role {isEditing && (<span className='text-red-500'>*</span>)}</FieldLabel>
+                                                <Input
+                                                    {...field}
+                                                    id="role"
+                                                    type="text"
+                                                    aria-invalid={fieldState.invalid}
+                                                    placeholder="Software Engineer"
+                                                    autoComplete="off"
+                                                    required
+                                                />
+                                                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                            </Field>
+                                        )}
+                                    />
+
+                                    <Controller
+                                        name="priority"
+                                        control={control}
+                                        render={({ field, fieldState }) => (
+                                            <Field data-invalid={fieldState.invalid}>
+                                                <FieldLabel htmlFor="role">Priority{isEditing && (<span className='text-red-500'>*</span>)}</FieldLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select priority" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="low">Low</SelectItem>
+                                                        <SelectItem value="medium">Medium</SelectItem>
+                                                        <SelectItem value="high">High</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                            </Field>
+                                        )}
+                                    />
+                                </FieldGroup>
+
                             ) : (
                                 <SheetDescription className="text-base font-medium text-primary/80">
                                     {selectedApp.role}
@@ -476,36 +524,230 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                             }</span>
                                         )}
                                     </div>
-
-                                    <div className="space-y-1" hidden={!isEditing}>
-                                        <span className="text-muted-foreground block">Priority</span>
-                                        {isEditing ? (
-                                            <Controller
-                                                name="priority"
-                                                control={control}
-                                                render={({ field, fieldState }) => (
-                                                    <Field data-invalid={fieldState.invalid}>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Select priority" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                <SelectItem value="low">Low</SelectItem>
-                                                                <SelectItem value="medium">Medium</SelectItem>
-                                                                <SelectItem value="high">High</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                                    </Field>
-                                                )}
-                                            />
-                                        ) : (
-                                            <></>
-                                        )}
-                                    </div>
                                 </div>
                             </section>
 
+                            {/* Status-specific Details */}
+                            {["applied", "interview", "offer"].includes(watched_status ?? "") && (
+                                <section className="space-y-3">
+                                    <h4 className="text-sm font-semibold text-foreground border-b pb-2">
+                                        Status-specific details
+                                    </h4>
+
+                                    <div id="status-specific-details-container">
+                                        {watched_status === "applied" && (
+                                            <FieldGroup>
+                                                <div className="space-y-1">
+                                                    <span className="text-muted-foreground block">Assessment Status</span>
+                                                    {isEditing ? (
+                                                        <Controller
+                                                            name="assessmentStatus"
+                                                            control={control}
+                                                            render={({ field, fieldState }) => (
+                                                                <Field data-invalid={fieldState.invalid}>
+                                                                    <Select
+                                                                        value={field.value ?? "none"}
+                                                                        onValueChange={field.onChange}
+                                                                    >
+                                                                        <SelectTrigger>
+                                                                            <SelectValue placeholder="Select assessment status" />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="none">None</SelectItem>
+                                                                            <SelectItem value="pending">Pending</SelectItem>
+                                                                            <SelectItem value="completed">Completed</SelectItem>
+                                                                            <SelectItem value="missed">Missed</SelectItem>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                                </Field>
+                                                            )}
+                                                        />
+                                                    ) : (
+                                                        <span className="font-medium capitalize">
+                                                            {selectedApp.assessmentStatus || "none"}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <span className="text-muted-foreground block">Assessment Deadline</span>
+                                                    {isEditing ? (
+                                                        <Controller
+                                                            name="assessmentDeadline"
+                                                            control={control}
+                                                            render={({ field, fieldState }) => (
+                                                                <Field data-invalid={fieldState.invalid}>
+                                                                    <Input
+                                                                        {...field}
+                                                                        id="assessmentDeadline"
+                                                                        type="date"
+                                                                        aria-invalid={fieldState.invalid}
+                                                                        value={
+                                                                            field.value instanceof Date && !isNaN(field.value.getTime())
+                                                                                ? field.value.toISOString().split("T")[0]
+                                                                                : ""
+                                                                        }
+                                                                        onChange={(e) =>
+                                                                            field.onChange(e.target.value ? new Date(e.target.value) : null)
+                                                                        }
+                                                                    />
+                                                                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                                </Field>
+                                                            )}
+                                                        />
+                                                    ) : (
+                                                        <span className="font-medium">
+                                                            {selectedApp.assessmentDeadline
+                                                                ? new Date(selectedApp.assessmentDeadline).toLocaleDateString()
+                                                                : "Not specified"}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </FieldGroup>
+                                        )}
+
+                                        {watched_status === "interview" && (
+                                            <FieldGroup>
+                                                <div className="space-y-1">
+                                                    <span className="text-muted-foreground block">Last Interview</span>
+                                                    {isEditing ? (
+                                                        <Controller
+                                                            name="lastInterviewAt"
+                                                            control={control}
+                                                            render={({ field, fieldState }) => (
+                                                                <Field data-invalid={fieldState.invalid}>
+                                                                    <Input
+                                                                        {...field}
+                                                                        id="lastInterviewAt"
+                                                                        type="date"
+                                                                        aria-invalid={fieldState.invalid}
+                                                                        value={
+                                                                            field.value instanceof Date && !isNaN(field.value.getTime())
+                                                                                ? field.value.toISOString().split("T")[0]
+                                                                                : ""
+                                                                        }
+                                                                        onChange={(e) =>
+                                                                            field.onChange(e.target.value ? new Date(e.target.value) : null)
+                                                                        }
+                                                                    />
+                                                                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                                </Field>
+                                                            )}
+                                                        />
+                                                    ) : (
+                                                        <span className="font-medium">
+                                                            {selectedApp.lastInterviewAt
+                                                                ? new Date(selectedApp.lastInterviewAt).toLocaleDateString()
+                                                                : "Not specified"}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <span className="text-muted-foreground block">Next Interview</span>
+                                                    {isEditing ? (
+                                                        <Controller
+                                                            name="nextInterviewAt"
+                                                            control={control}
+                                                            render={({ field, fieldState }) => (
+                                                                <Field data-invalid={fieldState.invalid}>
+                                                                    <Input
+                                                                        {...field}
+                                                                        id="nextInterviewAt"
+                                                                        type="date"
+                                                                        aria-invalid={fieldState.invalid}
+                                                                        value={
+                                                                            field.value instanceof Date && !isNaN(field.value.getTime())
+                                                                                ? field.value.toISOString().split("T")[0]
+                                                                                : ""
+                                                                        }
+                                                                        onChange={(e) =>
+                                                                            field.onChange(e.target.value ? new Date(e.target.value) : null)
+                                                                        }
+                                                                    />
+                                                                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                                </Field>
+                                                            )}
+                                                        />
+                                                    ) : (
+                                                        <span className="font-medium">
+                                                            {selectedApp.nextInterviewAt
+                                                                ? new Date(selectedApp.nextInterviewAt).toLocaleDateString()
+                                                                : "Not specified"}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <span className="text-muted-foreground block">Thank-you Email</span>
+                                                    {isEditing ? (
+                                                        <Controller
+                                                            name="thankYouEmailSent"
+                                                            control={control}
+                                                            render={({ field, fieldState }) => (
+                                                                <Field data-invalid={fieldState.invalid} orientation="horizontal">
+                                                                    <Checkbox
+                                                                        id="ty-email-sent-checkbox"
+                                                                        checked={!!field.value}
+                                                                        onCheckedChange={(checked) => field.onChange(!!checked)}
+                                                                    />
+                                                                    <FieldLabel htmlFor="ty-email-sent-checkbox">
+                                                                        Sent "thank you" email
+                                                                    </FieldLabel>
+                                                                </Field>
+                                                            )}
+                                                        />
+                                                    ) : (
+                                                        <span className="font-medium">
+                                                            {selectedApp.thankYouEmailSent ? "Sent" : "Not sent"}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </FieldGroup>
+                                        )}
+
+                                        {watched_status === "offer" && (
+                                            <FieldGroup>
+                                                <div className="space-y-1">
+                                                    <span className="text-muted-foreground block">Offer Deadline</span>
+                                                    {isEditing ? (
+                                                        <Controller
+                                                            name="offerDeadline"
+                                                            control={control}
+                                                            render={({ field, fieldState }) => (
+                                                                <Field data-invalid={fieldState.invalid}>
+                                                                    <Input
+                                                                        {...field}
+                                                                        id="offerDeadline"
+                                                                        type="date"
+                                                                        aria-invalid={fieldState.invalid}
+                                                                        value={
+                                                                            field.value instanceof Date && !isNaN(field.value.getTime())
+                                                                                ? field.value.toISOString().split("T")[0]
+                                                                                : ""
+                                                                        }
+                                                                        onChange={(e) =>
+                                                                            field.onChange(e.target.value ? new Date(e.target.value) : null)
+                                                                        }
+                                                                    />
+                                                                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                                                </Field>
+                                                            )}
+                                                        />
+                                                    ) : (
+                                                        <span className="font-medium">
+                                                            {selectedApp.offerDeadline
+                                                                ? new Date(selectedApp.offerDeadline).toLocaleDateString()
+                                                                : "Not specified"}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </FieldGroup>
+                                        )}
+                                    </div>
+                                </section>
+                            )}
 
                             {/* Notes Box */}
                             <section className="space-y-3">

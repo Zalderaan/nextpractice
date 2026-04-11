@@ -73,7 +73,6 @@ export function NeedsAttention({ applications }: NeedsAttentionProps) {
             <CardHeader className="flex flex-row justify-between w-full">
                 <CardTitle> Needs Attention </CardTitle>
                 <Badge>{filtered_apps.length}</Badge>
-                <Badge>{filtered_apps.length}</Badge>
             </CardHeader>
             <CardContent className="flex flex-col space-y-2">
                 {filtered_apps.map((app) => {
@@ -131,41 +130,6 @@ function NeedsAttentionItem({ application }: NeedsAttentionItemProps) {
                             }
                         </span>
                     </div>
-                    <CardHeader className="flex flex-col w-full">
-                        {/* Top row */}
-                        <div className="flex flex-row w-full items-start justify-between">
-                            <span>
-                                <CardTitle>{company}</CardTitle>
-                                <CardDescription className="text-xs">{role}</CardDescription>
-                            </span>
-                            <span>
-                                {nudgedAt === null ? (
-                                    <CardAction>
-                                        <Button size={"xs"}>
-                                            Mark as nudged
-                                        </Button>
-                                    </CardAction>
-                                ) : (
-                                    <Badge>
-                                        Nudged
-                                    </Badge>
-                                )}
-                            </span>
-                        </div>
-                        {/* Bottom Row */}
-                        <div className="flex flex-row w-full items-center justify-between">
-                            <div className="flex flex-row w-full items-center justify-between text-xs">
-                                <span>{status.charAt(0).toLocaleUpperCase() + status.slice(1)}</span>
-                                <span>
-                                    {
-                                        day_count
-                                            ? <span>{`${day_count} days ago`}</span>
-                                            : "?? days ago"
-                                    }
-                                </span>
-                            </div>
-                        </div>
-                    </CardHeader>
                 </div>
             </CardHeader>
         </Card>

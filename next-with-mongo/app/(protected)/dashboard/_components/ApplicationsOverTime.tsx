@@ -6,9 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { useDashboardStore } from "../_stores/dashboard.store"
 import { Application } from "../board/types/application.types"
 
-interface ApplicationsOverTimeProps {
-    applications: Application[]
-}
+
 function toValidDate(value: string | Date | null | undefined): Date | null {
     if (!value) return null
     const d = value instanceof Date ? value : new Date(value)
@@ -45,6 +43,11 @@ function groupByMonth(apps: Application[], monthsBack: number) {
 
 const PERIOD_LABEL: Record<number, string> = {
     3: "3m", 6: "6m", 12: "12m", 0: "All",
+}
+
+
+interface ApplicationsOverTimeProps {
+    applications: Application[]
 }
 
 export function ApplicationsOverTime({ applications }: ApplicationsOverTimeProps) {

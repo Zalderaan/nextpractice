@@ -123,13 +123,13 @@ export const createApplicationSchema = z
       });
     }
 
-    if (data.assessmentStatus === "pending" && !data.assessmentDeadline) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["assessmentDeadline"],
-        message: "Assessment deadline is required when assessment is pending",
-      });
-    }
+    // if (data.assessmentStatus === "pending" && !data.assessmentDeadline) {
+    //   ctx.addIssue({
+    //     code: "custom",
+    //     path: ["assessmentDeadline"],
+    //     message: "Assessment deadline is required when assessment is pending",
+    //   });
+    // }
 
     if (
       data.lastInterviewAt &&
@@ -143,13 +143,13 @@ export const createApplicationSchema = z
       });
     }
 
-    if (data.status === "offer" && !data.offerDeadline) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["offerDeadline"],
-        message: "Offer deadline is required when status is offer",
-      });
-    }
+    // if (data.status === "offer" && !data.offerDeadline) {
+    //   ctx.addIssue({
+    //     code: "custom",
+    //     path: ["offerDeadline"],
+    //     message: "Offer deadline is required when status is offer",
+    //   });
+    // }
 
     if (data.status === "wishlist" && data.offerDeadline) {
       ctx.addIssue({
