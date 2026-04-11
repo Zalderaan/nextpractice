@@ -4,6 +4,7 @@ import {
   APPLICATION_STATUSES,
   PRIORITIES,
   WORK_TYPES,
+  ASSESSMENT_STATUSES,
 } from "./Application.model";
 
 // ---------- helpers ----------
@@ -75,6 +76,14 @@ export const createApplicationSchema = z
     appliedAt: z.coerce.date().nullable().optional(),
 
     order: z.coerce.number().int().min(0).optional(),
+
+    assessmentStatus: z.enum(ASSESSMENT_STATUSES).optional().default("none"),
+    assessmentDeadline: z.coerce.date().nullable().optional(),
+    nextInterviewAt: z.coerce.date().nullable().optional(),
+    lastInterviewAt: z.coerce.date().nullable().optional(),
+    thankYouEmailSent: z.boolean().optional().default(false),
+    offerDeadline: z.coerce.date().nullable().optional(),
+    nudgedAt: z.coerce.date().nullable().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.salaryMin !== undefined && data.salaryMin < 0) {
@@ -103,6 +112,50 @@ export const createApplicationSchema = z
         path: ["salaryMax"],
         message:
           "Salary maximum must be greater than or equal to salary minimum",
+      });
+    }
+
+    if (data.status !== "wishlist" && !data.appliedAt) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["appliedAt"],
+        message: "Applied date is required once status is not wishlist",
+      });
+    }
+
+    if (data.assessmentStatus === "pending" && !data.assessmentDeadline) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["assessmentDeadline"],
+        message: "Assessment deadline is required when assessment is pending",
+      });
+    }
+
+    if (
+      data.lastInterviewAt &&
+      data.nextInterviewAt &&
+      data.nextInterviewAt < data.lastInterviewAt
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["nextInterviewAt"],
+        message: "Next interview date must be on or after last interview date",
+      });
+    }
+
+    if (data.status === "offer" && !data.offerDeadline) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["offerDeadline"],
+        message: "Offer deadline is required when status is offer",
+      });
+    }
+
+    if (data.status === "wishlist" && data.offerDeadline) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["offerDeadline"],
+        message: "Offer deadline only applies when status is offer",
       });
     }
   });
@@ -174,26 +227,21 @@ export const updateApplicationSchema = z
 
     appliedAt: z.coerce.date().nullable().optional(),
     order: z.coerce.number().int().min(0).optional(),
+
+    assessmentStatus: z.enum(ASSESSMENT_STATUSES).optional(),
+    assessmentDeadline: z.coerce.date().nullable().optional(),
+    nextInterviewAt: z.coerce.date().nullable().optional(),
+    lastInterviewAt: z.coerce.date().nullable().optional(),
+    thankYouEmailSent: z.boolean().optional(),
+    offerDeadline: z.coerce.date().nullable().optional(),
+    nudgedAt: z.coerce.date().nullable().optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "At least one field must be provided for update",
   })
   .superRefine((data, ctx) => {
-    if (data.salaryMin !== undefined && data.salaryMin < 0) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["salaryMin"],
-        message: "Salary minimum must be 0 or greater",
-      });
-    }
-
-    if (data.salaryMax !== undefined && data.salaryMax < 0) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["salaryMax"],
-        message: "Salary maximum must be 0 or greater",
-      });
-    }
+    const has = (key: keyof typeof data) =>
+      Object.prototype.hasOwnProperty.call(data, key);
 
     if (
       data.salaryMin !== undefined &&
@@ -207,12 +255,58 @@ export const updateApplicationSchema = z
           "Salary maximum must be greater than or equal to salary minimum",
       });
     }
+
+    if (
+      data.nextInterviewAt &&
+      data.lastInterviewAt &&
+      data.nextInterviewAt < data.lastInterviewAt
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["nextInterviewAt"],
+        message: "Next interview date must be on or after last interview date",
+      });
+    }
+
+    if (
+      data.assessmentStatus === "pending" &&
+      has("assessmentStatus") &&
+      !has("assessmentDeadline")
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["assessmentDeadline"],
+        message:
+          "Include assessment deadline when setting assessmentStatus to pending",
+      });
+    }
+
+    if (data.status === "offer" && has("status") && !has("offerDeadline")) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["offerDeadline"],
+        message: "Include offer deadline when setting status to offer",
+      });
+    }
+
+    if (
+      has("offerDeadline") &&
+      has("status") &&
+      data.status !== "offer" &&
+      data.offerDeadline
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["offerDeadline"],
+        message: "Offer deadline only applies when status is offer",
+      });
+    }
   });
 
 // ---------- move (kanban drag/drop persistence) ----------
 export const moveApplicationSchema = z.object({
   newStatus: z.enum(APPLICATION_STATUSES),
-  newOrder: z.coerce.number().min(0)
+  newOrder: z.coerce.number().min(0),
 });
 
 // ---------- inferred types (only reflects pure forms) ----------

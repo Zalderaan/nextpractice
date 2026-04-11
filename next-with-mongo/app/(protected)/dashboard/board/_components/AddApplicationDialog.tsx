@@ -349,6 +349,188 @@ export function AddApplicationDialog() {
                         </div>
                     </FieldGroup>
 
+                    {watched_status === "applied" && (
+                        <FieldGroup>
+                            {/* assessmentStatus dropdown */}
+                            <Controller
+                                name="assessmentStatus"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="assessmentStatus">Assessment Status</FieldLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select assessment status" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="none">None</SelectItem>
+                                                <SelectItem value="pending">Pending</SelectItem>
+                                                <SelectItem value="passed">Passed</SelectItem>
+                                                <SelectItem value="missed">Missed</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </Field>
+                                )}
+                            />
+                            {/* assessmentDeadline date picker */}
+                            <Controller
+                                name="assessmentDeadline"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="assessmentDeadline">Assessment Deadline</FieldLabel>
+                                        <Input
+                                            {...field}
+                                            id="assessmentDeadline"
+                                            type="date"
+                                            aria-invalid={fieldState.invalid}
+                                            value={
+                                                field.value instanceof Date && !isNaN(field.value.getTime())
+                                                    ? field.value.toISOString().split('T')[0]
+                                                    : ''
+                                            }
+                                            onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                                        />
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </Field>
+                                )}
+                            />
+                        </FieldGroup>
+                    )}
+
+                    {watched_status === "interview" && (
+                        <FieldGroup>
+                            <legend className="text-sm font-semibold text-foreground">Interview Tracking</legend>
+                            {/* lastInterviewAt date picker */}
+                            <Controller
+                                name="assessmentDeadline"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="assessmentDeadline">Assessment Deadline</FieldLabel>
+                                        <Input
+                                            {...field}
+                                            id="assessmentDeadline"
+                                            type="date"
+                                            aria-invalid={fieldState.invalid}
+                                            value={
+                                                field.value instanceof Date && !isNaN(field.value.getTime())
+                                                    ? field.value.toISOString().split('T')[0]
+                                                    : ''
+                                            }
+                                            onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                                        />
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </Field>
+                                )}
+                            />
+
+                            {/* nextInterviewAt date picker */}
+                            <Controller
+                                name="assessmentDeadline"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="assessmentDeadline">Assessment Deadline</FieldLabel>
+                                        <Input
+                                            {...field}
+                                            id="assessmentDeadline"
+                                            type="date"
+                                            aria-invalid={fieldState.invalid}
+                                            value={
+                                                field.value instanceof Date && !isNaN(field.value.getTime())
+                                                    ? field.value.toISOString().split('T')[0]
+                                                    : ''
+                                            }
+                                            onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                                        />
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </Field>
+                                )}
+                            />
+
+                            {/* thankYouEmailSent checkbox */}
+
+                            {/* assessmentStatus dropdown */}
+                            <Controller
+                                name="status"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="status">Status {isApplyDateRequired && (<span className="text-red-500">*</span>)}</FieldLabel>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                const previousStatus = field.value;
+                                                field.onChange(value);
+
+                                                const appliedAt = getValues('appliedAt');
+
+                                                if (previousStatus === 'wishlist' && value !== 'wishlist' && !appliedAt) {
+                                                    setValue('appliedAt', new Date(), {
+                                                        shouldDirty: true,
+                                                        shouldValidate: true,
+                                                    });
+                                                }
+
+                                                // clear date if setting it as wishlist again
+                                                if (previousStatus !== 'wishlist' && value === 'wishlist') {
+                                                    setValue('appliedAt', null, {
+                                                        shouldDirty: true,
+                                                        shouldValidate: true,
+                                                    });
+                                                }
+                                            }}
+                                            defaultValue={field.value}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select status" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="wishlist">Wishlist</SelectItem>
+                                                <SelectItem value="applied">Applied</SelectItem>
+                                                <SelectItem value="interview">Interview</SelectItem>
+                                                <SelectItem value="offer">Offer</SelectItem>
+                                                <SelectItem value="rejected">Rejected</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </Field>
+                                )}
+                            />
+
+                            {/* assessmentDeadline date picker */}
+                        </FieldGroup>
+                    )}
+
+                    {watched_status === "offer" && (
+                        <FieldGroup>
+                            {/* offerDeadline date picker */}
+                            <Controller
+                                name="offerDeadline"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="offerDeadline">Offer Deadline</FieldLabel>
+                                        <Input
+                                            {...field}
+                                            id="offerDeadline"
+                                            type="date"
+                                            aria-invalid={fieldState.invalid}
+                                            value={
+                                                field.value instanceof Date && !isNaN(field.value.getTime())
+                                                    ? field.value.toISOString().split('T')[0]
+                                                    : ''
+                                            }
+                                            onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                                        />
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </Field>
+                                )}
+                            />
+                        </FieldGroup>
+                    )}
+
                     <Separator />
 
                     {/* 4. Additional Notes */}
