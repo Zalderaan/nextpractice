@@ -21,6 +21,7 @@ import { DeleteApplicationDialog } from './DeleteApplicationDialog';
 import { ApplicationSheetSkeleton } from "./ApplicationSheetSkeleton"
 import { Application } from '../types/application.types';
 import { Checkbox } from '@/components/ui/checkbox';
+import next from 'next';
 
 // ? TODO LIST:
 // TODO: Loading state (skeleton)
@@ -64,13 +65,13 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
             appliedAt: appliedAt ? new Date(appliedAt) : null,  // Convert string to Date if present
             notes: notes,
             // === new fields ===
-            nudgedAt: nudgedAt,
+            nudgedAt: nudgedAt ? new Date(nudgedAt) : null,
             assessmentStatus: assessmentStatus,
-            assessmentDeadline: assessmentDeadline,
-            nextInterviewAt: nextInterviewAt,
-            lastInterviewAt: lastInterviewAt,
+            assessmentDeadline: assessmentDeadline ? new Date(assessmentDeadline) : null,
+            nextInterviewAt: nextInterviewAt ? new Date(nextInterviewAt) : null,
+            lastInterviewAt: lastInterviewAt ? new Date(lastInterviewAt) : null,
             thankYouEmailSent: thankYouEmailSent,
-            offerDeadline: offerDeadline
+            offerDeadline: offerDeadline ? new Date(offerDeadline) : null,
 
         }
     })
@@ -89,13 +90,13 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
             appliedAt: appliedAt ? new Date(appliedAt) : undefined,
             notes: notes || '',
             // === new fields ===
-            nudgedAt: nudgedAt,
+            nudgedAt: nudgedAt ? new Date(nudgedAt) : null,
             assessmentStatus: assessmentStatus,
-            assessmentDeadline: assessmentDeadline,
-            nextInterviewAt: nextInterviewAt,
-            lastInterviewAt: lastInterviewAt,
+            assessmentDeadline: assessmentDeadline ? new Date(assessmentDeadline) : null,
+            nextInterviewAt: nextInterviewAt ? new Date(nextInterviewAt) : null,
+            lastInterviewAt: lastInterviewAt ? new Date(lastInterviewAt) : null,
             thankYouEmailSent: thankYouEmailSent,
-            offerDeadline: offerDeadline
+            offerDeadline: offerDeadline ? new Date(offerDeadline) : null,
         });
     }
 
@@ -219,7 +220,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                         render={({ field, fieldState }) => (
                                             <Field data-invalid={fieldState.invalid}>
                                                 <FieldLabel htmlFor="role">Priority{isEditing && (<span className='text-red-500'>*</span>)}</FieldLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <Select onValueChange={field.onChange} value={field.value}>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select priority" />
                                                     </SelectTrigger>
@@ -302,7 +303,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                                                     });
                                                                 }
                                                             }}
-                                                            defaultValue={field.value}
+                                                            value={field.value}
                                                         >
                                                             <SelectTrigger>
                                                                 <SelectValue placeholder="Select status" />
@@ -379,7 +380,7 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                                                 }
                                                             }
                                                             }
-                                                            defaultValue={field.value}
+                                                            value={field.value}
                                                         >
                                                             <SelectTrigger>
                                                                 <SelectValue placeholder="Select work type" />

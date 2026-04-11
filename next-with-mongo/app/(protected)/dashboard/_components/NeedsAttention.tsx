@@ -77,20 +77,6 @@ function getDayCount(appliedAt: Application["appliedAt"], nowMs: number): number
     return Math.max(0, Math.floor((nowMs - ts) / DAY_IN_MS));
 }
 
-function getStaleAppliedApplications(applications: Application[], staleDays: number): NeedsAttentionApp[] {
-    const nowMs = Date.now();
-
-    return applications.flatMap((app) => {
-        if (app.status !== "applied") return [];
-
-        const day_count = getDayCount(app.appliedAt, nowMs);
-        if (day_count === null) return [];
-        if (day_count < staleDays) return [];
-
-        return [{ ...app, day_count }];
-    });
-}
-
 // Type for enriched data needed during filtering
 type NeedsAttentionContext = Application & {
     daysSinceApplied?: number;
@@ -117,12 +103,6 @@ type NeedsAttentionContext = Application & {
  *          - 30-day stale | action: move to archive (?) | would need to implement ghosted status
 */
 
-/**
- * 1. group them into arrays per status
- * 2. filter each array
- * 3. merge the filtered arrays
- */
-
 // Enrich app with computed fields once
 const enrichApp = (app: Application): NeedsAttentionContext => ({
     ...app,
@@ -131,6 +111,44 @@ const enrichApp = (app: Application): NeedsAttentionContext => ({
 });
 
 type AttentionReason = keyof typeof criteria;
+
+const ATTENTION_REASON_META: Record<
+    AttentionReason,
+    { label: string; description?: string }
+> = {
+    assessmentPending: {
+        label: "Assessment pending",
+        description: "Set a deadline or complete the assessment.",
+    },
+    assessmentMissed: {
+        label: "Assessment deadline missed",
+        description: "Follow up or mark outcome.",
+    },
+    upcomingInterview: {
+        label: "Interview coming up",
+        description: "Prepare and confirm schedule.",
+    },
+    thankYouEmailDue: {
+        label: "Send thank-you email",
+        description: "Interview happened recently and email is not sent.",
+    },
+    noCallbackAfterInterview: {
+        label: "No callback after interview",
+        description: "Consider follow-up message.",
+    },
+    expiringOffer: {
+        label: "Offer deadline approaching",
+        description: "Review and respond before deadline.",
+    },
+    staleFourteenDays: {
+        label: "No response for 14+ days",
+        description: "Nudge recruiter.",
+    },
+    staleThirtyDays: {
+        label: "No response for 30+ days",
+        description: "Consider marking as ghosted.",
+    },
+};
 
 const findAttentionReasons = (app: Application): AttentionReason[] => {
     const enriched = enrichApp(app);
@@ -180,7 +198,7 @@ function NeedsAttentionItem({ application, reasons }: NeedsAttentionItemProps) {
                         <div className="flex flex-wrap gap-1 mt-2">
                             {reasons.map((reason) => (
                                 <Badge key={reason} variant="outline" className="text-xs">
-                                    {reason.replace(/([A-Z])/g, " $1").trim()}
+                                    {ATTENTION_REASON_META[reason].label}
                                 </Badge>
                             ))}
                         </div>
