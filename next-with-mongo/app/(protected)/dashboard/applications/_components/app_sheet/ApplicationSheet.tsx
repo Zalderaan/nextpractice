@@ -123,8 +123,6 @@ export function ApplicationSheet({ selectedApp, onClose }: ApplicationSheetProps
                                 isEditing={isEditing}
                                 selectedApp={selectedApp}
                             />
-
-
                         </main>
 
                         <ApplicationSheetFooter

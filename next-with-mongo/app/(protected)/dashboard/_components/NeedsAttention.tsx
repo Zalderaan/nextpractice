@@ -10,6 +10,15 @@ import {
 } from "@/components/ui/card"
 import { Application } from "../board/types/application.types"
 import { Button } from "@/components/ui/button";
+import {
+    Empty,
+    EmptyHeader,
+    EmptyTitle,
+    EmptyDescription,
+    EmptyContent,
+    EmptyMedia,
+} from "@/components/ui/empty";
+import { Megaphone } from "lucide-react";
 
 interface NeedsAttentionProps {
     applications: Application[]
@@ -172,10 +181,14 @@ export function NeedsAttention({ applications }: NeedsAttentionProps) {
                 <CardTitle>Needs Attention</CardTitle>
                 <Badge>{filtered_apps.length}</Badge>
             </CardHeader>
-            <CardContent className="flex flex-col space-y-2">
-                {filtered_apps.map(({ app, reasons }) => (
-                    <NeedsAttentionItem key={app._id} application={app} reasons={reasons} />
-                ))}
+            <CardContent className="flex flex-col h-full space-y-2">
+                {
+                    filtered_apps.length > 0
+                        ? filtered_apps.map(({ app, reasons }) => (
+                            <NeedsAttentionItem key={app._id} application={app} reasons={reasons} />
+                        ))
+                        : <NeedsAttentionEmpty />
+                }
             </CardContent>
         </Card>
     );
@@ -207,4 +220,23 @@ function NeedsAttentionItem({ application, reasons }: NeedsAttentionItemProps) {
             </CardHeader>
         </Card>
     );
+}
+
+//! Tightly coupled with NeedsAttention
+function NeedsAttentionEmpty() {
+    return (
+        <>
+            <Empty className="w-full h-full">
+                <EmptyContent className="flex flex-col h-full items-center justify-center">
+                    <EmptyHeader className="flex flex-col">
+                        <EmptyMedia variant={'icon'}>
+                            <Megaphone />
+                        </EmptyMedia>
+                        <EmptyTitle>No applications require your attention</EmptyTitle>
+                        <EmptyDescription className="text-xs">Your don't have anything in your applications coming up for now. Apply some more!</EmptyDescription>
+                    </EmptyHeader>
+                </EmptyContent>
+            </Empty>
+        </>
+    )
 }
