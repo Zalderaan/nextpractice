@@ -5,6 +5,10 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Rectangle } from 'recharts';
 import { useDashboardStore } from "../_stores/dashboard.store"
 import { Application } from "../board/types/application.types"
+import { Empty, EmptyContent, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
+import { FileChartLine, LinkIcon, Megaphone, SquareArrowOutUpRight, SquareKanban, Table } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 
 function toValidDate(value: string | Date | null | undefined): Date | null {
@@ -90,38 +94,58 @@ export function ApplicationsOverTime({ applications }: ApplicationsOverTimeProps
             </CardHeader>
 
             <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
-                    <BarChart data={data} barCategoryGap="30%">
-                        <XAxis
-                            dataKey="month"
-                            tick={{ fontSize: 11 }}
-                            tickLine={false}
-                            axisLine={false}
-                            interval={globalPeriod === 0 || globalPeriod > 12 ? "preserveStartEnd" : 0}
-                        />
-                        <YAxis
-                            allowDecimals={false}
-                            tick={{ fontSize: 11 }}
-                            tickLine={false}
-                            axisLine={false}
-                            width={24}
-                        />
-                        <Tooltip
-                            cursor={{ fill: "hsl(var(--muted))" }}
-                            content={({ active, payload, label }) => {
-                                if (!active || !payload?.length) return null
-                                return (
-                                    <div className="bg-background border border-border rounded-md px-3 py-2 text-xs shadow-sm">
-                                        <p className="text-muted-foreground mb-0.5">{label}</p>
-                                        <p className="font-medium">{payload[0].value} application{payload[0].value !== 1 ? "s" : ""}</p>
-                                    </div>
-                                )
-                            }}
-                        />
-                        <Bar dataKey="count" shape={renderBarShape} />
-                    </BarChart>
-                </ResponsiveContainer>
+                {data && data.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={200}>
+                        <BarChart data={data} barCategoryGap="30%">
+                            <XAxis
+                                dataKey="month"
+                                tick={{ fontSize: 11 }}
+                                tickLine={false}
+                                axisLine={false}
+                                interval={globalPeriod === 0 || globalPeriod > 12 ? "preserveStartEnd" : 0}
+                            />
+                            <YAxis
+                                allowDecimals={false}
+                                tick={{ fontSize: 11 }}
+                                tickLine={false}
+                                axisLine={false}
+                                width={24}
+                            />
+                            <Tooltip
+                                cursor={{ fill: "hsl(var(--muted))" }}
+                                content={({ active, payload, label }) => {
+                                    if (!active || !payload?.length) return null
+                                    return (
+                                        <div className="bg-background border border-border rounded-md px-3 py-2 text-xs shadow-sm">
+                                            <p className="text-muted-foreground mb-0.5">{label}</p>
+                                            <p className="font-medium">{payload[0].value} application{payload[0].value !== 1 ? "s" : ""}</p>
+                                        </div>
+                                    )
+                                }}
+                            />
+                            <Bar dataKey="count" shape={renderBarShape} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <ApplicationsOverTimeEmpty />
+                )}
             </CardContent>
         </Card>
+    )
+}
+
+function ApplicationsOverTimeEmpty() {
+    return (
+        <>
+            <Empty className="w-full h-full">
+                <EmptyHeader className="flex flex-col">
+                    <EmptyMedia variant={'icon'}>
+                        <FileChartLine />
+                    </EmptyMedia>
+                    <EmptyTitle>No applications yet</EmptyTitle>
+                    <EmptyDescription className="text-xs">Start building your application history. New entries will appear here over time.</EmptyDescription>
+                </EmptyHeader>
+            </Empty>
+        </>
     )
 }

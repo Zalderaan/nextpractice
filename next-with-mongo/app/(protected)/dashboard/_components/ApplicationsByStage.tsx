@@ -1,15 +1,15 @@
 import {
     Card,
     CardHeader,
-    CardFooter,
     CardTitle,
-    CardAction,
-    CardDescription,
     CardContent,
 } from "@/components/ui/card";
 import { Application, APPLICATION_STATUSES } from "../board/types/application.types";
 import { ApplicationStatus } from "../board/types/application.types";
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { FolderOpen, SquareKanban, Table } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link"
 
 interface absItemProps {
     status: string,
@@ -87,9 +87,27 @@ function ApplicationsByStageEmpty() {
         <>
             <Empty className="w-full h-full">
                 <EmptyHeader>
+                    <EmptyMedia variant={'icon'}>
+                        <FolderOpen />
+                    </EmptyMedia>
                     <EmptyTitle>Nothing here... for now</EmptyTitle>
-                    <EmptyDescription>You haven't tracked any job applications yet!</EmptyDescription>
+                    <EmptyDescription className="text-xs">You haven’t added any applications yet. Start by adding one in Table or Board view.</EmptyDescription>
                 </EmptyHeader>
+                <EmptyContent className="flex flex-row justify-center space-x-">
+                    <Link href="/dashboard/applications" className="asChild">
+                        <Button className="space-x" variant={"secondary"}>
+                            <Table />
+                            <span>Table View</span>
+                        </Button>
+                    </Link>
+
+                    <Link href="/dashboard/board" className="asChild">
+                        <Button className="space-x">
+                            <SquareKanban />
+                            <span>Board View</span>
+                        </Button>
+                    </Link>
+                </EmptyContent>
             </Empty>
         </>
     )
