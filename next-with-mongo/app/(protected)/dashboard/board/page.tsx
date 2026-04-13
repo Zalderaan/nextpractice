@@ -1,6 +1,5 @@
 import { BoardPageHeader } from './_components/BoardPageHeader';
-import { Application } from './_components/ApplicationCard';
-import { cookies, headers } from 'next/headers';
+import { Application } from './types/application.types';
 import BoardView from './_components/BoardView';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,6 @@ export default async function BoardPage() {
 
     return (
         <main className="flex min-h-0 h-full flex-1 flex-col">
-            <BoardPageHeader />
             {
                 applications.length > 0
                     ? <BoardView applications={applications} />

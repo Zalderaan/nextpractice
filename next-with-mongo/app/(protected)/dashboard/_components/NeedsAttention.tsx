@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge"
 import {
     Card,
     CardHeader,
-    CardFooter,
     CardTitle,
     CardAction,
     CardDescription,
@@ -18,6 +17,7 @@ import {
     EmptyContent,
     EmptyMedia,
 } from "@/components/ui/empty";
+import Link from "next/link"
 import { Megaphone } from "lucide-react";
 
 interface NeedsAttentionProps {
@@ -200,8 +200,9 @@ interface NeedsAttentionItemProps {
 }
 
 function NeedsAttentionItem({ application, reasons }: NeedsAttentionItemProps) {
-    const { company, role } = application;
+    const { _id: appId, company, role } = application;
     return (
+        <Link href={`/dashboard/board?appId=${appId}`}>
         <Card className="bg-gray-50 border rounded-sm">
             <CardHeader className="flex flex-col w-full">
                 <div className="flex flex-row w-full items-start justify-between">
@@ -216,9 +217,16 @@ function NeedsAttentionItem({ application, reasons }: NeedsAttentionItemProps) {
                             ))}
                         </div>
                     </span>
+                    <CardAction>
+                        <Button>
+                            Test
+                        </Button>
+                    </CardAction>
                 </div>
             </CardHeader>
         </Card>
+        </Link>
+
     );
 }
 

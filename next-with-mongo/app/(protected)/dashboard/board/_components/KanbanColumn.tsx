@@ -4,7 +4,7 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/componen
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/react';
 import { PlusIcon } from "lucide-react";
-import { ApplicationCard, Application } from "./ApplicationCard";
+import { Application } from "../types/application.types";
 import { SortableApplicationCard } from "./SortableApplicationCard";
 import { Badge } from "@/components/ui/badge";
 

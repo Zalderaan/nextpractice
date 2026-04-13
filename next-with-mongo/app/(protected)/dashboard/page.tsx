@@ -22,23 +22,23 @@ async function DashboardHomeContent() {
     const applications: Application[] = data.data.applications;
 
     return (
-        <main className="h-full w-full p-(--dashboard-pages-padding)">
+        <main className="w-full p-(--dashboard-pages-padding)">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-6 xl:grid-cols-12 auto-rows-[minmax(180px,auto)]">
                 <section className="col-span-full">
                     <StatCards applications={applications} />
                 </section>
 
                 <section className="md:col-span-6 xl:col-span-8">
-                    <ApplicationsByStage applications={applications} />
-                </section>
-
-                <section className="md:col-span-6 xl:col-span-4 bg-yellow-200" >
-                    <NeedsAttention applications={applications} />
-                </section>
-                <section className="md:col-span-3 xl:col-span-6 bg-yellow-200" >
                     <ApplicationsOverTime applications={applications}/>
                 </section>
-                <section className="md:col-span-3 xl:col-span-6 bg-yellow-200" />
+
+                <section className="md:col-span-6 xl:col-span-4 row-span-2" >
+                    <NeedsAttention applications={applications} />
+                </section>
+                <section className="md:col-span-3 xl:col-span-4" >
+                    <ApplicationsByStage applications={applications} />
+                </section>
+                <section className="md:col-span-3 xl:col-span-4 bg-yellow-200" />
             </div>
         </main>
     );

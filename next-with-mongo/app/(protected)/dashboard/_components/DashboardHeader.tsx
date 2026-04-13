@@ -38,7 +38,7 @@ export function DashboardHeader() {
     const currentPage = getPageData();
 
     return (
-        <header className="flex flex-row items-center justify-between px-(--header-px) border-b bg-sidebar h-(--header-height)">
+        <header className="sticky z-50 top-0 flex flex-row items-center justify-between px-(--header-px) border-b bg-sidebar h-(--header-height)">
 
             <div className="flex flex-row items-center space-x-2">
                 <SidebarTrigger className={isMobile ? "" : "hidden"}/>

@@ -30,7 +30,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden h-full`}
     >
-      <body className="min-h-dvh w-full h-full overflow-x-hidden">
+      <body className="min-h-dvh max-h-screen w-full h-full overflow-x-hidden">
         <TooltipProvider>
           {children}
           <Toaster />
