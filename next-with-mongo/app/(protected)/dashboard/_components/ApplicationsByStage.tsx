@@ -23,9 +23,9 @@ interface ApplicationsByStageProps {
 
 function AbsItem({ status, amount, percent }: absItemProps) {
     return (
-        <div className="w-full flex flex-col space-y-2">
+        <div className="w-full flex flex-col space-y">
             <div className="flex flex-row items-center justify-between">
-                <span>{status}</span>
+                <span className="text-xs">{status}</span>
                 <span>{amount}</span>
             </div>
             <div className="h-2 w-full rounded bg-muted overflow-hidden">
@@ -53,7 +53,7 @@ export function ApplicationsByStage({ applications }: ApplicationsByStageProps) 
             <CardContent className="w-full h-full">
                 {
                     safeApplications && safeApplications.length > 0 ? (
-                        <div id="absItemContainer" className="flex flex-col space-y-4">
+                        <div id="absItemContainer" className="flex flex-col flex-1 h-full items-stretch justify-between">
                             {APPLICATION_STATUSES.map((app_status) => {
                                 const amount = safeApplications.filter(
                                     (app) => app.status === app_status

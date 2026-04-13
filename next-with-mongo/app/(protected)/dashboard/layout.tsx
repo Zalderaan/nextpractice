@@ -12,7 +12,7 @@ export default function DashboardLayout({
         <SidebarProvider>
             <AuthBootstrap />
             <AppSidebar />
-            <SidebarInset className="flex flex-col min-w-0 flex-1 overflow-x-hidden">
+            <SidebarInset className="flex flex-col min-w-0 flex-1 h-dvh overflow-hidden">
                 <DashboardHeader />
                 <main className="flex flex-1 min-h-0 max-h-full w-full overflow-x-hidden overflow-y-auto">
                     {children}
