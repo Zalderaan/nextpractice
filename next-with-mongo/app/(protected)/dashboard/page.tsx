@@ -7,6 +7,7 @@ import DashboardHomeLoading from "./loading";
 import { Application } from "./board/types/application.types";
 import { NeedsAttention } from "./_components/NeedsAttention";
 import { ApplicationsOverTime } from "./_components/ApplicationsOverTime";
+import { EffortVsResult } from "./applications/_components/EffortVsResult";
 
 export default function DashboardHomePage() {
     return (
@@ -35,10 +36,12 @@ async function DashboardHomeContent() {
                 <section className="md:col-span-6 xl:col-span-4 row-span-2" >
                     <NeedsAttention applications={applications} />
                 </section>
-                <section className="md:col-span-3 xl:col-span-4" >
+                <section className="md:col-span-3 xl:col-span-3" >
                     <ApplicationsByStage applications={applications} />
                 </section>
-                <section className="md:col-span-3 xl:col-span-4 bg-yellow-200" />
+                <section className="md:col-span-3 xl:col-span-5">
+                    <EffortVsResult applications={applications}/>
+                </section>
             </div>
         </div>
     );

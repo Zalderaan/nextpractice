@@ -364,6 +364,7 @@ export default function BoardView({ applications }: Props) {
 
                             return (
                                 <div className="opacity-90 shadow-2xl rotate-2 transition-transform cursor-grabbing touch-none">
+                                    {/* TODO: Add notif badge for a card if there's a needs attention on it */}
                                     <ApplicationCard application={app} onClick={() => { }} />
                                 </div>
                             )

@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { ApplicationsTable, applicationTableColumns } from './application-table';
-import { ApplicationSheet } from '../../board/_components/ApplicationDetailsSheet';
+import { ApplicationSheet } from '../../applications/_components/app_sheet/ApplicationSheet';
 import { Application } from '../../board/types/application.types';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 

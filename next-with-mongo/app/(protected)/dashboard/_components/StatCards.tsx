@@ -24,29 +24,44 @@ interface StatCardsProps {
 
 function countAppliedInLastDays(applications: Application[], days: number) {
     const cutoff = new Date();
+    cutoff.setHours(0, 0, 0, 0);
     cutoff.setDate(cutoff.getDate() - days);
 
     return applications.filter((app) => {
-        app.appliedAt && app.appliedAt >= cutoff
-    });
+        if (!app.appliedAt) return false;
+
+        const appliedDate = new Date(app.appliedAt);
+        return appliedDate >= cutoff
+    }).length;
 }
 
 export function StatCards({ applications }: StatCardsProps) {
     const total = applications.length;
-    const applied_week_count = countAppliedInLastDays(applications, 7).length; //! not calculating correctly at the moment
+    const total_active_applied = applications.filter((app) => {
+        // ? If it has an appliedAt date, it was submitted, regardless of current status!
+        return app.appliedAt
+    }).length;
+    const applied_week_count = countAppliedInLastDays(applications, 7); //! not calculating correctly at the moment
+    const applied_total_count = applications.filter((app) => {
+        return app.status === "applied"
+    }).length
     const interview_count = applications.filter((app) => {
         return app.status === "interview"
     }).length
     const offer_count = applications.filter((app) => {
         return app.status === "offer"
     }).length
-    const interview_rate = (interview_count / total) * 100;
-
+    
+    // TODO: fix interview counting, add did_interview flag in db
+    const interview_rate = total_active_applied > 0
+        ? (interview_count / total_active_applied) * 100
+        : 0;
+        
     const statistics: StatisticsType[] = [
         {
             title: "Total Applications",
-            value: total,
-            description: "applications",
+            value: total_active_applied,
+            description: "active applications",
             accent: "gray",
         },
         {
@@ -58,7 +73,7 @@ export function StatCards({ applications }: StatCardsProps) {
         {
             title: "Interviews",
             value: interview_count,
-            description: `of ${total} applied`,
+            description: `of ${total_active_applied} applied`,
             accent: "purple"
         },
         {

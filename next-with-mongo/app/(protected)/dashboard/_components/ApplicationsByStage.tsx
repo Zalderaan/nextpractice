@@ -38,6 +38,7 @@ function AbsItem({ status, amount, percent }: absItemProps) {
     )
 }
 
+// TODO: MAke this into a pie chart
 export function ApplicationsByStage({ applications }: ApplicationsByStageProps) {
     // console.log("This is applications in ABS.tsx: ", applications)
     const total = applications.length || 1;
