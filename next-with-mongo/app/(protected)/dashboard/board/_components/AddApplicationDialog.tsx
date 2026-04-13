@@ -90,20 +90,20 @@ export function AddApplicationDialog() {
                 </Button>
             </DialogTrigger>
 
-            <DialogContent>
+            <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>
                         Add an application
                     </DialogTitle>
                     <DialogDescription>
-                        lorem ipsum dolor sit amet.
+                        Enter your job applicaiton details and start tracking
                     </DialogDescription>
                 </DialogHeader>
 
                 <form
                     id="add-application-form"
                     onSubmit={handleSubmit(onSubmit)}
-                    className="flex flex-col space-y-6 max-h-96 overflow-y-auto"
+                    className="flex flex-col space-y-6 max-h-[80vh] overflow-y-auto px-2"
                 >
                     {/* 1. Basic Job Info */}
                     <FieldGroup className="">

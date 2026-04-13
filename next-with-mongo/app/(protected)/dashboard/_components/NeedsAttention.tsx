@@ -217,11 +217,6 @@ function NeedsAttentionItem({ application, reasons }: NeedsAttentionItemProps) {
                             ))}
                         </div>
                     </span>
-                    <CardAction>
-                        <Button>
-                            Test
-                        </Button>
-                    </CardAction>
                 </div>
             </CardHeader>
         </Card>
