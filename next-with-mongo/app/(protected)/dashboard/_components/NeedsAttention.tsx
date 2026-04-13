@@ -232,8 +232,8 @@ function NeedsAttentionEmpty() {
                         <EmptyMedia variant={'icon'}>
                             <Megaphone />
                         </EmptyMedia>
-                        <EmptyTitle>No applications require your attention</EmptyTitle>
-                        <EmptyDescription className="text-xs">Your don't have anything in your applications coming up for now. Apply some more!</EmptyDescription>
+                        <EmptyTitle>No applications require your attention yet</EmptyTitle>
+                        <EmptyDescription className="text-xs">You don't have anything in your applications that require your immediate attention for now. Apply some more!</EmptyDescription>
                     </EmptyHeader>
                 </EmptyContent>
             </Empty>

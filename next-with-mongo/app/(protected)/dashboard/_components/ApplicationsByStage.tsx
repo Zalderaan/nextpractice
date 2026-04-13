@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Application, APPLICATION_STATUSES } from "../board/types/application.types";
 import { ApplicationStatus } from "../board/types/application.types";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 
 interface absItemProps {
     status: string,
@@ -38,39 +39,58 @@ function AbsItem({ status, amount, percent }: absItemProps) {
 }
 
 export function ApplicationsByStage({ applications }: ApplicationsByStageProps) {
-    console.log("This is applications in ABS.tsx: ", applications)
+    // console.log("This is applications in ABS.tsx: ", applications)
     const total = applications.length || 1;
     const safeApplications = Array.isArray(applications) ? applications : [];
 
     return (
-        <Card>
+        <Card className="h-full w-full">
             <CardHeader>
                 <CardTitle>
                     Applications by Stage
                 </CardTitle>
             </CardHeader>
             <CardContent className="w-full h-full">
-                <div id="absItemContainer" className="flex flex-col space-y-4">
-                    {/* status.map() */}
-                    {APPLICATION_STATUSES.map((app_status) => {
-                        const amount = safeApplications.filter(
-                            (app) => app.status === app_status
-                        ).length;
+                {
+                    safeApplications && safeApplications.length > 0 ? (
+                        <div id="absItemContainer" className="flex flex-col space-y-4">
+                            {APPLICATION_STATUSES.map((app_status) => {
+                                const amount = safeApplications.filter(
+                                    (app) => app.status === app_status
+                                ).length;
 
-                        const percent = Math.round((amount / total) * 100);
+                                const percent = Math.round((amount / total) * 100);
 
-                        return (
-                            <AbsItem
-                                key={app_status}
-                                status={app_status}
-                                amount={amount}
-                                percent={percent}
-                            />
-                        )
-                    })}
-                </div>
+                                return (
+                                    <AbsItem
+                                        key={app_status}
+                                        status={app_status}
+                                        amount={amount}
+                                        percent={percent}
+                                    />
+                                )
+                            })}
+                        </div>
+                    ) : (
+                        <ApplicationsByStageEmpty />
+                    )
+                }
+
 
             </CardContent>
         </Card>
+    )
+}
+
+function ApplicationsByStageEmpty() {
+    return (
+        <>
+            <Empty className="w-full h-full">
+                <EmptyHeader>
+                    <EmptyTitle>Nothing here... for now</EmptyTitle>
+                    <EmptyDescription>You haven't tracked any job applications yet!</EmptyDescription>
+                </EmptyHeader>
+            </Empty>
+        </>
     )
 }
