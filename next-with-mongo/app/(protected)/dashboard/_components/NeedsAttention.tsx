@@ -26,28 +26,34 @@ interface NeedsAttentionProps {
 
 const criteria = {
     // 1. Time-sensitive
-    assessmentPending: (app: NeedsAttentionContext) =>
-        app.status === "applied" && app.assessmentStatus === "pending",
+    assessmentPending: (app: NeedsAttentionContext) => app.status === "applied" && app.assessmentStatus === "pending",
 
-    assessmentMissed: (app: NeedsAttentionContext) =>
-        app.status === "applied" && app.assessmentStatus === "missed",
+    assessmentMissed: (app: NeedsAttentionContext) => app.status === "applied" && app.assessmentStatus === "missed",
+
+    missingInterviewDate: (app: NeedsAttentionContext) =>
+        app.status === "interview" && !app.nextInterviewAt && !app.lastInterviewAt,
 
     upcomingInterview: (app: NeedsAttentionContext) =>
         app.status === "interview" && app.nextInterviewAt && new Date(app.nextInterviewAt) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 
     // 2. Strategic follow-ups
-    thankYouEmailDue: (app: NeedsAttentionContext) =>
+    thankYouEmailDue: (app: NeedsAttentionContext) => 
         app.status === "interview" &&
-        !app.thankYouEmailSent &&
-        app.lastInterviewAt &&
-        getDayCount(app.lastInterviewAt, Date.now()) === 0, // same day
+            !app.thankYouEmailSent &&
+            app.lastInterviewAt &&
+            getDayCount(app.lastInterviewAt, Date.now()) === 0 // same day
+    ,
 
-    noCallbackAfterInterview: (app: NeedsAttentionContext) =>
+    noCallbackAfterInterview: (app: NeedsAttentionContext) => 
         app.status === "interview" &&
-        app.daysSinceLastInterview !== undefined &&
-        app.daysSinceLastInterview >= 7,
+            app.daysSinceLastInterview !== undefined &&
+            app.daysSinceLastInterview >= 7
+    ,
 
     // 3. Offer & Negotiation
+    missingOfferDeadline: (app: NeedsAttentionContext) =>
+        app.status === "offer" && !app.offerDeadline,
+
     expiringOffer: (app: NeedsAttentionContext) =>
         app.status === "offer" &&
         app.offerDeadline &&
@@ -112,6 +118,8 @@ type NeedsAttentionContext = Application & {
  *          - 30-day stale | action: move to archive (?) | would need to implement ghosted status
 */
 
+// TODO: Enhance criteria
+
 // Enrich app with computed fields once
 const enrichApp = (app: Application): NeedsAttentionContext => ({
     ...app,
@@ -133,6 +141,10 @@ const ATTENTION_REASON_META: Record<
         label: "Assessment deadline missed",
         description: "Follow up or mark outcome.",
     },
+    missingInterviewDate: {
+        label: "No interview date entered",
+        description: "You haven't entered a date for your initial interview"
+    },
     upcomingInterview: {
         label: "Interview coming up",
         description: "Prepare and confirm schedule.",
@@ -144,6 +156,10 @@ const ATTENTION_REASON_META: Record<
     noCallbackAfterInterview: {
         label: "No callback after interview",
         description: "Consider follow-up message.",
+    },
+    missingOfferDeadline: {
+        label: "No offer deadline entered",
+        description: "Consider adding an offer deadline."
     },
     expiringOffer: {
         label: "Offer deadline approaching",
@@ -177,11 +193,11 @@ export function NeedsAttention({ applications }: NeedsAttentionProps) {
 
     return (
         <Card className="w-full h-full">
-            <CardHeader className="flex flex-row justify-between w-full">
+            <CardHeader className="flex flex-row justify-between w-full border-b">
                 <CardTitle>Needs Attention</CardTitle>
                 <Badge>{filtered_apps.length}</Badge>
             </CardHeader>
-            <CardContent className="flex flex-col h-full space-y-2">
+            <CardContent className="flex flex-col h-full space-y-2 py-2 overflow-y-auto">
                 {
                     filtered_apps.length > 0
                         ? filtered_apps.map(({ app, reasons }) => (
@@ -203,23 +219,23 @@ function NeedsAttentionItem({ application, reasons }: NeedsAttentionItemProps) {
     const { _id: appId, company, role } = application;
     return (
         <Link href={`/dashboard/board?appId=${appId}`}>
-        <Card className="bg-gray-50 border rounded-sm">
-            <CardHeader className="flex flex-col w-full">
-                <div className="flex flex-row w-full items-start justify-between">
-                    <span>
-                        <CardTitle>{company}</CardTitle>
-                        <CardDescription className="text-xs">{role}</CardDescription>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                            {reasons.map((reason) => (
-                                <Badge key={reason} variant="outline" className="text-xs">
-                                    {ATTENTION_REASON_META[reason].label}
-                                </Badge>
-                            ))}
-                        </div>
-                    </span>
-                </div>
-            </CardHeader>
-        </Card>
+            <Card className="bg-gray-50 border rounded-sm">
+                <CardHeader className="flex flex-col w-full">
+                    <div className="flex flex-row w-full items-start justify-between">
+                        <span>
+                            <CardTitle>{company}</CardTitle>
+                            <CardDescription className="text-xs">{role}</CardDescription>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                                {reasons.map((reason) => (
+                                    <Badge key={reason} variant="outline" className="text-xs">
+                                        {ATTENTION_REASON_META[reason].label}
+                                    </Badge>
+                                ))}
+                            </div>
+                        </span>
+                    </div>
+                </CardHeader>
+            </Card>
         </Link>
 
     );
