@@ -17,11 +17,36 @@ import {
     EmptyMedia,
 } from "@/components/ui/empty";
 import Link from "next/link"
-import { Check, ExternalLink, Megaphone, MoreHorizontal, X } from "lucide-react";
+import { ExternalLink, Megaphone, MoreHorizontal, X } from "lucide-react";
 
-interface NeedsAttentionProps {
-    applications: Application[]
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+function parseTimestamp(value: Application["appliedAt"]): number | null {
+    if (!value) return null;
+    const ts = value instanceof Date ? value.getTime() : new Date(value).getTime();
+    return Number.isNaN(ts) ? null : ts;
 }
+
+function getDayCount(appliedAt: Application["appliedAt"], nowMs: number): number | null {
+    const ts = parseTimestamp(appliedAt);
+    if (ts === null) return null;
+
+    // Clamp to 0 in case of future timestamps from bad data/timezone mismatch
+    return Math.max(0, Math.floor((nowMs - ts) / DAY_IN_MS));
+}
+
+// Type for enriched data needed during filtering
+type NeedsAttentionContext = Application & {
+    daysSinceApplied?: number;
+    daysSinceLastInterview?: number;
+};
+
+// Enrich app with computed fields once
+const enrichApp = (app: Application): NeedsAttentionContext => ({
+    ...app,
+    daysSinceApplied: app.appliedAt ? getDayCount(app.appliedAt, Date.now()) ?? 0 : undefined,
+    daysSinceLastInterview: app.lastInterviewAt ? getDayCount(app.lastInterviewAt, Date.now()) ?? 0 : undefined,
+});
 
 const criteria = {
     // 1. Time-sensitive
@@ -70,39 +95,6 @@ const criteria = {
         app.appliedAt &&
         (app.daysSinceApplied ?? 0) >= 30,
 };
-
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
-
-type NeedsAttentionApp = Application & {
-    day_count: number;
-}
-
-function parseTimestamp(value: Application["appliedAt"]): number | null {
-    if (!value) return null;
-    const ts = value instanceof Date ? value.getTime() : new Date(value).getTime();
-    return Number.isNaN(ts) ? null : ts;
-}
-
-function getDayCount(appliedAt: Application["appliedAt"], nowMs: number): number | null {
-    const ts = parseTimestamp(appliedAt);
-    if (ts === null) return null;
-
-    // Clamp to 0 in case of future timestamps from bad data/timezone mismatch
-    return Math.max(0, Math.floor((nowMs - ts) / DAY_IN_MS));
-}
-
-// Type for enriched data needed during filtering
-type NeedsAttentionContext = Application & {
-    daysSinceApplied?: number;
-    daysSinceLastInterview?: number;
-};
-
-// Enrich app with computed fields once
-const enrichApp = (app: Application): NeedsAttentionContext => ({
-    ...app,
-    daysSinceApplied: app.appliedAt ? getDayCount(app.appliedAt, Date.now()) ?? 0 : undefined,
-    daysSinceLastInterview: app.lastInterviewAt ? getDayCount(app.lastInterviewAt, Date.now()) ?? 0 : undefined,
-});
 
 type AttentionReason = keyof typeof criteria;
 
@@ -159,6 +151,9 @@ const findAttentionReasons = (app: Application): AttentionReason[] => {
         .map(([key]) => key);
 };
 
+interface NeedsAttentionProps {
+    applications: Application[]
+}
 
 export function NeedsAttention({ applications }: NeedsAttentionProps) {
     const filtered_apps = applications
@@ -167,6 +162,8 @@ export function NeedsAttention({ applications }: NeedsAttentionProps) {
             reasons: findAttentionReasons(app),
         }))
         .filter(({ reasons }) => reasons.length > 0);
+
+        console.log("This is filtered_apps: ", filtered_apps)
 
     return (
         <Card className="w-full h-full flex flex-col overflow-hidden">
