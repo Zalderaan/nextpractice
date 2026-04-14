@@ -5,8 +5,8 @@ import { SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
 import { Control, Controller } from "react-hook-form";
-import { Application } from "../../../board/types/application.types";
-import { ApplicationFormValues } from "../../../board/types/application-form.schema";
+import { Application } from "../../types/application.types";
+import { ApplicationFormValues } from "../../types/application-form.schema";
 
 interface ApplicationSheetHeaderProps {
     selectedApp: Application,

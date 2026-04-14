@@ -14,6 +14,7 @@
 
 // ─── React & hooks ────────────────────────────────────────────────────────────
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useApplicationSheetStore } from '../../_components/app_sheet/app_sheet.store'
 
 // ─── Next.js navigation ───────────────────────────────────────────────────────
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -27,11 +28,11 @@ import { move } from '@dnd-kit/helpers'
 import BoardClient from '../../_components/BoardClient'
 import { ApplicationCard, ApplicationStatus } from './ApplicationCard'
 import { KanbanColumn } from './KanbanColumn'
-import { ApplicationSheet } from '../../applications/_components/app_sheet/ApplicationSheet'
+import { ApplicationSheet } from '../../_components/app_sheet/ApplicationSheet'
 
 // ─── Types & server actions ───────────────────────────────────────────────────
-import { Application } from '../types/application.types'
-import { updateApplicationStatusAction } from '../actions'
+import { Application } from '../../types/application.types'
+import { updateApplicationStatusAction } from '../../actions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -110,9 +111,8 @@ export default function BoardView({ applications }: Props) {
     /** True while a card is being dragged; passed down to BoardClient for cursor styling. */
     const [isDraggingCard, setIsDraggingCard] = useState(false)
 
-    /** ID of the application whose side-sheet drawer is currently open. */
-    const [selectedAppId, setSelectedAppId] = useState<string | null>(null)
-
+    /** Get sheet actions from the shared zustand store */
+    const { openSheet, closeSheet, selectedApp: storeSelectedApp } = useApplicationSheetStore()
     // ── Sync board with fresh server data ───────────────────────────────────
 
     /**
@@ -133,46 +133,55 @@ export default function BoardView({ applications }: Props) {
      */
     useEffect(() => {
         const paramsAppId = searchParams.get('appId')
+        const currentStoreApp = useApplicationSheetStore.getState().selectedApp
+
 
         if (!paramsAppId) {
-            setSelectedAppId(null)
+            if (currentStoreApp) closeSheet()
             return
         }
 
-        if (appById.has(paramsAppId)) {
-            setSelectedAppId(paramsAppId)
-        } else {
-            setSelectedAppId(null)
+        // Only update Zustand if the URL app doesn't match what's currently open
+        if (storeSelectedApp?._id !== paramsAppId) {
+            const app = appById.get(paramsAppId)
+            // If the app exists in the data, open it. 
+            // If it was just deleted (undefined), safely close it and ignore URL.
+            if (app) {
+                openSheet(app)
+            } else {
+                closeSheet()
+            }
         }
-    }, [searchParams, appById])
+    }, [searchParams, appById, openSheet, closeSheet])
 
+    // ── Sync Zustand with fresh server data updates ─────────────────────────
+
+    useEffect(() => {
+        if (!storeSelectedApp) return;
+
+        // Get the fresh version of the currently open app
+        const latestApp = appById.get(storeSelectedApp._id);
+
+        // If the data was updated by a server action (the object reference changes), push to Zustand
+        if (latestApp && latestApp !== storeSelectedApp) {
+            openSheet(latestApp);
+        }
+    }, [appById, storeSelectedApp, openSheet]);
+    
     // ── Drawer helpers ───────────────────────────────────────────────────────
 
-    /** Resolved Application object for the open drawer, or null when closed. */
-    const selectedApp = applications.find((app) => app._id === selectedAppId) ?? null
 
     /** Opens the application side-sheet and pushes ?appId= into the URL. */
     const handleSelect = useCallback(
         (app: Application) => {
-            setSelectedAppId(app._id)
+            openSheet(app) // Open via Zustand immediately 
 
             const params = new URLSearchParams(searchParams.toString())
             params.set('appId', app._id)
             router.replace(`${pathname}?${params.toString()}`, { scroll: false })
         },
-        [router, pathname, searchParams]
+        [router, pathname, searchParams, openSheet]
     )
-
-    /** Closes the side-sheet and removes ?appId= from the URL. */
-    const closeDrawer = useCallback(() => {
-        setSelectedAppId(null)
-
-        const params = new URLSearchParams(searchParams.toString())
-        params.delete('appId')
-        const qs = params.toString()
-        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
-    }, [router, pathname, searchParams])
-
     // ── Drag-and-drop helpers ────────────────────────────────────────────────
 
     /**
@@ -372,7 +381,7 @@ export default function BoardView({ applications }: Props) {
                     </DragOverlay>
 
                     {/* Side-sheet drawer for viewing / editing a single application */}
-                    <ApplicationSheet selectedApp={selectedApp} onClose={closeDrawer} />
+                    <ApplicationSheet />
                 </DragDropProvider>
             </div>
         </div>

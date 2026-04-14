@@ -1,6 +1,6 @@
 import { Control, Controller } from "react-hook-form";
-import { ApplicationFormValues } from "../../../board/types/application-form.schema";
-import { Application } from "../../../board/types/application.types";
+import { ApplicationFormValues } from "../../types/application-form.schema";
+import { Application } from "../../types/application.types";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";

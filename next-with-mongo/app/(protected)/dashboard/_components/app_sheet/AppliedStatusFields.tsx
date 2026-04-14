@@ -1,10 +1,10 @@
 import { Field, FieldError, FieldGroup } from "@/components/ui/field";
 import { Control, Controller } from "react-hook-form";
-import { ApplicationFormValues } from "../../../board/types/application-form.schema";
+import { ApplicationFormValues } from "../../types/application-form.schema";
 import { Input } from "@/components/ui/input";
 import { SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Select } from "@/components/ui/select";
-import { Application } from "../../../board/types/application.types";
+import { Application } from "../../types/application.types";
 
 interface AppliedStatusFieldsProps {
     selectedApp: Application;

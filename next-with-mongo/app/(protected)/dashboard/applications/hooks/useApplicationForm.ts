@@ -5,9 +5,9 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
-import { ApplicationFormValues, fullFormSchema } from "../../board/types/application-form.schema";
-import { updateApplicationAction } from "@/app/(protected)/dashboard/board/actions";
-import { Application } from "../../board/types/application.types";
+import { ApplicationFormValues, fullFormSchema } from "../../types/application-form.schema";
+import { updateApplicationAction } from "@/app/(protected)/dashboard/actions";
+import { Application } from "../../types/application.types";
 import { mapApplicationToFormValues } from "../utils/application_sheet.util";
 
 export function useApplicationForm(

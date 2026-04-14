@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Application } from "./ApplicationCard";
-import { deleteApplicationAction } from "../actions";
+import { deleteApplicationAction } from "../../actions";
 
 interface DeleteApplicationDialogProps {
     application: Application;

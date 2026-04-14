@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Application } from "../../board/types/application.types";
+import { Application } from "../types/application.types";
 
 interface EVRProps {
     applications: Application[]

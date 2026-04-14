@@ -7,7 +7,7 @@ import { AddApplicationDialog } from "./AddApplicationDialog"
 import Link from 'next/link'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Checkbox } from "@/components/ui/checkbox" // ADDED Checkbox import
-import { PRIORITIES, WORK_TYPES, WorkType } from "../types/application.types"
+import { PRIORITIES, WORK_TYPES, WorkType } from "../../types/application.types"
 import { Label } from "@/components/ui/label"
 import { Toggle } from "@/components/ui/toggle"
 import { useState } from "react"

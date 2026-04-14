@@ -1,7 +1,7 @@
 // lib/application-form.helpers.ts
 
-import { Application } from "../../board/types/application.types";
-import { ApplicationFormValues } from "../../board/types/application-form.schema";
+import { Application } from "../../types/application.types";
+import { ApplicationFormValues } from "../../types/application-form.schema";
 
 // ? helper to map application-related forms values
 // * example: call this in defaultValues of useForm

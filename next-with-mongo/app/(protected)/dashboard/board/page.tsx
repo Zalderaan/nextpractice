@@ -1,5 +1,5 @@
 import { BoardPageHeader } from './_components/BoardPageHeader';
-import { Application } from './types/application.types';
+import { Application } from '../types/application.types';
 import BoardView from './_components/BoardView';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Button } from '@/components/ui/button';

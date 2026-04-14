@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle, CardDescription, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Calendar, Briefcase, MapPin, DollarSign } from "lucide-react";
-import { Application } from "../types/application.types";
+import { Application } from "../../types/application.types";
 
 export const WORK_TYPES = ["remote", "hybrid", "onsite"] as const;
 export const APPLICATION_STATUSES = [

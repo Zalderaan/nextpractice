@@ -4,10 +4,10 @@ import { getAuthContext } from "@/lib/auth";
 import { ApplicationsByStage } from "./_components/ApplicationsByStage";
 import { StatCards } from "./_components/StatCards";
 import DashboardHomeLoading from "./loading";
-import { Application } from "./board/types/application.types";
+import { Application } from "./types/application.types";
 import { NeedsAttention } from "./_components/NeedsAttention";
 import { ApplicationsOverTime } from "./_components/ApplicationsOverTime";
-import { EffortVsResult } from "./applications/_components/EffortVsResult";
+import { EffortVsResult } from "./_components/EffortVsResult";
 
 export default function DashboardHomePage() {
     return (

@@ -4,8 +4,8 @@ import {
     CardTitle,
     CardContent,
 } from "@/components/ui/card";
-import { Application, APPLICATION_STATUSES } from "../board/types/application.types";
-import { ApplicationStatus } from "../board/types/application.types";
+import { Application, APPLICATION_STATUSES } from "../types/application.types";
+import { ApplicationStatus } from "../types/application.types";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { FolderOpen, SquareKanban, Table } from "lucide-react";
 import { Button } from "@/components/ui/button";

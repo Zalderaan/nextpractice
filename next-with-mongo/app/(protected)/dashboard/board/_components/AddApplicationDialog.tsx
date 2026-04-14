@@ -29,8 +29,8 @@ import { toast } from "sonner"
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { createApplicationAction } from "../actions";
-import { fullFormSchema } from "../types/application-form.schema";
+import { createApplicationAction } from "../../actions";
+import { fullFormSchema } from "../../types/application-form.schema";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export function AddApplicationDialog() {

@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
-import { Application } from "../../board/types/application.types"
+import { Application } from "../../types/application.types"
 import {
     Table,
     TableBody,

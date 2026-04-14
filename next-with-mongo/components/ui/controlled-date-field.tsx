@@ -1,7 +1,7 @@
 import { Control, Controller } from "react-hook-form";
 import { Field, FieldError } from "./field";
 import { Input } from "./input";
-import { ApplicationFormValues } from "@/app/(protected)/dashboard/board/types/application-form.schema";
+import { ApplicationFormValues } from "@/app/(protected)/dashboard/types/application-form.schema";
 
 type ControlledDateFieldProps = {
     // ? update name's type when new date fields exist

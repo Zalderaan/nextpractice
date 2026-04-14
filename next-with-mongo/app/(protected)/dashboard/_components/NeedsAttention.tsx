@@ -6,7 +6,7 @@ import {
     CardDescription,
     CardContent,
 } from "@/components/ui/card"
-import { Application } from "../board/types/application.types"
+import { Application } from "../types/application.types"
 import { Button } from "@/components/ui/button";
 import {
     Empty,
@@ -96,28 +96,6 @@ type NeedsAttentionContext = Application & {
     daysSinceApplied?: number;
     daysSinceLastInterview?: number;
 };
-
-
-// export function NeedsAttention({ applications }: NeedsAttentionProps) {
-/** 
- * ? Criteria for being marked as "Needs Attention"
- * TODO: 1. Time-sensitive
- *          - assessment pending/missed deadline | action: mark as passed assessment | would need to implement assessment + assessment_status in cols db?
- *          - remind user of upcoming interview date | action: mark as taken, will not take, etc. | would need interview_date col in db
- * TODO: 2. Strategic follow-ups
- *          - send a "thank you" email to recruiter within 24 hours after interview | action: mark as email sent / opt not to send / etc.
- *          - no callbacks yet after 5-7 days after an interview | action: mark as ghosted?
- * TODO: 3. Offer & Negotiation hurdles | action: mark as reviewed
- *          - Offer review
- *          - expiring offers | would need to add offer deadline 
- * TODO: 4. Stale rules (pinaka possible magawa ngayon)
- * TODO:    - 14-day stale | action: nudge + mark as nudged (stays in the needs attention)
- * *            - successfully counting 14-day 
- * TODO:        - no action yet 
- *          - 30-day stale | action: move to archive (?) | would need to implement ghosted status
-*/
-
-// TODO: Enhance criteria
 
 // Enrich app with computed fields once
 const enrichApp = (app: Application): NeedsAttentionContext => ({
@@ -240,24 +218,9 @@ function NeedsAttentionItem({ application, reasons }: NeedsAttentionItemProps) {
 }
 
 function NeedsAttentionItemReason({ reason, appId }: { reason: string, appId: string }) {
-
     return (
         <div className="group flex w-full border text-xs items-center justify-between rounded-lg px-4 py-2">
             <span>{reason}</span>
-
-            {/* <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex flex-row items-center gap-1 shrink-0">
-                <Button variant={"ghost"} size={"icon"} title="Remind me tomorrow">
-                    <Megaphone />
-                </Button>
-                <Button variant={"ghost"} size={"icon"} title="Dismiss for this application">
-                    <X />
-                </Button>
-                <Button variant={"ghost"} size={"icon"} className="h-7 w-7" title="Edit details" asChild>
-                    <Link href={`/dashboard/board?appId=${appId}`}>
-                        <ExternalLink className="h-3.5 w-3.5" />
-                    </Link>
-                </Button>
-            </div> */}
 
             {/* Relative wrapper keeps the height consistent to avoid layout shift */}
             <div className="relative flex items-center h-8">

@@ -7,7 +7,7 @@ import {
     CardDescription,
     CardContent,
 } from "@/components/ui/card";
-import { Application } from "../board/types/application.types";
+import { Application } from "../types/application.types";
 import { ReactNode } from "react";
 
 type StatisticsType = {

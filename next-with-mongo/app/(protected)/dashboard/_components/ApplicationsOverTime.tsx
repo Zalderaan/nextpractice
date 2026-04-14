@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Rectangle } from 'recharts';
 import { useDashboardStore } from "../_stores/dashboard.store"
-import { Application } from "../board/types/application.types"
+import { Application } from "../types/application.types"
 import { Empty, EmptyContent, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { FileChartLine, LinkIcon, Megaphone, SquareArrowOutUpRight, SquareKanban, Table } from "lucide-react";
 import Link from "next/link";

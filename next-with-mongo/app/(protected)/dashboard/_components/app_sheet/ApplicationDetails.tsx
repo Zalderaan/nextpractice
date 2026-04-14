@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { LinkIcon, Pencil } from "lucide-react";
 import Link from "next/link";
-import { Application } from "../../../board/types/application.types";
-import { ApplicationFormValues } from "../../../board/types/application-form.schema";
+import { Application } from "../../types/application.types";
+import { ApplicationFormValues } from "../../types/application-form.schema";
 import { Control, Controller, UseFormGetValues, UseFormSetValue } from "react-hook-form";
 import { Field, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";

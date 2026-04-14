@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button'
 import { SheetFooter } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { X, Save } from 'lucide-react'
-import { DeleteApplicationDialog } from '../../../board/_components/DeleteApplicationDialog'
-import { Application } from '../../../board/types/application.types'
+import { DeleteApplicationDialog } from '../../board/_components/DeleteApplicationDialog'
+import { Application } from '../../types/application.types'
 
 type ApplicationSheetFooterProps = {
     isEditing: boolean
