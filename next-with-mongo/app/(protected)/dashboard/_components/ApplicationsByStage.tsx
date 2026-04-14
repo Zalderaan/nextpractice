@@ -76,8 +76,6 @@ export function ApplicationsByStage({ applications }: ApplicationsByStageProps) 
                         <ApplicationsByStageEmpty />
                     )
                 }
-
-
             </CardContent>
         </Card>
     )

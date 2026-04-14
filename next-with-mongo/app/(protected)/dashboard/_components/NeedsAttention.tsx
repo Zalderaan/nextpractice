@@ -3,7 +3,6 @@ import {
     Card,
     CardHeader,
     CardTitle,
-    CardAction,
     CardDescription,
     CardContent,
 } from "@/components/ui/card"
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/empty";
 import Link from "next/link"
 import { Megaphone } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface NeedsAttentionProps {
     applications: Application[]
@@ -37,17 +37,17 @@ const criteria = {
         app.status === "interview" && app.nextInterviewAt && new Date(app.nextInterviewAt) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 
     // 2. Strategic follow-ups
-    thankYouEmailDue: (app: NeedsAttentionContext) => 
+    thankYouEmailDue: (app: NeedsAttentionContext) =>
         app.status === "interview" &&
-            !app.thankYouEmailSent &&
-            app.lastInterviewAt &&
-            getDayCount(app.lastInterviewAt, Date.now()) === 0 // same day
+        !app.thankYouEmailSent &&
+        app.lastInterviewAt &&
+        getDayCount(app.lastInterviewAt, Date.now()) === 0 // same day
     ,
 
-    noCallbackAfterInterview: (app: NeedsAttentionContext) => 
+    noCallbackAfterInterview: (app: NeedsAttentionContext) =>
         app.status === "interview" &&
-            app.daysSinceLastInterview !== undefined &&
-            app.daysSinceLastInterview >= 7
+        app.daysSinceLastInterview !== undefined &&
+        app.daysSinceLastInterview >= 7
     ,
 
     // 3. Offer & Negotiation
@@ -216,29 +216,49 @@ interface NeedsAttentionItemProps {
 }
 
 function NeedsAttentionItem({ application, reasons }: NeedsAttentionItemProps) {
-    const { _id: appId, company, role } = application;
+    const { _id: appId, company, role, status } = application;
     return (
-        <Link href={`/dashboard/board?appId=${appId}`}>
+        <Link href={`/dashboard/board?appId=${appId}`} title="See job application details">
             <Card className="bg-gray-50 border rounded-sm">
                 <CardHeader className="flex flex-col w-full">
-                    <div className="flex flex-row w-full items-start justify-between">
-                        <span>
-                            <CardTitle>{company}</CardTitle>
-                            <CardDescription className="text-xs">{role}</CardDescription>
-                            <div className="flex flex-wrap gap-1 mt-2">
-                                {reasons.map((reason) => (
-                                    <Badge key={reason} variant="outline" className="text-xs">
-                                        {ATTENTION_REASON_META[reason].label}
-                                    </Badge>
-                                ))}
-                            </div>
-                        </span>
+                    <div className="flex flex-row w-full justify-between capitalize">
+                        <CardTitle>{company}</CardTitle>
+                        <Badge>{status}</Badge>
                     </div>
+                    <CardDescription className="text-xs">{role}</CardDescription>
                 </CardHeader>
+                <CardContent>
+                    {/* list of reasons */}
+                    <div className="flex w-full flex-wrap gap-1 mt-2">
+                        {reasons.map((reason) => (
+                            <NeedsAttentionItemReason key={reason}
+                                reason={ATTENTION_REASON_META[reason].label}
+                            />
+                        ))}
+                    </div>
+                </CardContent>
             </Card>
         </Link>
 
     );
+}
+
+function NeedsAttentionItemReason({ reason }: { reason: string }) {
+    return (
+        <div className="flex w-full border text-xs items-center justify-between rounded-lg p-2">
+            <span>{reason}</span>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">Action</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuItem>Update Details</DropdownMenuItem> {/* Opens modal */}
+                    <DropdownMenuItem>Remind me tomorrow</DropdownMenuItem> {/* Snoozes */}
+                    <DropdownMenuItem>Ignore for this app</DropdownMenuItem> {/* Permanent dismiss */}
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
+    )
 }
 
 //! Tightly coupled with NeedsAttention
