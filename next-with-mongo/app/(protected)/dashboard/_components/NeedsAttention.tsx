@@ -17,8 +17,7 @@ import {
     EmptyMedia,
 } from "@/components/ui/empty";
 import Link from "next/link"
-import { Megaphone } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Check, ExternalLink, Megaphone, MoreHorizontal, X } from "lucide-react";
 
 interface NeedsAttentionProps {
     applications: Application[]
@@ -192,12 +191,12 @@ export function NeedsAttention({ applications }: NeedsAttentionProps) {
         .filter(({ reasons }) => reasons.length > 0);
 
     return (
-        <Card className="w-full h-full">
+        <Card className="w-full h-full flex flex-col overflow-hidden">
             <CardHeader className="flex flex-row justify-between w-full border-b">
                 <CardTitle>Needs Attention</CardTitle>
                 <Badge>{filtered_apps.length}</Badge>
             </CardHeader>
-            <CardContent className="flex flex-col h-full space-y-2 py-2 overflow-y-auto">
+            <CardContent className="space-y-2 py-2 overflow-y-auto">
                 {
                     filtered_apps.length > 0
                         ? filtered_apps.map(({ app, reasons }) => (
@@ -218,45 +217,72 @@ interface NeedsAttentionItemProps {
 function NeedsAttentionItem({ application, reasons }: NeedsAttentionItemProps) {
     const { _id: appId, company, role, status } = application;
     return (
-        <Link href={`/dashboard/board?appId=${appId}`} title="See job application details">
-            <Card className="bg-gray-50 border rounded-sm">
-                <CardHeader className="flex flex-col w-full">
-                    <div className="flex flex-row w-full justify-between capitalize">
-                        <CardTitle>{company}</CardTitle>
-                        <Badge>{status}</Badge>
-                    </div>
-                    <CardDescription className="text-xs">{role}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {/* list of reasons */}
-                    <div className="flex w-full flex-wrap gap-1 mt-2">
-                        {reasons.map((reason) => (
-                            <NeedsAttentionItemReason key={reason}
-                                reason={ATTENTION_REASON_META[reason].label}
-                            />
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
-        </Link>
-
+        <Card className="flex flex-col border rounded-sm w-full">
+            <CardHeader className="flex flex-col w-full">
+                <div className="flex flex-row w-full justify-between capitalize">
+                    <CardTitle>{company}</CardTitle>
+                    <Badge>{status}</Badge>
+                </div>
+                <CardDescription className="text-xs">{role}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col flex-1">
+                <div className="flex flex-col flex-1 w-full gap-1 mt-2">
+                    {reasons.map((reason) => (
+                        <NeedsAttentionItemReason key={reason}
+                            reason={ATTENTION_REASON_META[reason].label}
+                            appId={appId}
+                        />
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
     );
 }
 
-function NeedsAttentionItemReason({ reason }: { reason: string }) {
+function NeedsAttentionItemReason({ reason, appId }: { reason: string, appId: string }) {
+
     return (
-        <div className="flex w-full border text-xs items-center justify-between rounded-lg p-2">
+        <div className="group flex w-full border text-xs items-center justify-between rounded-lg px-4 py-2">
             <span>{reason}</span>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">Action</Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuItem>Update Details</DropdownMenuItem> {/* Opens modal */}
-                    <DropdownMenuItem>Remind me tomorrow</DropdownMenuItem> {/* Snoozes */}
-                    <DropdownMenuItem>Ignore for this app</DropdownMenuItem> {/* Permanent dismiss */}
-                </DropdownMenuContent>
-            </DropdownMenu>
+
+            {/* <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex flex-row items-center gap-1 shrink-0">
+                <Button variant={"ghost"} size={"icon"} title="Remind me tomorrow">
+                    <Megaphone />
+                </Button>
+                <Button variant={"ghost"} size={"icon"} title="Dismiss for this application">
+                    <X />
+                </Button>
+                <Button variant={"ghost"} size={"icon"} className="h-7 w-7" title="Edit details" asChild>
+                    <Link href={`/dashboard/board?appId=${appId}`}>
+                        <ExternalLink className="h-3.5 w-3.5" />
+                    </Link>
+                </Button>
+            </div> */}
+
+            {/* Relative wrapper keeps the height consistent to avoid layout shift */}
+            <div className="relative flex items-center h-8">
+
+                {/* Visual Cue: 3 dots, fades out on hover */}
+                <div className="absolute right-2 flex items-center opacity-100 group-hover:opacity-0 transition-opacity duration-150 text-muted-foreground/50 pointer-events-none">
+                    <MoreHorizontal className="h-4 w-4" />
+                </div>
+
+                {/* Actions: Fade in on hover */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex flex-row items-center gap-1 shrink-0 relative z-10">
+                    <Button variant={"ghost"} size={"icon"} className="h-7 w-7" title="Remind me tomorrow">
+                        <Megaphone className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant={"ghost"} size={"icon"} className="h-7 w-7" title="Dismiss for this application">
+                        <X className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant={"ghost"} size={"icon"} className="h-7 w-7" title="Edit details" asChild>
+                        <Link href={`/dashboard/board?appId=${appId}`}>
+                            <ExternalLink className="h-3.5 w-3.5" />
+                        </Link>
+                    </Button>
+                </div>
+
+            </div>
         </div>
     )
 }
