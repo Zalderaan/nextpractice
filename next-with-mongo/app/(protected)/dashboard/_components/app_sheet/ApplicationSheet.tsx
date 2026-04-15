@@ -11,7 +11,7 @@ import { Pencil, LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { ApplicationDetails } from "./ApplicationDetails";
 import { ApplicationSheetFooter } from "./ApplicationSheetFooter";
-import { mapApplicationToFormValues } from "../../applications/utils/application_sheet.util";
+import { mapApplicationToFormValues } from "../../applications/utils/application_sheet.utils";
 import { AppliedStatusFields } from "./AppliedStatusFields";
 import { OfferStatusFields } from "./OfferStatusFields";
 import { InterviewStatusFields } from "./InterviewStatusFields";

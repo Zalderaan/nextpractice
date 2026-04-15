@@ -32,11 +32,11 @@ export type AttentionReason =
   | "staleFourteenDays"
   | "staleThirtyDays";
 
-  export interface NeedsAttentionState {
-    reason: AttentionReason;
-    isDismissed: boolean;
-    snoozedUntil?: Date | string | null; // The date when the snooze expires
-  }
+export interface NeedsAttentionState {
+  reason: AttentionReason;
+  isDismissed: boolean;
+  snoozedUntil?: Date | string | null; // The date when the snooze expires
+}
 
 export interface Application {
   _id: string;
@@ -62,6 +62,5 @@ export interface Application {
   thankYouEmailSent: boolean;
   offerDeadline?: Date | null;
   nudgedAt?: Date | null;
-  // attentionStates?: NeedsAttentionState[]; // TODO: Implement this
+  attentionStates?: NeedsAttentionState[]; 
 }
-

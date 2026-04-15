@@ -1,3 +1,5 @@
+"use client"
+
 import { Badge } from "@/components/ui/badge"
 import {
     Card,
@@ -6,7 +8,7 @@ import {
     CardDescription,
     CardContent,
 } from "@/components/ui/card"
-import { Application } from "../types/application.types"
+import { Application, AttentionReason, NeedsAttentionState } from "../types/application.types"
 import { Button } from "@/components/ui/button";
 import {
     Empty,
@@ -18,90 +20,72 @@ import {
 } from "@/components/ui/empty";
 import Link from "next/link"
 import { ExternalLink, Megaphone, MoreHorizontal, X } from "lucide-react";
+import { enrichApp, getDayCount, NeedsAttentionContext, isSnoozed } from "../applications.utils";
+import { useDismissReasonDialogStore } from "../_stores/dismiss-reason-dialog.store";
+import { DismissNotification } from "./DismissNotification";
 
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-function parseTimestamp(value: Application["appliedAt"]): number | null {
-    if (!value) return null;
-    const ts = value instanceof Date ? value.getTime() : new Date(value).getTime();
-    return Number.isNaN(ts) ? null : ts;
-}
+/**
+ * A callback with a series of conditions (business logic) to determine for each criterion (AttentionReason)
+ * @params app: NeedsAttentionContext
+ * @returns boolean
+ */
+type CriteriaPredicate = (app: NeedsAttentionContext) => boolean
 
-function getDayCount(appliedAt: Application["appliedAt"], nowMs: number): number | null {
-    const ts = parseTimestamp(appliedAt);
-    if (ts === null) return null;
-
-    // Clamp to 0 in case of future timestamps from bad data/timezone mismatch
-    return Math.max(0, Math.floor((nowMs - ts) / DAY_IN_MS));
-}
-
-// Type for enriched data needed during filtering
-type NeedsAttentionContext = Application & {
-    daysSinceApplied?: number;
-    daysSinceLastInterview?: number;
-};
-
-// Enrich app with computed fields once
-const enrichApp = (app: Application): NeedsAttentionContext => ({
-    ...app,
-    daysSinceApplied: app.appliedAt ? getDayCount(app.appliedAt, Date.now()) ?? 0 : undefined,
-    daysSinceLastInterview: app.lastInterviewAt ? getDayCount(app.lastInterviewAt, Date.now()) ?? 0 : undefined,
-});
-
-const criteria = {
+// assign a CriteriaPredicate to determine each AttentionReason in a key-value pair format
+type CriteriaRecord = Record<AttentionReason, CriteriaPredicate>
+const criteria: CriteriaRecord = {
     // 1. Time-sensitive
-    assessmentPending: (app: NeedsAttentionContext) => app.status === "applied" && app.assessmentStatus === "pending",
-
-    assessmentMissed: (app: NeedsAttentionContext) => app.status === "applied" && app.assessmentStatus === "missed",
-
-    missingInterviewDate: (app: NeedsAttentionContext) =>
-        app.status === "interview" && !app.nextInterviewAt && !app.lastInterviewAt,
-
-    upcomingInterview: (app: NeedsAttentionContext) =>
-        app.status === "interview" && app.nextInterviewAt && new Date(app.nextInterviewAt) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    assessmentPending: (app) => app.status === "applied" && app.assessmentStatus === "pending",
+    assessmentMissed: (app) => app.status === "applied" && app.assessmentStatus === "missed",
+    missingInterviewDate: (app) => app.status === "interview" && !app.nextInterviewAt && !app.lastInterviewAt,
+    upcomingInterview: (app) =>
+        app.status === "interview" &&
+        !!app.nextInterviewAt &&
+        new Date(app.nextInterviewAt).getTime() < (Date.now() + 7 * 24 * 60 * 60 * 1000),
 
     // 2. Strategic follow-ups
-    thankYouEmailDue: (app: NeedsAttentionContext) =>
+    thankYouEmailDue: (app) =>
         app.status === "interview" &&
         !app.thankYouEmailSent &&
-        app.lastInterviewAt &&
-        getDayCount(app.lastInterviewAt, Date.now()) === 0 // same day
-    ,
+        app.lastInterviewAt !== null &&
+        getDayCount(app.lastInterviewAt, Date.now()) === 0,
 
-    noCallbackAfterInterview: (app: NeedsAttentionContext) =>
+    noCallbackAfterInterview: (app) =>
         app.status === "interview" &&
         app.daysSinceLastInterview !== undefined &&
-        app.daysSinceLastInterview >= 7
-    ,
+        app.daysSinceLastInterview >= 7,
 
     // 3. Offer & Negotiation
-    missingOfferDeadline: (app: NeedsAttentionContext) =>
+    missingOfferDeadline: (app) =>
         app.status === "offer" && !app.offerDeadline,
 
-    expiringOffer: (app: NeedsAttentionContext) =>
+    expiringOffer: (app) =>
         app.status === "offer" &&
-        app.offerDeadline &&
-        new Date(app.offerDeadline) < new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // within 3 days
+        !!app.offerDeadline &&
+        new Date(app.offerDeadline).getTime() < (Date.now() + 3 * 24 * 60 * 60 * 1000),
 
     // 4. Stale rules
-    staleFourteenDays: (app: NeedsAttentionContext) =>
+    staleFourteenDays: (app) =>
         app.status === "applied" &&
-        app.appliedAt &&
+        app.appliedAt !== null &&
         (app.daysSinceApplied ?? 0) >= 14 &&
         !app.nudgedAt,
 
-    staleThirtyDays: (app: NeedsAttentionContext) =>
+    staleThirtyDays: (app) =>
         app.status === "applied" &&
-        app.appliedAt &&
+        app.appliedAt !== null &&
         (app.daysSinceApplied ?? 0) >= 30,
 };
 
-type AttentionReason = keyof typeof criteria;
+// contains label and descriptions for an AttentionReason
+type AttentionReasonData = {
+    label: string;
+    description?: string;
+}
 
-const ATTENTION_REASON_META: Record<
-    AttentionReason,
-    { label: string; description?: string }
-> = {
+// assign label & descriptions associated with each AttentionReason
+const ATTENTION_REASON_META: Record<AttentionReason, AttentionReasonData> = {
     assessmentPending: {
         label: "Assessment pending",
         description: "Set a deadline or complete the assessment.",
@@ -144,16 +128,24 @@ const ATTENTION_REASON_META: Record<
     },
 };
 
+/**
+ * Function to find AttentionReasons in an Application
+ * @params app: Application
+ * @returns AttentionReason[]
+ */
 const findAttentionReasons = (app: Application): AttentionReason[] => {
     const enriched = enrichApp(app);
-    return (Object.entries(criteria) as [AttentionReason, (a: NeedsAttentionContext) => boolean][])
-        .filter(([_, predicate]) => predicate(enriched))
+    return (Object.entries(criteria) as [AttentionReason, CriteriaPredicate][])
+        .filter(
+            ([_, predicate]) => predicate(enriched) // call the predicate function
+        )
         .map(([key]) => key);
 };
 
 interface NeedsAttentionProps {
     applications: Application[]
 }
+
 
 export function NeedsAttention({ applications }: NeedsAttentionProps) {
     const filtered_apps = applications
@@ -163,24 +155,27 @@ export function NeedsAttention({ applications }: NeedsAttentionProps) {
         }))
         .filter(({ reasons }) => reasons.length > 0);
 
-        console.log("This is filtered_apps: ", filtered_apps)
+    // console.log("This is filtered_apps: ", filtered_apps)
 
     return (
-        <Card className="w-full h-full flex flex-col overflow-hidden">
-            <CardHeader className="flex flex-row justify-between w-full border-b">
-                <CardTitle>Needs Attention</CardTitle>
-                <Badge>{filtered_apps.length}</Badge>
-            </CardHeader>
-            <CardContent className="space-y-2 py-2 overflow-y-auto">
-                {
-                    filtered_apps.length > 0
-                        ? filtered_apps.map(({ app, reasons }) => (
-                            <NeedsAttentionItem key={app._id} application={app} reasons={reasons} />
-                        ))
-                        : <NeedsAttentionEmpty />
-                }
-            </CardContent>
-        </Card>
+        <>
+            <Card className="w-full h-full flex flex-col overflow-hidden">
+                <CardHeader className="flex flex-row justify-between w-full border-b">
+                    <CardTitle>Needs Attention</CardTitle>
+                    <Badge>{filtered_apps.length}</Badge>
+                </CardHeader>
+                <CardContent className="space-y-2 py-2 overflow-y-auto">
+                    {
+                        filtered_apps.length > 0
+                            ? filtered_apps.map(({ app, reasons }) => (
+                                <NeedsAttentionItem key={app._id} application={app} reasons={reasons} />
+                            ))
+                            : <NeedsAttentionEmpty />
+                    }
+                </CardContent>
+            </Card>
+            <DismissNotification />
+        </>
     );
 }
 
@@ -190,7 +185,8 @@ interface NeedsAttentionItemProps {
 }
 
 function NeedsAttentionItem({ application, reasons }: NeedsAttentionItemProps) {
-    const { _id: appId, company, role, status } = application;
+    const { _id: appId, company, role, status, attentionStates } = application;
+    console.log("attentionStates: ", attentionStates);
     return (
         <Card className="flex flex-col border rounded-sm w-full">
             <CardHeader className="flex flex-col w-full">
@@ -203,9 +199,11 @@ function NeedsAttentionItem({ application, reasons }: NeedsAttentionItemProps) {
             <CardContent className="flex flex-col flex-1">
                 <div className="flex flex-col flex-1 w-full gap-1 mt-2">
                     {reasons.map((reason) => (
-                        <NeedsAttentionItemReason key={reason}
+                        <NeedsAttentionItemReason
+                            key={reason}
                             reason={ATTENTION_REASON_META[reason].label}
-                            appId={appId}
+                            attentionStates={attentionStates}
+                            application={application}
                         />
                     ))}
                 </div>
@@ -214,7 +212,15 @@ function NeedsAttentionItem({ application, reasons }: NeedsAttentionItemProps) {
     );
 }
 
-function NeedsAttentionItemReason({ reason, appId }: { reason: string, appId: string }) {
+function NeedsAttentionItemReason({ reason, application, attentionStates }: { reason: string, application: Application, attentionStates?: NeedsAttentionState[] }) {
+    const { openDialog } = useDismissReasonDialogStore();
+
+    const reasonState = attentionStates?.find((state) => state.reason === reason);
+
+    if (reasonState?.isDismissed) return; // if dismissed permanently
+    if (isSnoozed(reasonState?.snoozedUntil)) return; // if snoozed
+
+    // if not dismissed and isSnoozed == false
     return (
         <div className="group flex w-full border text-xs items-center justify-between rounded-lg px-4 py-2">
             <span>{reason}</span>
@@ -232,11 +238,16 @@ function NeedsAttentionItemReason({ reason, appId }: { reason: string, appId: st
                     <Button variant={"ghost"} size={"icon"} className="h-7 w-7" title="Remind me tomorrow">
                         <Megaphone className="h-3.5 w-3.5" />
                     </Button>
-                    <Button variant={"ghost"} size={"icon"} className="h-7 w-7" title="Dismiss for this application">
+                    <Button
+                        variant={"ghost"}
+                        size={"icon"}
+                        className="h-7 w-7"
+                        title="Dismiss for this application"
+                        onClick={() => openDialog(application, reason)}>
                         <X className="h-3.5 w-3.5" />
                     </Button>
                     <Button variant={"ghost"} size={"icon"} className="h-7 w-7" title="Edit details" asChild>
-                        <Link href={`/dashboard/board?appId=${appId}`}>
+                        <Link href={`/dashboard/board?appId=${application._id}`}>
                             <ExternalLink className="h-3.5 w-3.5" />
                         </Link>
                     </Button>

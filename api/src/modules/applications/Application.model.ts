@@ -60,7 +60,24 @@ export interface IApplication {
 
   // 4. Stale Rules
   nudgedAt?: Date | null;
+
+  attentionStates: IAttentionState[];
 }
+
+export interface IAttentionState {
+  reason: string;
+  isDismissed: boolean;
+  snoozedUntil?: Date | string | null; // The date when the snooze expires
+}
+
+const attentionStateSchema = new Schema<IAttentionState>(
+  {
+    reason: { type: String, required: true },
+    isDismissed: { type: Boolean, default: false },
+    snoozedUntil: { type: Date, default: null },
+  },
+  { _id: false },
+);
 
 const applicationSchema = new Schema<IApplication>(
   {
@@ -163,6 +180,7 @@ const applicationSchema = new Schema<IApplication>(
       type: Date,
       default: null,
     },
+    attentionStates: [attentionStateSchema],
   },
   {
     timestamps: true,

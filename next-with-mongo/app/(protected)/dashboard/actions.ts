@@ -149,3 +149,21 @@ export async function deleteApplicationAction(appId: string) {
     return { success: false, error: "Network error occurred" };
   }
 }
+
+export async function snoozeApplicationAction(appId: string) {
+  const { token, userId } = await getAuthContext(); // ← gets both
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_PROTECTED_API_URL}/applications/${appId}`,
+    );
+  } catch (error) {}
+}
+
+export async function dismissApplicationAction(appId: string, reason: string) {
+  const { token, userId } = await getAuthContext(); // ← gets both
+  try {
+      // `${process.env.NEXT_PUBLIC_PROTECTED_API_URL}/applications/${appId}`,
+  } catch (error) {
+    return { success: false, error: "Network error occurred" };
+  }
+}

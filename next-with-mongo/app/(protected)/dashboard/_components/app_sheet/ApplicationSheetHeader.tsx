@@ -7,6 +7,7 @@ import { Select } from "@/components/ui/select";
 import { Control, Controller } from "react-hook-form";
 import { Application } from "../../types/application.types";
 import { ApplicationFormValues } from "../../types/application-form.schema";
+import { useApplicationSheetStore } from "./app_sheet.store";
 
 interface ApplicationSheetHeaderProps {
     selectedApp: Application,
@@ -15,6 +16,7 @@ interface ApplicationSheetHeaderProps {
 }
 
 export function ApplicationSheetHeader({ selectedApp, isEditing, control }: ApplicationSheetHeaderProps) {
+    
     return (
         <SheetHeader className="px-6 py-4 space-y-2 border-b shrink-0 max-h-full" >
             <div className="flex flex-row items-center space-x-3">

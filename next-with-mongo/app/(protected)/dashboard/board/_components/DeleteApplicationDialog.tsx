@@ -10,7 +10,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Application } from "./ApplicationCard";
+import { Application } from "../../types/application.types";
 import { deleteApplicationAction } from "../../actions";
 
 interface DeleteApplicationDialogProps {
