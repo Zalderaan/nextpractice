@@ -303,6 +303,15 @@ export const updateApplicationSchema = z
     }
   });
 
+  export const dismissNotificationSchema = z.object({
+    reason: z.string().min(1, "Reason is required"),
+  })
+
+  export const snoozeNotificationSchema = z.object({
+    reason: z.string().min(1, "Reason is required"),
+    snoozedUntil: z.date().min(1, "snoozedUntil is required")
+  });
+
 // ---------- move (kanban drag/drop persistence) ----------
 export const moveApplicationSchema = z.object({
   newStatus: z.enum(APPLICATION_STATUSES),
@@ -319,3 +328,4 @@ export type CreateApplicationData = CreateApplicationInput & {
   userId: Types.ObjectId;
   order: number;
 };
+

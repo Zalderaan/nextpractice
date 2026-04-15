@@ -22,7 +22,7 @@ import Link from "next/link"
 import { ExternalLink, Megaphone, MoreHorizontal, X } from "lucide-react";
 import { enrichApp, getDayCount, NeedsAttentionContext, isSnoozed } from "../applications.utils";
 import { useDismissReasonDialogStore } from "../_stores/dismiss-reason-dialog.store";
-import { DismissNotification } from "./DismissNotification";
+import { DismissNotificationDialog } from "./DismissNotificationDialog";
 
 
 /**
@@ -174,7 +174,7 @@ export function NeedsAttention({ applications }: NeedsAttentionProps) {
                     }
                 </CardContent>
             </Card>
-            <DismissNotification />
+            <DismissNotificationDialog />
         </>
     );
 }
@@ -216,6 +216,7 @@ function NeedsAttentionItemReason({ reason, application, attentionStates }: { re
     const { openDialog } = useDismissReasonDialogStore();
 
     const reasonState = attentionStates?.find((state) => state.reason === reason);
+    console.log(`This is reasonState for ${application.company} - ${application.role}: ${reasonState}`)
 
     if (reasonState?.isDismissed) return; // if dismissed permanently
     if (isSnoozed(reasonState?.snoozedUntil)) return; // if snoozed

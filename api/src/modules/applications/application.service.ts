@@ -98,7 +98,6 @@ export class ApplicationService {
                     then: new Date(),
                   },
                   {
-
                     // from other status --> wishlist, clear it
                     case: {
                       $and: [
@@ -140,6 +139,32 @@ export class ApplicationService {
       },
     );
     return updated_application;
+  }
+
+  static async dismissReason(appId: string, userId: string, reason: string) {
+    const dismissed_application = await Application.findOneAndUpdate(
+      {
+        _id: appId,
+        userId: userId,
+        "attentionStates.reason": reason,
+      }, // filter ensures they only update their own app & the reason matches
+      { $set: { "attentionStates.isDismissed": true } },
+    );
+
+    return dismissed_application;
+  }
+
+  static async snoozeReason(appId: string, userId: string, reason: string, snoozedUntil: Date) {
+    const snoozed_application = await Application.findOneAndUpdate(
+      {
+        _id: appId,
+        userId: userId,
+        "attentionStates.reason": reason,
+      }, // filter ensures they only update their own app & the reason matches
+      { $set: { "attentionStates.snoozedUntil": snoozedUntil } },
+    );
+
+    return snoozed_application;
   }
 
   static async deleteApplication(appId: string, userId: string) {

@@ -9,12 +9,19 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useDismissReasonDialogStore } from "../_stores/dismiss-reason-dialog.store";
+import { dismissNotificationAction } from "../actions";
 
-export function DismissNotification() {
+export function DismissNotificationDialog() {
     const { app, reason, isOpen, closeDialog } = useDismissReasonDialogStore();
 
     if (!app) return;
-    const { company, role } = app
+    const { _id: appId, company, role } = app
+
+    const handleDismiss = async () => {
+        if (reason) {
+            await dismissNotificationAction(appId, reason);
+        }
+    }
 
     return (
         <AlertDialog open={isOpen} onOpenChange={closeDialog}>
@@ -48,7 +55,10 @@ export function DismissNotification() {
                     <AlertDialogCancel>
                         Cancel
                     </AlertDialogCancel>
-                    <Button variant={"destructive"}>
+                    <Button
+                        variant={"destructive"}
+                        onClick={handleDismiss}
+                    >
                         Confirm
                     </Button>
                 </AlertDialogFooter>

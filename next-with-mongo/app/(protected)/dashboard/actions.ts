@@ -150,20 +150,74 @@ export async function deleteApplicationAction(appId: string) {
   }
 }
 
-export async function snoozeApplicationAction(appId: string) {
+export async function snoozeNotificationAction(
+  appId: string,
+  reason: string,
+  snoozedUntil: Date,
+) {
   const { token, userId } = await getAuthContext(); // ← gets both
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_PROTECTED_API_URL}/applications/${appId}`,
+      `${process.env.NEXT_PUBLIC_PROTECTED_API_URL}/applications/${appId}/snooze`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reason, snoozedUntil }),
+      },
     );
-  } catch (error) {}
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      return {
+        success: false,
+        error:
+          errorData.message ||
+          `Failed to snooze application notification (${res.status})`,
+      };
+    }
+  } catch (error) {
+    return { success: false, error: "Network error occurred" };
+  }
 }
 
-export async function dismissApplicationAction(appId: string, reason: string) {
-  const { token, userId } = await getAuthContext(); // ← gets both
+export async function dismissNotificationAction(appId: string, reason: string) {
+  const { token, userId } = await getAuthContext();
   try {
-      // `${process.env.NEXT_PUBLIC_PROTECTED_API_URL}/applications/${appId}`,
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_PROTECTED_API_URL}/applications/${appId}/dismiss`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reason }),
+      },
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error("Dismiss error:", {
+        status: res.status,
+        error: errorData.error,
+        details: errorData.details, // ← This has field-level validation errors
+      });
+
+      return {
+        success: false,
+        error:
+          errorData.error || `Failed to dismiss notification (${res.status})`,
+        details: errorData.details,
+      };
+    }
+
+    updateTag(`applications-${userId}`);
+    return { success: true };
   } catch (error) {
+    console.error("Dismiss network error:", error);
     return { success: false, error: "Network error occurred" };
   }
 }

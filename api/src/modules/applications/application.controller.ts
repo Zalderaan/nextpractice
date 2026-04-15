@@ -3,7 +3,10 @@ import { ApplicationService } from "./application.service";
 import { makeAppError } from "../../middleware/errorHandler";
 import Application, { IApplication } from "./Application.model";
 import { HydratedDocument } from "mongoose";
-import { MoveApplicationInput, UpdateApplicationInput } from "./application.validator";
+import {
+  MoveApplicationInput,
+  UpdateApplicationInput,
+} from "./application.validator";
 
 export class ApplicationController {
   static async postApplication(
@@ -164,7 +167,76 @@ export class ApplicationController {
         data: updated_application,
       });
     } catch (error) {
-      console.error('Error in updateApplicationStatus:', error);
+      console.error("Error in updateApplicationStatus:", error);
+      next(error);
+    }
+  }
+
+  static async dismissNotification(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const user = (req as any).user;
+      const userId = user?.sub;
+
+      if (!userId) throw makeAppError("Unauthorized", 401);
+
+      const appId = req.params.id as string;
+      const { reason } = req.body;
+
+      if (!appId) throw makeAppError("Application not found", 404);
+      if (!reason) throw makeAppError("Notification reason not found", 404);
+
+      const dismissed_app = await ApplicationService.dismissReason(
+        appId,
+        userId,
+        reason,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "App notificaiton dismissed successfully",
+        data: { dismissed_app },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async snoozeNotification(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const user = (req as any).user;
+      const userId = user?.sub;
+
+      if (!userId) throw makeAppError("Unauthorized", 401);
+
+      const appId = req.params.id as string;
+      const { reason, snoozedUntil } = req.body;
+
+      if (!appId) throw makeAppError("Application not found", 404);
+      if (!reason) throw makeAppError("Notification reason not found", 404);
+      if (!snoozedUntil)
+        throw makeAppError("Notification snoozedUntil not found", 404);
+
+      const dismissed_app = await ApplicationService.snoozeReason(
+        appId,
+        userId,
+        reason,
+        snoozedUntil,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "App notificaiton dismissed successfully",
+        data: { dismissed_app },
+      });
+    } catch (error) {
       next(error);
     }
   }
